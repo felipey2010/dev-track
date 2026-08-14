@@ -1,3 +1,4 @@
+import GoogleRecaptchaWrapper from '@/components/auth/google-recaptcha-wrapper'
 import { Providers } from '@/components/providers'
 import type { Metadata } from 'next'
 import { fraunces, ibmPlexMono, poppins } from './fonts'
@@ -18,7 +19,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body>
-        <Providers>{children}</Providers>
+        <GoogleRecaptchaWrapper>
+          <Providers>{children}</Providers>
+        </GoogleRecaptchaWrapper>
       </body>
     </html>
   )

@@ -8,11 +8,14 @@ import {
   registrationSchema,
   type RegistrationInput,
 } from '@/lib/auth/validation'
+import { RECAPTCHA_ACTIONS } from '@/lib/recaptcha/constants'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import AuthField from './auth-field'
 import AuthHeader from './auth-header'
 import GoogleButton from './google-button'
+import { RecaptchaConsent } from './recaptcha-consent'
+import { useRecaptchaToken } from './use-recaptcha-token'
 
 function RegistrationForm({
   onLogin,
@@ -22,6 +25,7 @@ function RegistrationForm({
   googleEnabled: boolean
 }) {
   const router = useRouter()
+  const getRecaptchaToken = useRecaptchaToken()
   const form = useForm<RegistrationInput>({
     resolver: zodResolver(registrationSchema),
     defaultValues: {
@@ -35,30 +39,47 @@ function RegistrationForm({
 
   async function submit(values: RegistrationInput) {
     form.clearErrors('root')
-    const response = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(values),
-    })
-    const body = (await response.json()) as ApiResponse<{ status: string }>
-    if (!response.ok) {
-      form.setError('root', { message: body.message })
-      return
-    }
-    const result = await signIn('credentials', {
-      email: values.email,
-      password: values.password,
-      redirect: false,
-    })
-    if (result?.error) {
-      form.setError('root', {
-        message: 'Conta criada. Entre com suas credenciais.',
+    try {
+      const registrationToken = await getRecaptchaToken(
+        RECAPTCHA_ACTIONS.registration
+      )
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...values, recaptchaToken: registrationToken }),
       })
-      onLogin()
-      return
+      const body = (await response.json()) as ApiResponse<{
+        status: string
+        verification: { verified: boolean }
+      }>
+      if (!response.ok) {
+        form.setError('root', { message: body.message })
+        return
+      }
+
+      // A fresh token is required because reCAPTCHA tokens are single-use.
+      const loginToken = await getRecaptchaToken(RECAPTCHA_ACTIONS.login)
+      const result = await signIn('credentials', {
+        email: values.email,
+        password: values.password,
+        recaptchaToken: loginToken,
+        redirect: false,
+      })
+      if (result?.error) {
+        form.setError('root', {
+          message: 'Conta criada. Entre com suas credenciais.',
+        })
+        onLogin()
+        return
+      }
+      router.push('/account/pending')
+      router.refresh()
+    } catch {
+      form.setError('root', {
+        message:
+          'A verificação de segurança está indisponível. Tente novamente.',
+      })
     }
-    router.push('/account/pending')
-    router.refresh()
   }
 
   return (
@@ -157,6 +178,7 @@ function RegistrationForm({
       >
         {form.formState.isSubmitting ? 'Criando conta...' : 'Criar conta'}
       </Button>
+      <RecaptchaConsent />
       {googleEnabled && <GoogleButton />}
       <p className='text-center text-xs text-muted-foreground'>
         Já tem uma conta?{' '}
@@ -167,4 +189,5 @@ function RegistrationForm({
     </form>
   )
 }
+
 export default RegistrationForm

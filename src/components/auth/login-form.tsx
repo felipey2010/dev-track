@@ -5,12 +5,18 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { credentialsSchema, type CredentialsInput } from '@/lib/auth/validation'
+import { loginFormSchema, type CredentialsInput } from '@/lib/auth/validation'
+import {
+  RECAPTCHA_ACTIONS,
+  RECAPTCHA_ERROR_CODE,
+} from '@/lib/recaptcha/constants'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import AuthField from './auth-field'
 import AuthHeader from './auth-header'
 import GoogleButton from './google-button'
+import { RecaptchaConsent } from './recaptcha-consent'
+import { useRecaptchaToken } from './use-recaptcha-token'
 
 function LoginForm({
   onRegister,
@@ -21,21 +27,40 @@ function LoginForm({
 }) {
   const router = useRouter()
   const [passwordVisible, setPasswordVisible] = useState(false)
+  const getRecaptchaToken = useRecaptchaToken()
   const form = useForm<CredentialsInput>({
-    resolver: zodResolver(credentialsSchema),
+    resolver: zodResolver(loginFormSchema),
     defaultValues: { email: '', password: '' },
   })
 
   async function submit(values: CredentialsInput) {
     form.clearErrors('root')
-    const result = await signIn('credentials', { ...values, redirect: false })
-
-    if (result?.error) {
-      form.setError('root', { message: 'E-mail ou senha inválidos.' })
-      return
+    try {
+      const recaptchaToken = await getRecaptchaToken(RECAPTCHA_ACTIONS.login)
+      const result = await signIn('credentials', {
+        ...values,
+        recaptchaToken,
+        redirect: false,
+      })
+      if (result?.code === RECAPTCHA_ERROR_CODE) {
+        form.setError('root', {
+          message:
+            'Não foi possível confirmar a verificação de segurança. Tente novamente.',
+        })
+        return
+      }
+      if (result?.error) {
+        form.setError('root', { message: 'E-mail ou senha inválidos.' })
+        return
+      }
+      router.push('/dashboard')
+      router.refresh()
+    } catch {
+      form.setError('root', {
+        message:
+          'A verificação de segurança está indisponível. Tente novamente.',
+      })
     }
-    router.push('/dashboard')
-    router.refresh()
   }
 
   return (
@@ -106,6 +131,7 @@ function LoginForm({
       >
         {form.formState.isSubmitting ? 'Entrando...' : 'Entrar'}
       </Button>
+      <RecaptchaConsent />
       {googleEnabled && <GoogleButton />}
       <p className='text-center text-xs text-muted-foreground'>
         Não tem uma conta?{' '}
@@ -116,4 +142,5 @@ function LoginForm({
     </form>
   )
 }
+
 export default LoginForm

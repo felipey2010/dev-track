@@ -1,13 +1,18 @@
 import { hash } from 'bcryptjs'
 import { randomUUID } from 'node:crypto'
 import { Prisma } from '@/generated/prisma/client'
-import { registrationSchema } from '@/lib/auth/validation'
+import { registrationRequestSchema } from '@/lib/auth/validation'
 import { apiError, apiSuccess } from '@/lib/http'
 import { prisma } from '@/lib/prisma'
+import { RECAPTCHA_ACTIONS } from '@/lib/recaptcha/constants'
+import {
+  getRequestIp,
+  verifyRecaptcha,
+} from '@/server/recaptcha/verify-recaptcha'
 
 export async function POST(request: Request) {
   try {
-    const parsed = registrationSchema.safeParse(await request.json())
+    const parsed = registrationRequestSchema.safeParse(await request.json())
     if (!parsed.success)
       return Response.json(
         {
@@ -16,6 +21,20 @@ export async function POST(request: Request) {
           data: null,
         },
         { status: 422 }
+      )
+    const verification = await verifyRecaptcha({
+      token: parsed.data.recaptchaToken,
+      expectedAction: RECAPTCHA_ACTIONS.registration,
+      remoteIp: getRequestIp(request.headers),
+    })
+    if (!verification.verified)
+      return Response.json(
+        {
+          success: false,
+          message: 'Não foi possível confirmar a verificação de segurança.',
+          data: { verification },
+        },
+        { status: 403 }
       )
     const { name, email, password } = parsed.data
     const id = randomUUID()
@@ -45,7 +64,7 @@ export async function POST(request: Request) {
     ])
     return apiSuccess(
       'Conta criada. Aguarde a aprovação de um administrador.',
-      { status: 'PENDING' },
+      { status: 'PENDING', verification },
       201
     )
   } catch (error) {

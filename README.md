@@ -39,9 +39,18 @@ O produto é uma aplicação monolítica em Next.js, com autenticação, autoriz
    AUTH_SECRET="uma-chave-segura-e-aleatoria"
    AUTH_GOOGLE_ID=""
    AUTH_GOOGLE_SECRET=""
+   NEXT_PUBLIC_RECAPTCHA_SITE_KEY="chave-publica-do-recaptcha-v3"
+   RECAPTCHA_SECRET_KEY="chave-secreta-do-recaptcha-v3"
+   RECAPTCHA_MIN_SCORE="0.5"
+   RECAPTCHA_ALLOWED_HOSTNAMES="localhost,dev-track.exemplo.com"
    ```
 
    O provedor Google só aparece na interface quando as duas credenciais estão preenchidas. Configure no Google a callback `/api/auth/callback/google` para o domínio utilizado.
+
+   Cadastre os domínios da aplicação em uma chave reCAPTCHA v3. A chave
+   pública roda no navegador; a chave secreta existe somente no servidor.
+   `RECAPTCHA_ALLOWED_HOSTNAMES` é opcional e recebe uma lista separada por
+   vírgulas.
 
 3. Prepare o banco de dados usando [db/scripts/001_initial_schema.sql](db/scripts/001_initial_schema.sql) ou o fluxo de migrações adotado pelo ambiente.
 
@@ -72,6 +81,10 @@ Depois disso, esse administrador poderá aprovar, rejeitar, suspender e reativar
 ## Autenticação e autorização
 
 - Credenciais e Google são suportados.
+- Login por credenciais e registro usam reCAPTCHA v3. O token é criado no
+  envio e validado no servidor antes da operação protegida. Tokens inválidos,
+  reutilizados, com ação ou hostname inesperado, ou score abaixo do limite são
+  rejeitados.
 - Senhas são armazenadas somente como hashes bcrypt.
 - Contas novas ficam pendentes de aprovação.
 - Contas pendentes e suspensas não acessam funcionalidades de negócio.

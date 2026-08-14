@@ -1,9 +1,14 @@
 import { z } from 'zod'
 import { normalizeEmail, sanitizeSingleLine } from '@/lib/security/sanitize'
+import { recaptchaTokenSchema } from '@/lib/recaptcha/validation'
 
-export const credentialsSchema = z.object({
+export const loginFormSchema = z.object({
   email: z.string().transform(normalizeEmail).pipe(z.email()),
   password: z.string().min(1),
+})
+
+export const credentialsSchema = loginFormSchema.extend({
+  recaptchaToken: recaptchaTokenSchema,
 })
 
 export const registrationSchema = z
@@ -32,4 +37,8 @@ export const registrationSchema = z
   })
 
 export type RegistrationInput = z.infer<typeof registrationSchema>
-export type CredentialsInput = z.infer<typeof credentialsSchema>
+export type CredentialsInput = z.infer<typeof loginFormSchema>
+
+export const registrationRequestSchema = registrationSchema.safeExtend({
+  recaptchaToken: recaptchaTokenSchema,
+})

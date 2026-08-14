@@ -6,6 +6,12 @@ import { randomUUID } from 'node:crypto'
 import { prisma } from '@/lib/prisma'
 import { credentialsSchema } from '@/lib/auth/validation'
 import { normalizeEmail, sanitizeSingleLine } from '@/lib/security/sanitize'
+import { RECAPTCHA_ACTIONS } from '@/lib/recaptcha/constants'
+import { RecaptchaCredentialsError } from '@/lib/auth/errors'
+import {
+  getRequestIp,
+  verifyRecaptcha,
+} from '@/server/recaptcha/verify-recaptcha'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
@@ -21,10 +27,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           placeholder: 'seu-email@exemplo.com',
         },
         password: { label: 'Password', type: 'password' },
+        recaptchaToken: { label: 'reCAPTCHA token', type: 'hidden' },
       },
-      async authorize(rawCredentials) {
+      async authorize(rawCredentials, request) {
         const parsed = credentialsSchema.safeParse(rawCredentials)
         if (!parsed.success) return null
+
+        const verification = await verifyRecaptcha({
+          token: parsed.data.recaptchaToken,
+          expectedAction: RECAPTCHA_ACTIONS.login,
+          remoteIp: getRequestIp(request.headers),
+        })
+        if (!verification.verified) throw new RecaptchaCredentialsError()
 
         const user = await prisma.users.findUnique({
           where: { email: parsed.data.email },
