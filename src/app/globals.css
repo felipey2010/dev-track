@@ -1,0 +1,154 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: oklch(0.985 0.002 247);
+  --foreground: oklch(0.18 0.018 253);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.018 253);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.018 253);
+  --primary: oklch(0.54 0.13 223);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.96 0.006 247);
+  --secondary-foreground: oklch(0.25 0.02 253);
+  --muted: oklch(0.96 0.006 247);
+  --muted-foreground: oklch(0.53 0.025 253);
+  --accent: oklch(0.94 0.018 223);
+  --accent-foreground: oklch(0.3 0.06 223);
+  --destructive: oklch(0.58 0.22 27);
+  --border: oklch(0.9 0.008 247);
+  --input: oklch(0.9 0.008 247);
+  --ring: oklch(0.62 0.12 223);
+  --chart-1: oklch(0.62 0.12 223);
+  --chart-2: oklch(0.69 0.13 155);
+  --chart-3: oklch(0.7 0.13 80);
+  --chart-4: oklch(0.62 0.13 295);
+  --chart-5: oklch(0.6 0.15 25);
+  --radius: 0.375rem;
+  --sidebar: oklch(0.97 0.005 247);
+  --sidebar-foreground: oklch(0.22 0.02 253);
+  --sidebar-primary: oklch(0.54 0.13 223);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.93 0.02 223);
+  --sidebar-accent-foreground: oklch(0.28 0.05 223);
+  --sidebar-border: oklch(0.9 0.008 247);
+  --sidebar-ring: oklch(0.62 0.12 223);
+}
+
+.dark {
+  --background: oklch(0.135 0.01 250);
+  --foreground: oklch(0.94 0.008 247);
+  --card: oklch(0.165 0.012 250);
+  --card-foreground: oklch(0.94 0.008 247);
+  --popover: oklch(0.165 0.012 250);
+  --popover-foreground: oklch(0.94 0.008 247);
+  --primary: oklch(0.7 0.13 220);
+  --primary-foreground: oklch(0.14 0.01 250);
+  --secondary: oklch(0.22 0.014 250);
+  --secondary-foreground: oklch(0.93 0.008 247);
+  --muted: oklch(0.22 0.014 250);
+  --muted-foreground: oklch(0.64 0.02 247);
+  --accent: oklch(0.24 0.025 223);
+  --accent-foreground: oklch(0.88 0.06 220);
+  --destructive: oklch(0.7 0.18 25);
+  --border: oklch(1 0 0 / 11%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.67 0.12 220);
+  --sidebar: oklch(0.155 0.012 250);
+  --sidebar-foreground: oklch(0.9 0.01 247);
+  --sidebar-primary: oklch(0.7 0.13 220);
+  --sidebar-primary-foreground: oklch(0.14 0.01 250);
+  --sidebar-accent: oklch(0.22 0.02 223);
+  --sidebar-accent-foreground: oklch(0.9 0.04 220);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.67 0.12 220);
+}
+
+@theme inline {
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  --font-poppins: Poppins, sans-serif;
+  --font-fraunces: var(--font-fraunces), serif;
+  --font-mono: var(--font-plex-mono), monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) * 0.7);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) * 1.35);
+  --radius-xl: calc(var(--radius) * 1.8);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer utilities {
+  /* Disabling tailwind warnings
+https://github.com/tailwindlabs/tailwindcss/discussions/5258 */
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    width: 100%;
+    min-height: 100svh;
+    overflow-x: hidden;
+    transition: all 0.3s ease-in-out;
+    scroll-behavior: smooth;
+    /* font-family: 'Poppins', sans-serif; */
+    font-family: var(--font-poppins), sans-serif;
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--color-ring);
+    outline-offset: 1px;
+  }
+
+  .skip-link {
+    position: absolute;
+    left: 1rem;
+    top: -3rem;
+    z-index: 1000;
+    border-radius: 0.375rem;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    transition: top 0.2s ease-in-out;
+  }
+
+  .skip-link:focus {
+    top: 1rem;
+  }
+}

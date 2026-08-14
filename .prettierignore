@@ -1,0 +1,6 @@
+node_modules
+coverage
+generated
+
+.env
+package-lock.json

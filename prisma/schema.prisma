@@ -1,0 +1,332 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["public"]
+}
+
+model accounts {
+  id                  String  @id
+  user_id             String
+  type                String
+  provider            String
+  provider_account_id String
+  refresh_token       String?
+  access_token        String?
+  expires_at          Int?
+  token_type          String?
+  scope               String?
+  id_token            String?
+  session_state       String?
+  users               users   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([provider, provider_account_id])
+  @@index([user_id], map: "accounts_user_idx")
+  @@schema("public")
+}
+
+model audit_logs {
+  id                         String            @id
+  entity_type                audit_entity_type
+  entity_id                  String
+  action                     String
+  actor_user_id              String?
+  actor_name_snapshot        String?
+  actor_system_role_snapshot system_role?
+  actor_team_role_snapshot   team_member_role?
+  metadata_json              Json?
+  created_at                 DateTime          @default(now()) @db.Timestamptz(6)
+  users                      users?            @relation(fields: [actor_user_id], references: [id], onUpdate: NoAction)
+
+  @@index([entity_type, entity_id, created_at], map: "audit_entity_created_idx")
+  @@schema("public")
+}
+
+model development_records {
+  id             String       @id
+  requirement_id String
+  developer_id   String
+  started_at     DateTime     @default(now()) @db.Timestamptz(6)
+  completed_at   DateTime?    @db.Timestamptz(6)
+  notes          String?
+  created_at     DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime     @default(now()) @db.Timestamptz(6)
+  users          users        @relation(fields: [developer_id], references: [id], onUpdate: NoAction)
+  requirements   requirements @relation(fields: [requirement_id], references: [id], onUpdate: NoAction)
+
+  @@index([requirement_id, created_at], map: "development_requirement_created_idx")
+  @@schema("public")
+}
+
+model projects {
+  id                       String         @id
+  name                     String
+  description              String
+  client                   String?
+  team_id                  String
+  start_date               DateTime       @db.Date
+  expected_completion_date DateTime?      @db.Date
+  status                   project_status @default(PLANNING)
+  created_by_id            String
+  created_at               DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime       @default(now()) @db.Timestamptz(6)
+  users                    users          @relation(fields: [created_by_id], references: [id], onUpdate: NoAction)
+  teams                    teams          @relation(fields: [team_id], references: [id], onUpdate: NoAction)
+  requirements             requirements[]
+
+  @@index([status])
+  @@index([team_id], map: "projects_team_idx")
+  @@schema("public")
+}
+
+model requirement_assignment_history {
+  id                                                               String             @id
+  requirement_id                                                   String
+  action                                                           assignment_action
+  previous_assignee_id                                             String?
+  new_assignee_id                                                  String?
+  performed_by_id                                                  String
+  requirement_status                                               requirement_status
+  reason                                                           String?
+  performed_by_name_snapshot                                       String
+  performed_by_context_snapshot                                    String?
+  previous_assignee_name_snapshot                                  String?
+  new_assignee_name_snapshot                                       String?
+  created_at                                                       DateTime           @default(now()) @db.Timestamptz(6)
+  users_requirement_assignment_history_new_assignee_idTousers      users?             @relation("requirement_assignment_history_new_assignee_idTousers", fields: [new_assignee_id], references: [id], onUpdate: NoAction)
+  users_requirement_assignment_history_performed_by_idTousers      users              @relation("requirement_assignment_history_performed_by_idTousers", fields: [performed_by_id], references: [id], onUpdate: NoAction)
+  users_requirement_assignment_history_previous_assignee_idTousers users?             @relation("requirement_assignment_history_previous_assignee_idTousers", fields: [previous_assignee_id], references: [id], onUpdate: NoAction)
+  requirements                                                     requirements       @relation(fields: [requirement_id], references: [id], onUpdate: NoAction)
+
+  @@index([requirement_id, created_at], map: "assignment_history_requirement_created_idx")
+  @@schema("public")
+}
+
+model requirement_history {
+  id                         String              @id
+  requirement_id             String
+  from_status                requirement_status?
+  to_status                  requirement_status
+  performed_by_id            String
+  note                       String?
+  actor_name_snapshot        String
+  actor_system_role_snapshot system_role
+  actor_team_role_snapshot   team_member_role?
+  created_at                 DateTime            @default(now()) @db.Timestamptz(6)
+  users                      users               @relation(fields: [performed_by_id], references: [id], onUpdate: NoAction)
+  requirements               requirements        @relation(fields: [requirement_id], references: [id], onUpdate: NoAction)
+
+  @@index([requirement_id, created_at], map: "requirement_history_requirement_created_idx")
+  @@schema("public")
+}
+
+model requirements {
+  id                                         String                           @id
+  project_id                                 String
+  code                                       String
+  title                                      String
+  description                                String
+  type                                       requirement_type
+  priority                                   requirement_priority             @default(MEDIUM)
+  status                                     requirement_status               @default(REQUIREMENTS)
+  assigned_user_id                           String?
+  deadline                                   DateTime?                        @db.Date
+  created_by_id                              String
+  created_at                                 DateTime                         @default(now()) @db.Timestamptz(6)
+  updated_at                                 DateTime                         @default(now()) @db.Timestamptz(6)
+  development_records                        development_records[]
+  requirement_assignment_history             requirement_assignment_history[]
+  requirement_history                        requirement_history[]
+  users_requirements_assigned_user_idTousers users?                           @relation("requirements_assigned_user_idTousers", fields: [assigned_user_id], references: [id], onUpdate: NoAction)
+  users_requirements_created_by_idTousers    users                            @relation("requirements_created_by_idTousers", fields: [created_by_id], references: [id], onUpdate: NoAction)
+  projects                                   projects                         @relation(fields: [project_id], references: [id], onUpdate: NoAction)
+  testing_records                            testing_records[]
+
+  @@unique([project_id, code])
+  @@index([assigned_user_id], map: "requirements_assignee_idx")
+  @@index([project_id, status], map: "requirements_project_status_idx")
+  @@schema("public")
+}
+
+model sessions {
+  session_token String   @id
+  user_id       String
+  expires       DateTime @db.Timestamptz(6)
+  users         users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model team_members {
+  id         String           @id
+  team_id    String
+  user_id    String
+  role       team_member_role
+  created_at DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at DateTime         @default(now()) @db.Timestamptz(6)
+  teams      teams            @relation(fields: [team_id], references: [id], onUpdate: NoAction)
+  users      users            @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+
+  @@unique([team_id, user_id])
+  @@index([user_id], map: "team_members_user_idx")
+  @@schema("public")
+}
+
+model teams {
+  id           String         @id
+  name         String         @unique
+  description  String?
+  leader_id    String?
+  created_at   DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime       @default(now()) @db.Timestamptz(6)
+  projects     projects[]
+  team_members team_members[]
+  users        users?         @relation(fields: [leader_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+
+  @@index([leader_id], map: "teams_leader_idx")
+  @@schema("public")
+}
+
+model testing_records {
+  id             String          @id
+  requirement_id String
+  tester_id      String
+  started_at     DateTime        @default(now()) @db.Timestamptz(6)
+  completed_at   DateTime?       @db.Timestamptz(6)
+  result         testing_result?
+  notes          String?
+  created_at     DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime        @default(now()) @db.Timestamptz(6)
+  requirements   requirements    @relation(fields: [requirement_id], references: [id], onUpdate: NoAction)
+  users          users           @relation(fields: [tester_id], references: [id], onUpdate: NoAction)
+
+  @@index([requirement_id, created_at], map: "testing_requirement_created_idx")
+  @@schema("public")
+}
+
+model users {
+  id                                                                                        String                           @id
+  name                                                                                      String
+  email                                                                                     String                           @unique
+  email_verified                                                                            DateTime?                        @db.Timestamptz(6)
+  image                                                                                     String?
+  password_hash                                                                             String?
+  system_role                                                                               system_role                      @default(USER)
+  status                                                                                    user_status                      @default(PENDING)
+  created_at                                                                                DateTime                         @default(now()) @db.Timestamptz(6)
+  updated_at                                                                                DateTime                         @default(now()) @db.Timestamptz(6)
+  accounts                                                                                  accounts[]
+  audit_logs                                                                                audit_logs[]
+  development_records                                                                       development_records[]
+  projects                                                                                  projects[]
+  requirement_assignment_history_requirement_assignment_history_new_assignee_idTousers      requirement_assignment_history[] @relation("requirement_assignment_history_new_assignee_idTousers")
+  requirement_assignment_history_requirement_assignment_history_performed_by_idTousers      requirement_assignment_history[] @relation("requirement_assignment_history_performed_by_idTousers")
+  requirement_assignment_history_requirement_assignment_history_previous_assignee_idTousers requirement_assignment_history[] @relation("requirement_assignment_history_previous_assignee_idTousers")
+  requirement_history                                                                       requirement_history[]
+  requirements_requirements_assigned_user_idTousers                                         requirements[]                   @relation("requirements_assigned_user_idTousers")
+  requirements_requirements_created_by_idTousers                                            requirements[]                   @relation("requirements_created_by_idTousers")
+  sessions                                                                                  sessions[]
+  team_members                                                                              team_members[]
+  teams                                                                                     teams[]
+  testing_records                                                                           testing_records[]
+
+  @@index([status])
+  @@schema("public")
+}
+
+model verification_tokens {
+  identifier String
+  token      String   @unique
+  expires    DateTime @db.Timestamptz(6)
+
+  @@id([identifier, token])
+  @@schema("public")
+}
+
+enum assignment_action {
+  ASSIGNED
+  REASSIGNED
+  UNASSIGNED
+  INVALIDATED
+
+  @@schema("public")
+}
+
+enum audit_entity_type {
+  USER
+  TEAM
+  TEAM_MEMBER
+  PROJECT
+  REQUIREMENT
+
+  @@schema("public")
+}
+
+enum project_status {
+  PLANNING
+  IN_DEVELOPMENT
+  TESTING
+  COMPLETED
+  ON_HOLD
+  CANCELLED
+
+  @@schema("public")
+}
+
+enum requirement_priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+
+  @@schema("public")
+}
+
+enum requirement_status {
+  REQUIREMENTS
+  DEVELOPMENT
+  TESTING
+  COMPLETED
+
+  @@schema("public")
+}
+
+enum requirement_type {
+  FUNCTIONAL
+  NON_FUNCTIONAL
+
+  @@schema("public")
+}
+
+enum system_role {
+  ADMIN
+  USER
+
+  @@schema("public")
+}
+
+enum team_member_role {
+  DEVELOPER
+  TESTER
+
+  @@schema("public")
+}
+
+enum testing_result {
+  APPROVED
+  FAILED
+
+  @@schema("public")
+}
+
+enum user_status {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REJECTED
+
+  @@schema("public")
+}
