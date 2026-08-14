@@ -1,5 +1,6 @@
 import Sidebar from '@/components/sidebar'
 import Topbar from '@/components/topbar'
+import { USER_STATUS } from '@/lib/auth/constants'
 import { getCurrentUser } from '@/server/authorization/session'
 import { redirect } from 'next/navigation'
 
@@ -9,10 +10,11 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   const user = await getCurrentUser()
+
   if (!user) redirect('/login')
-  if (user.status === 'PENDING') redirect('/account/pending')
-  if (user.status === 'SUSPENDED') redirect('/account/suspended')
-  if (user.status !== 'ACTIVE') redirect('/login')
+  if (user.status === USER_STATUS.PENDING) redirect('/account/pending')
+  if (user.status === USER_STATUS.SUSPENDED) redirect('/account/suspended')
+  if (user.status !== USER_STATUS.ACTIVE) redirect('/login')
 
   return (
     <div className='grid min-h-screen grid-cols-1 grid-rows-[56px_1fr] bg-background md:grid-cols-[216px_1fr]'>

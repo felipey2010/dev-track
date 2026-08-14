@@ -15,7 +15,7 @@ export function AuthPanel({ googleEnabled }: { googleEnabled: boolean }) {
       onValueChange={(value) => setMode(value as Mode)}
       className='mt-8'
     >
-      <TabsList className='grid w-full grid-cols-2'>
+      <TabsList className='grid w-full grid-cols-2 min-h-10'>
         <TabsTrigger value='login'>Entrar</TabsTrigger>
         <TabsTrigger value='register'>Criar conta</TabsTrigger>
       </TabsList>

@@ -66,7 +66,7 @@ function LoginForm({
   return (
     <form
       onSubmit={form.handleSubmit(submit)}
-      className='mt-8 flex flex-col gap-4'
+      className='mt-6 flex flex-col gap-4'
       noValidate
     >
       <AuthHeader
@@ -101,6 +101,7 @@ function LoginForm({
             id='login-password'
             type={passwordVisible ? 'text' : 'password'}
             autoComplete='current-password'
+            placeholder='Digite sua senha'
             className='pr-10'
             {...form.register('password')}
           />

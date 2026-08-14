@@ -9,11 +9,12 @@ import {
   getRequestIp,
   verifyRecaptcha,
 } from '@/server/recaptcha/verify-recaptcha'
+import { USER_STATUS } from '@/lib/auth/constants'
 
 export async function POST(request: Request) {
   try {
     const parsed = registrationRequestSchema.safeParse(await request.json())
-    if (!parsed.success)
+    if (!parsed.success) {
       return Response.json(
         {
           success: false,
@@ -22,6 +23,7 @@ export async function POST(request: Request) {
         },
         { status: 422 }
       )
+    }
     const verification = await verifyRecaptcha({
       token: parsed.data.recaptchaToken,
       expectedAction: RECAPTCHA_ACTIONS.registration,
@@ -46,7 +48,7 @@ export async function POST(request: Request) {
           email,
           password_hash: await hash(password, 12),
           system_role: 'USER',
-          status: 'PENDING',
+          status: USER_STATUS.PENDING,
         },
       }),
       prisma.audit_logs.create({
@@ -58,13 +60,13 @@ export async function POST(request: Request) {
           actor_user_id: id,
           actor_name_snapshot: name,
           actor_system_role_snapshot: 'USER',
-          metadata_json: { status: 'PENDING', method: 'credentials' },
+          metadata_json: { status: USER_STATUS.PENDING, method: 'credentials' },
         },
       }),
     ])
     return apiSuccess(
       'Conta criada. Aguarde a aprovação de um administrador.',
-      { status: 'PENDING', verification },
+      { status: USER_STATUS.PENDING, verification },
       201
     )
   } catch (error) {

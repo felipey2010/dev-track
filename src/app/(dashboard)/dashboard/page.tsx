@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { dateLabel, dateTimeLabel, projectStatusLabel } from '@/lib/format'
+import { PROJECT_STATUS } from '@/lib/projects/constants'
 import type { Activity, Project, Team } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
 import {
@@ -27,9 +28,10 @@ export default function Dashboard() {
   const teams = useApi<Team[]>('teams', '/api/teams')
   const rows = projects.data ?? []
   const counts = {
-    development: rows.filter((p) => p.status === 'IN_DEVELOPMENT').length,
-    testing: rows.filter((p) => p.status === 'TESTING').length,
-    completed: rows.filter((p) => p.status === 'COMPLETED').length,
+    development: rows.filter((p) => p.status === PROJECT_STATUS.IN_DEVELOPMENT)
+      .length,
+    testing: rows.filter((p) => p.status === PROJECT_STATUS.TESTING).length,
+    completed: rows.filter((p) => p.status === PROJECT_STATUS.COMPLETED).length,
   }
   const warnings =
     teams.data?.filter((t) => !t.users || t.users.status !== 'ACTIVE') ?? []
