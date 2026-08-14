@@ -1,22 +1,29 @@
 import { z } from 'zod'
+import { normalizeEmail, sanitizeSingleLine } from '@/lib/security/sanitize'
 
 export const credentialsSchema = z.object({
-  email: z.string().trim().toLowerCase().email(),
+  email: z.string().transform(normalizeEmail).pipe(z.email()),
   password: z.string().min(1),
 })
 
 export const registrationSchema = z
   .object({
-    name: z.string().trim().min(2, 'Informe seu nome completo.'),
-    email: z.string().trim().toLowerCase().email('Informe um e-mail válido.'),
+    name: z
+      .string()
+      .transform(sanitizeSingleLine)
+      .pipe(z.string().min(2, 'Informe seu nome completo.').max(120)),
+    email: z
+      .string()
+      .transform(normalizeEmail)
+      .pipe(z.email('Informe um e-mail válido.').max(254)),
     password: z
       .string()
       .min(8, 'A senha deve ter pelo menos 8 caracteres.')
       .regex(/[A-Za-z]/, 'A senha deve conter uma letra.')
       .regex(/[0-9]/, 'A senha deve conter um número.'),
     passwordConfirmation: z.string(),
-    acceptedTerms: z.literal(true, {
-      error: 'Você precisa aceitar os termos e a política de privacidade.',
+    acceptedTerms: z.boolean().refine((value) => value, {
+      message: 'Você precisa aceitar os termos e a política de privacidade.',
     }),
   })
   .refine((value) => value.password === value.passwordConfirmation, {
@@ -25,3 +32,4 @@ export const registrationSchema = z
   })
 
 export type RegistrationInput = z.infer<typeof registrationSchema>
+export type CredentialsInput = z.infer<typeof credentialsSchema>

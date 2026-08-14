@@ -1,10 +1,4 @@
 'use client'
-import { Plus } from 'lucide-react'
-import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useApi } from '@/lib/use-api'
-import type { Team } from '@/lib/types'
-import type { ApiResponse } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -16,8 +10,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -25,19 +17,47 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import type { ApiResponse } from '@/lib/api'
+import {
+  projectFormSchema,
+  type ProjectFormData,
+  type ProjectFormInput,
+} from '@/lib/projects/validation'
+import type { Team } from '@/lib/types'
+import { useApi } from '@/lib/use-api'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Plus } from 'lucide-react'
+import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import ProjectField from './project-label'
+
+const defaults: ProjectFormInput = {
+  name: '',
+  client: '',
+  description: '',
+  teamId: '',
+  status: 'PLANNING',
+  startDate: '',
+  expectedCompletionDate: '',
+}
 
 export function CreateProjectDialog() {
   const [open, setOpen] = useState(false)
-  const [teamId, setTeamId] = useState('')
-  const [status, setStatus] = useState('PLANNING')
   const client = useQueryClient()
   const { data: teams, isLoading } = useApi<Team[]>('teams', '/api/teams')
   const eligible =
     teams?.filter(
       (team) => team.canManage && team.users?.status === 'ACTIVE'
     ) ?? []
+  const form = useForm<ProjectFormInput, unknown, ProjectFormData>({
+    resolver: zodResolver(projectFormSchema),
+    defaultValues: defaults,
+  })
+
   const mutation = useMutation({
-    mutationFn: async (payload: Record<string, unknown>) => {
+    mutationFn: async (payload: ProjectFormData) => {
       const response = await fetch('/api/projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -49,26 +69,15 @@ export function CreateProjectDialog() {
     },
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: ['projects'] })
+      form.reset(defaults)
       setOpen(false)
     },
   })
-  function submit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const form = new FormData(event.currentTarget)
-    mutation.mutate({
-      name: form.get('name'),
-      client: form.get('client'),
-      description: form.get('description'),
-      teamId,
-      status,
-      startDate: form.get('startDate'),
-      expectedCompletionDate: form.get('expectedCompletionDate') || undefined,
-    })
-  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className='gap-2'>
+        <Button size='lg' className='gap-2'>
           <Plus className='size-4' />
           Novo projeto
         </Button>
@@ -80,98 +89,138 @@ export function CreateProjectDialog() {
             Somente projetos das equipes que você lidera podem ser criados.
           </DialogDescription>
         </DialogHeader>
-        <form className='grid gap-4 py-2 sm:grid-cols-2' onSubmit={submit}>
-          <Field label='Nome'>
-            <Input name='name' placeholder='Nome do projeto' required />
-          </Field>
-          <Field label='Cliente'>
-            <Input name='client' placeholder='Cliente (opcional)' />
-          </Field>
-          <Field label='Descrição' wide>
+        <form
+          className='grid gap-4 py-2 sm:grid-cols-2'
+          onSubmit={form.handleSubmit((values) => mutation.mutate(values))}
+          noValidate
+        >
+          <ProjectField
+            label='Nome'
+            htmlFor='project-name'
+            error={form.formState.errors.name?.message}
+          >
+            <Input
+              id='project-name'
+              placeholder='Nome do projeto'
+              {...form.register('name')}
+            />
+          </ProjectField>
+          <ProjectField
+            label='Cliente'
+            htmlFor='project-client'
+            error={form.formState.errors.client?.message}
+          >
+            <Input
+              id='project-client'
+              placeholder='Cliente (opcional)'
+              {...form.register('client')}
+            />
+          </ProjectField>
+          <ProjectField
+            label='Descrição'
+            htmlFor='project-description'
+            error={form.formState.errors.description?.message}
+            wide
+          >
             <Textarea
-              name='description'
+              id='project-description'
               rows={4}
               placeholder='Objetivo e escopo resumido'
-              required
+              {...form.register('description')}
             />
-          </Field>
-          <Field label='Equipe'>
-            <Select
-              value={teamId}
-              onValueChange={(value) => setTeamId(value ?? '')}
-              disabled={isLoading || !eligible.length}
-            >
-              <SelectTrigger className='w-full'>
-                <SelectValue
-                  placeholder={
-                    isLoading ? 'Carregando...' : 'Selecione uma equipe'
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {eligible.map((team) => (
-                  <SelectItem key={team.id} value={team.id}>
-                    {team.name} — {team.users?.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {!isLoading && !eligible.length && (
-              <p className='text-[10px] text-muted-foreground'>
-                Você não lidera uma equipe ativa.
-              </p>
-            )}
-          </Field>
-          <Field label='Status inicial'>
-            <Select
-              value={status}
-              onValueChange={(value) => setStatus(value ?? 'PLANNING')}
-            >
-              <SelectTrigger className='w-full'>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='PLANNING'>Planejamento</SelectItem>
-                <SelectItem value='IN_DEVELOPMENT'>
-                  Em desenvolvimento
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field label='Data de início'>
-            <Input name='startDate' type='date' required />
-          </Field>
-          <Field label='Conclusão prevista'>
-            <Input name='expectedCompletionDate' type='date' />
-          </Field>
+          </ProjectField>
+          <ProjectField
+            label='Equipe'
+            htmlFor='project-team'
+            error={form.formState.errors.teamId?.message}
+          >
+            <Controller
+              control={form.control}
+              name='teamId'
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={isLoading || !eligible.length}
+                >
+                  <SelectTrigger id='project-team' className='w-full'>
+                    <SelectValue
+                      placeholder={
+                        isLoading ? 'Carregando...' : 'Selecione uma equipe'
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {eligible.map((team) => (
+                      <SelectItem key={team.id} value={team.id}>
+                        {team.name} — {team.users?.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </ProjectField>
+          <ProjectField
+            label='Status inicial'
+            htmlFor='project-status'
+            error={form.formState.errors.status?.message}
+          >
+            <Controller
+              control={form.control}
+              name='status'
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger id='project-status' className='w-full'>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='PLANNING'>Planejamento</SelectItem>
+                    <SelectItem value='IN_DEVELOPMENT'>
+                      Em desenvolvimento
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </ProjectField>
+          <ProjectField
+            label='Data de início'
+            htmlFor='project-start'
+            error={form.formState.errors.startDate?.message}
+          >
+            <Input
+              id='project-start'
+              type='date'
+              {...form.register('startDate')}
+            />
+          </ProjectField>
+          <ProjectField
+            label='Conclusão prevista'
+            htmlFor='project-due'
+            error={form.formState.errors.expectedCompletionDate?.message}
+          >
+            <Input
+              id='project-due'
+              type='date'
+              {...form.register('expectedCompletionDate')}
+            />
+          </ProjectField>
           {mutation.error && (
             <p role='alert' className='text-xs text-destructive sm:col-span-2'>
               {mutation.error.message}
             </p>
           )}
           <DialogFooter className='sm:col-span-2'>
-            <Button type='submit' disabled={mutation.isPending || !teamId}>
+            <Button
+              type='submit'
+              disabled={mutation.isPending || form.formState.isSubmitting}
+            >
               {mutation.isPending ? 'Criando...' : 'Criar projeto'}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  )
-}
-function Field({
-  label,
-  wide,
-  children,
-}: {
-  label: string
-  wide?: boolean
-  children: React.ReactNode
-}) {
-  return (
-    <div className={wide ? 'grid gap-2 sm:col-span-2' : 'grid gap-2'}>
-      <Label>{label}</Label>
-      {children}
-    </div>
   )
 }

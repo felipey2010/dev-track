@@ -18,16 +18,19 @@ import {
 } from '@/lib/format'
 import type { ProjectDetail } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
+
 const types: Record<string, string> = {
   FUNCTIONAL: 'Funcional',
   NON_FUNCTIONAL: 'Não funcional',
 }
+
 const priorities: Record<string, string> = {
   LOW: 'BAIXA',
   MEDIUM: 'MÉDIA',
   HIGH: 'ALTA',
   CRITICAL: 'CRÍTICA',
 }
+
 export default function ProjectPage({
   params,
 }: {
@@ -39,6 +42,7 @@ export default function ProjectPage({
     `/api/projects/${id}`
   )
   if (isLoading) return <Skeleton className='h-72 w-full' />
+
   if (error)
     return (
       <Card>
@@ -47,9 +51,11 @@ export default function ProjectPage({
         </CardContent>
       </Card>
     )
+
   if (!data) return null
+
   return (
-    <div className='mx-auto max-w-[1280px]'>
+    <div className='mx-auto max-w-7xl'>
       <p className='mb-3 font-mono text-[10px] text-muted-foreground'>
         Projetos / {data.name}
       </p>
@@ -137,6 +143,7 @@ export default function ProjectPage({
     </div>
   )
 }
+
 function Summary({
   label,
   children,

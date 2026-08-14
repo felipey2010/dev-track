@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { apiError, apiSuccess } from '@/lib/http'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/server/authorization/session'
+import { identifierSchema } from '@/lib/validation/common'
 
 const statusSchema = z.object({
   status: z.enum(['ACTIVE', 'SUSPENDED', 'REJECTED']),
@@ -13,7 +14,13 @@ export async function PATCH(
 ) {
   try {
     const actor = await requireAdmin()
-    const { id } = await params
+    const parsedId = identifierSchema.safeParse((await params).id)
+    if (!parsedId.success)
+      return Response.json(
+        { success: false, message: 'Usuário não encontrado.', data: null },
+        { status: 404 }
+      )
+    const id = parsedId.data
     const parsed = statusSchema.safeParse(await request.json())
     if (!parsed.success)
       return Response.json(

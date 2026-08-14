@@ -2,24 +2,7 @@ import { apiError, apiSuccess } from '@/lib/http'
 import { prisma } from '@/lib/prisma'
 import { requireActiveUser } from '@/server/authorization/session'
 import { randomUUID } from 'node:crypto'
-import { z } from 'zod'
-
-const projectSchema = z
-  .object({
-    name: z.string().trim().min(2),
-    description: z.string().trim().min(2),
-    client: z.string().trim().optional(),
-    teamId: z.string().min(1),
-    startDate: z.coerce.date(),
-    expectedCompletionDate: z.coerce.date().optional(),
-    status: z.enum(['PLANNING', 'IN_DEVELOPMENT']),
-  })
-  .refine(
-    (value) =>
-      !value.expectedCompletionDate ||
-      value.expectedCompletionDate >= value.startDate,
-    { message: 'A conclusão prevista deve ser posterior ao início.' }
-  )
+import { projectFormSchema } from '@/lib/projects/validation'
 
 export async function GET() {
   try {
@@ -64,7 +47,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const actor = await requireActiveUser()
-    const parsed = projectSchema.safeParse(await request.json())
+    const parsed = projectFormSchema.safeParse(await request.json())
     if (!parsed.success)
       return Response.json(
         {
@@ -105,8 +88,10 @@ export async function POST(request: Request) {
           description: parsed.data.description,
           client: parsed.data.client || null,
           team_id: team.id,
-          start_date: parsed.data.startDate,
-          expected_completion_date: parsed.data.expectedCompletionDate,
+          start_date: new Date(`${parsed.data.startDate}T00:00:00.000Z`),
+          expected_completion_date: parsed.data.expectedCompletionDate
+            ? new Date(`${parsed.data.expectedCompletionDate}T00:00:00.000Z`)
+            : null,
           status: parsed.data.status,
           created_by_id: actor.id,
         },

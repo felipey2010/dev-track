@@ -13,14 +13,21 @@ import {
 } from '@/components/ui/table'
 import type { Team } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
+import { Plus } from 'lucide-react'
+
 export default function TeamsPage() {
   const { data, error, isLoading } = useApi<Team[]>('teams', '/api/teams')
+
   return (
-    <div className='mx-auto max-w-[1280px]'>
+    <div className='mx-auto max-w-7xl'>
       <PageHeader
         title='Equipes'
         description='Liderança, membros e projetos sob responsabilidade.'
-        action={<Button size='sm'>Nova equipe</Button>}
+        action={
+          <Button size='lg' className='gap-2'>
+            <Plus className='size-4' /> Nova equipe
+          </Button>
+        }
       />
       <Card className='gap-0 overflow-hidden py-0'>
         <CardContent className='p-0'>
@@ -68,6 +75,7 @@ export default function TeamsPage() {
     </div>
   )
 }
+
 function State({ text, error }: { text: string; error?: boolean }) {
   return (
     <div

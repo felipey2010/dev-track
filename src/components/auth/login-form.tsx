@@ -1,8 +1,11 @@
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Eye, EyeOff } from 'lucide-react'
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { FormEvent, useState } from 'react'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { credentialsSchema, type CredentialsInput } from '@/lib/auth/validation'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import AuthField from './auth-field'
@@ -18,22 +21,17 @@ function LoginForm({
 }) {
   const router = useRouter()
   const [passwordVisible, setPasswordVisible] = useState(false)
-  const [pending, setPending] = useState(false)
-  const [message, setMessage] = useState<string>()
+  const form = useForm<CredentialsInput>({
+    resolver: zodResolver(credentialsSchema),
+    defaultValues: { email: '', password: '' },
+  })
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setPending(true)
-    setMessage(undefined)
-    const form = new FormData(event.currentTarget)
-    const result = await signIn('credentials', {
-      email: form.get('email'),
-      password: form.get('password'),
-      redirect: false,
-    })
-    setPending(false)
+  async function submit(values: CredentialsInput) {
+    form.clearErrors('root')
+    const result = await signIn('credentials', { ...values, redirect: false })
+
     if (result?.error) {
-      setMessage('E-mail ou senha inválidos.')
+      form.setError('root', { message: 'E-mail ou senha inválidos.' })
       return
     }
     router.push('/dashboard')
@@ -41,22 +39,32 @@ function LoginForm({
   }
 
   return (
-    <form onSubmit={submit} className='mt-8 flex flex-col gap-4'>
+    <form
+      onSubmit={form.handleSubmit(submit)}
+      className='mt-8 flex flex-col gap-4'
+      noValidate
+    >
       <AuthHeader
         title='Acessar a sua conta'
         description='Use seu e-mail e senha para continuar.'
       />
-      <AuthField label='E-mail'>
+      <AuthField
+        label='E-mail'
+        htmlFor='login-email'
+        error={form.formState.errors.email?.message}
+      >
         <Input
-          name='email'
+          id='login-email'
           type='email'
           autoComplete='email'
           placeholder='voce@empresa.com'
-          required
+          {...form.register('email')}
         />
       </AuthField>
       <AuthField
         label='Senha'
+        htmlFor='login-password'
+        error={form.formState.errors.password?.message}
         aside={
           <Link href='/forgot-password' className='text-xs text-primary'>
             Esqueci minha senha
@@ -65,11 +73,11 @@ function LoginForm({
       >
         <div className='relative'>
           <Input
-            name='password'
+            id='login-password'
             type={passwordVisible ? 'text' : 'password'}
             autoComplete='current-password'
-            required
             className='pr-10'
+            {...form.register('password')}
           />
           <button
             type='button'
@@ -85,13 +93,18 @@ function LoginForm({
           </button>
         </div>
       </AuthField>
-      {message && (
+      {form.formState.errors.root?.message && (
         <p role='alert' className='text-xs text-destructive'>
-          {message}
+          {form.formState.errors.root.message}
         </p>
       )}
-      <Button size='lg' className='w-full' disabled={pending} type='submit'>
-        {pending ? 'Entrando...' : 'Entrar'}
+      <Button
+        size='lg'
+        className='w-full'
+        disabled={form.formState.isSubmitting}
+        type='submit'
+      >
+        {form.formState.isSubmitting ? 'Entrando...' : 'Entrar'}
       </Button>
       {googleEnabled && <GoogleButton />}
       <p className='text-center text-xs text-muted-foreground'>
@@ -103,5 +116,4 @@ function LoginForm({
     </form>
   )
 }
-
 export default LoginForm

@@ -14,16 +14,19 @@ import {
 import type { User } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
 import { UserStatusActions } from '@/components/users/user-status-actions'
+
 const labels: Record<string, string> = {
   ACTIVE: 'ATIVO',
   PENDING: 'PENDENTE',
   SUSPENDED: 'SUSPENSO',
   REJECTED: 'REJEITADO',
 }
+
 export default function UsersPage() {
   const { data, error, isLoading } = useApi<User[]>('users', '/api/users')
+
   return (
-    <div className='mx-auto max-w-[1280px]'>
+    <div className='mx-auto max-w-7xl'>
       <PageHeader
         title='Usuários'
         description='Aprovação e controle de acesso à plataforma.'
@@ -75,6 +78,7 @@ export default function UsersPage() {
     </div>
   )
 }
+
 function State({ text, error }: { text: string; error?: boolean }) {
   return (
     <div

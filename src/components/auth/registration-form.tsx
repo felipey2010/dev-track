@@ -1,8 +1,13 @@
-import { ApiResponse } from '@/lib/api'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { FormEvent, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import type { ApiResponse } from '@/lib/api'
+import {
+  registrationSchema,
+  type RegistrationInput,
+} from '@/lib/auth/validation'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import AuthField from './auth-field'
@@ -17,41 +22,38 @@ function RegistrationForm({
   googleEnabled: boolean
 }) {
   const router = useRouter()
-  const [pending, setPending] = useState(false)
-  const [message, setMessage] = useState<string>()
+  const form = useForm<RegistrationInput>({
+    resolver: zodResolver(registrationSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      passwordConfirmation: '',
+      acceptedTerms: false,
+    },
+  })
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setPending(true)
-    setMessage(undefined)
-    const form = new FormData(event.currentTarget)
+  async function submit(values: RegistrationInput) {
+    form.clearErrors('root')
     const response = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: form.get('name'),
-        email: form.get('email'),
-        password: form.get('password'),
-        passwordConfirmation: form.get('passwordConfirmation'),
-        acceptedTerms: form.get('acceptedTerms') === 'on',
-      }),
+      body: JSON.stringify(values),
     })
-
     const body = (await response.json()) as ApiResponse<{ status: string }>
     if (!response.ok) {
-      setPending(false)
-      setMessage(body.message)
+      form.setError('root', { message: body.message })
       return
     }
-
     const result = await signIn('credentials', {
-      email: form.get('email'),
-      password: form.get('password'),
+      email: values.email,
+      password: values.password,
       redirect: false,
     })
-    setPending(false)
     if (result?.error) {
-      setMessage('Conta criada. Entre com suas credenciais.')
+      form.setError('root', {
+        message: 'Conta criada. Entre com suas credenciais.',
+      })
       onLogin()
       return
     }
@@ -60,50 +62,70 @@ function RegistrationForm({
   }
 
   return (
-    <form onSubmit={submit} className='mt-8 flex flex-col gap-4'>
+    <form
+      onSubmit={form.handleSubmit(submit)}
+      className='mt-8 flex flex-col gap-4'
+      noValidate
+    >
       <AuthHeader
         title='Criar conta'
         description='Sua conta ficará pendente de aprovação antes do primeiro acesso.'
       />
-      <AuthField label='Nome completo'>
+      <AuthField
+        label='Nome completo'
+        htmlFor='register-name'
+        error={form.formState.errors.name?.message}
+      >
         <Input
-          name='name'
+          id='register-name'
           autoComplete='name'
           placeholder='Seu nome'
-          required
+          {...form.register('name')}
         />
       </AuthField>
-      <AuthField label='E-mail'>
+      <AuthField
+        label='E-mail'
+        htmlFor='register-email'
+        error={form.formState.errors.email?.message}
+      >
         <Input
-          name='email'
+          id='register-email'
           type='email'
           autoComplete='email'
           placeholder='voce@empresa.com'
-          required
+          {...form.register('email')}
         />
       </AuthField>
-      <AuthField label='Senha'>
+      <AuthField
+        label='Senha'
+        htmlFor='register-password'
+        error={form.formState.errors.password?.message}
+      >
         <Input
-          name='password'
+          id='register-password'
           type='password'
           autoComplete='new-password'
           placeholder='Mínimo de 8 caracteres'
-          required
+          {...form.register('password')}
         />
       </AuthField>
-      <AuthField label='Confirmar senha'>
+      <AuthField
+        label='Confirmar senha'
+        htmlFor='register-confirmation'
+        error={form.formState.errors.passwordConfirmation?.message}
+      >
         <Input
-          name='passwordConfirmation'
+          id='register-confirmation'
           type='password'
           autoComplete='new-password'
-          required
+          {...form.register('passwordConfirmation')}
         />
       </AuthField>
       <label className='flex items-start gap-2 text-xs leading-5 text-muted-foreground'>
         <input
-          name='acceptedTerms'
           type='checkbox'
           className='mt-1 size-3.5 accent-primary'
+          {...form.register('acceptedTerms')}
         />
         <span>
           Concordo com os{' '}
@@ -117,13 +139,23 @@ function RegistrationForm({
           .
         </span>
       </label>
-      {message && (
-        <p role='alert' className='text-xs text-destructive'>
-          {message}
+      {form.formState.errors.acceptedTerms?.message && (
+        <p className='text-xs text-destructive'>
+          {form.formState.errors.acceptedTerms.message}
         </p>
       )}
-      <Button size='lg' className='w-full' disabled={pending}>
-        {pending ? 'Criando conta...' : 'Criar conta'}
+      {form.formState.errors.root?.message && (
+        <p role='alert' className='text-xs text-destructive'>
+          {form.formState.errors.root.message}
+        </p>
+      )}
+      <Button
+        size='lg'
+        className='w-full'
+        disabled={form.formState.isSubmitting}
+        type='submit'
+      >
+        {form.formState.isSubmitting ? 'Criando conta...' : 'Criar conta'}
       </Button>
       {googleEnabled && <GoogleButton />}
       <p className='text-center text-xs text-muted-foreground'>
@@ -135,5 +167,4 @@ function RegistrationForm({
     </form>
   )
 }
-
 export default RegistrationForm

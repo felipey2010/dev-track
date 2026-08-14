@@ -1,13 +1,20 @@
 import { apiError, apiSuccess } from '@/lib/http'
 import { prisma } from '@/lib/prisma'
 import { requireProjectAccess } from '@/server/authorization/session'
+import { identifierSchema } from '@/lib/validation/common'
 
 export async function GET(
   _: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params
+    const parsedId = identifierSchema.safeParse((await params).id)
+    if (!parsedId.success)
+      return Response.json(
+        { success: false, message: 'Projeto não encontrado.', data: null },
+        { status: 404 }
+      )
+    const id = parsedId.data
     await requireProjectAccess(id)
     const row = await prisma.projects.findUnique({
       where: { id },

@@ -1,6 +1,7 @@
 import 'server-only'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
+import { identifierSchema } from '@/lib/validation/common'
 import {
   ApplicationError,
   AuthenticationError,
@@ -22,26 +23,31 @@ export async function getCurrentUser() {
     },
   })
 }
+
 export async function requireAuthenticatedUser() {
   const user = await getCurrentUser()
   if (!user) throw new AuthenticationError()
   return user
 }
+
 export async function requireActiveUser() {
   const user = await requireAuthenticatedUser()
   if (user.status !== 'ACTIVE')
     throw new AuthorizationError('Sua conta não está ativa.')
   return user
 }
+
 export async function requireAdmin() {
   const user = await requireActiveUser()
   if (user.system_role !== 'ADMIN') throw new AuthorizationError()
   return user
 }
+
 export async function requireProjectAccess(projectId: string) {
+  const safeProjectId = identifierSchema.parse(projectId)
   const user = await requireActiveUser()
   const project = await prisma.projects.findUnique({
-    where: { id: projectId },
+    where: { id: safeProjectId },
     select: { team_id: true, teams: { select: { leader_id: true } } },
   })
   if (!project) throw new ApplicationError('Projeto não encontrado.', 404)
@@ -53,10 +59,12 @@ export async function requireProjectAccess(projectId: string) {
   if (!membership) throw new ApplicationError('Projeto não encontrado.', 404)
   return user
 }
+
 export async function requireProjectManager(projectId: string) {
+  const safeProjectId = identifierSchema.parse(projectId)
   const user = await requireActiveUser()
   const project = await prisma.projects.findUnique({
-    where: { id: projectId },
+    where: { id: safeProjectId },
     select: { teams: { select: { leader_id: true } } },
   })
   if (!project) throw new ApplicationError('Projeto não encontrado.', 404)

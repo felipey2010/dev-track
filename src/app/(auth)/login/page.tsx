@@ -10,9 +10,7 @@ export default async function LoginPage() {
     if (session.user.status === 'SUSPENDED') redirect('/account/suspended')
   }
 
-  const googleEnabled = Boolean(
-    process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET
-  )
+  const googleEnabled = Boolean(process.env.NEXT_PUBLIC_GOOGLE_ENABLED)
 
   return <AuthPanel googleEnabled={googleEnabled} />
 }

@@ -5,18 +5,23 @@ import { compare } from 'bcryptjs'
 import { randomUUID } from 'node:crypto'
 import { prisma } from '@/lib/prisma'
 import { credentialsSchema } from '@/lib/auth/validation'
-
-const googleEnabled = Boolean(
-  process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET
-)
+import { normalizeEmail, sanitizeSingleLine } from '@/lib/security/sanitize'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
-  session: { strategy: 'jwt' },
+  session: { strategy: 'jwt', maxAge: 24 * 60 * 60 },
   pages: { signIn: '/login' },
   providers: [
     Credentials({
-      credentials: { email: {}, password: {} },
+      name: 'credentials',
+      credentials: {
+        email: {
+          label: 'Email',
+          type: 'email',
+          placeholder: 'seu-email@exemplo.com',
+        },
+        password: { label: 'Password', type: 'password' },
+      },
       async authorize(rawCredentials) {
         const parsed = credentialsSchema.safeParse(rawCredentials)
         if (!parsed.success) return null
@@ -42,19 +47,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       },
     }),
-    ...(googleEnabled
-      ? [
-          Google({
-            clientId: process.env.AUTH_GOOGLE_ID!,
-            clientSecret: process.env.AUTH_GOOGLE_SECRET!,
-          }),
-        ]
-      : []),
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      issuer: 'https://accounts.google.com',
+    }),
   ],
   callbacks: {
     async signIn({ account, profile }) {
       if (account?.provider !== 'google') return true
-      const email = profile?.email?.trim().toLowerCase()
+      const email = profile?.email ? normalizeEmail(profile.email) : undefined
       if (!email) return false
 
       const existingAccount = await prisma.accounts.findUnique({
@@ -76,7 +78,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           await transaction.users.create({
             data: {
               id: userId,
-              name: profile?.name?.trim() || email.split('@')[0],
+              name: profile?.name
+                ? sanitizeSingleLine(profile.name)
+                : email.split('@')[0],
               email,
               image:
                 typeof profile?.picture === 'string' ? profile.picture : null,
@@ -92,7 +96,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               entity_id: userId,
               action: 'USER_REGISTERED',
               actor_user_id: userId,
-              actor_name_snapshot: profile?.name?.trim() || email.split('@')[0],
+              actor_name_snapshot: profile?.name
+                ? sanitizeSingleLine(profile.name)
+                : email.split('@')[0],
               actor_system_role_snapshot: 'USER',
               metadata_json: { status: 'PENDING', method: 'google' },
             },
@@ -124,7 +130,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       let userId = user?.id ?? token.sub
       if (account?.provider === 'google' && profile?.email) {
         const databaseUser = await prisma.users.findUnique({
-          where: { email: profile.email.trim().toLowerCase() },
+          where: { email: normalizeEmail(profile.email) },
           select: { id: true },
         })
         userId = databaseUser?.id
