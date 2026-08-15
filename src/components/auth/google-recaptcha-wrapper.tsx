@@ -8,6 +8,7 @@ export default function GoogleRecaptchaWrapper({
   children: React.ReactNode
 }) {
   const recaptchaKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+
   return (
     <GoogleReCaptchaProvider
       reCaptchaKey={recaptchaKey ?? 'NOT_CONFIGURED'}

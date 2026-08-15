@@ -5,7 +5,7 @@ import { APP_IDENTITY } from '@/lib/app-identity'
 
 function LegalPageLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className='flex min-h-screen flex-col bg-muted/20'>
+    <div className='flex min-h-dvh flex-col bg-muted/20'>
       <header className='sticky top-0 z-40 col-span-full flex h-14 items-center justify-between border-b bg-background/95 backdrop-blur px:4 sm:px-8'>
         <div className='flex h-full w-full items-center px-4 md:w-54'>
           <Link href='/dashboard' className='flex items-center gap-2.5'>

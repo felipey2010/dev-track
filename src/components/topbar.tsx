@@ -8,7 +8,7 @@ import { APP_IDENTITY } from '@/lib/app-identity'
 
 export default function Topbar() {
   return (
-    <header className='sticky top-0 z-40 col-span-full flex h-14 items-center border-b bg-background/95 backdrop-blur'>
+    <header className='z-40 col-span-full flex h-14 items-center border-b bg-background/95 backdrop-blur'>
       <div className='flex h-full w-full items-center border-r px-4 md:w-54'>
         <Link href='/dashboard' className='flex items-center gap-2.5'>
           <Image
