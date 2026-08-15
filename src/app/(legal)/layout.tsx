@@ -1,6 +1,7 @@
 import { ArrowLeft } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { APP_IDENTITY } from '@/lib/app-identity'
 
 function LegalPageLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -9,15 +10,17 @@ function LegalPageLayout({ children }: { children: React.ReactNode }) {
         <div className='flex h-full w-full items-center px-4 md:w-54'>
           <Link href='/dashboard' className='flex items-center gap-2.5'>
             <Image
-              src='/assets/images/logo.png'
-              alt='Dev Track'
+              src={APP_IDENTITY.logoPath}
+              alt={APP_IDENTITY.name}
               width={28}
               height={28}
             />
             <div>
-              <strong className='block text-sm leading-none'>Dev Track</strong>
+              <strong className='block text-sm leading-none'>
+                {APP_IDENTITY.name}
+              </strong>
               <span className='mt-1 block font-mono text-[8px] uppercase tracking-[.2em] text-muted-foreground'>
-                Engenharia · Interno
+                {APP_IDENTITY.subtitle}
               </span>
             </div>
           </Link>
@@ -32,7 +35,7 @@ function LegalPageLayout({ children }: { children: React.ReactNode }) {
       </header>
       {children}
       <footer className='flex flex-col gap-3 border-t bg-card px-4 py-5 text-[11px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8'>
-        <span>© 2026 Dev Track</span>
+        <span>© 2026 {APP_IDENTITY.name}</span>
         <nav className='flex gap-5'>
           <Link href='/privacy' className='hover:text-foreground'>
             Política de Privacidade

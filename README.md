@@ -43,6 +43,13 @@ O produto é uma aplicação monolítica em Next.js, com autenticação, autoriz
    RECAPTCHA_SECRET_KEY="chave-secreta-do-recaptcha-v3"
    RECAPTCHA_MIN_SCORE="0.5"
    RECAPTCHA_ALLOWED_HOSTNAMES="localhost,dev-track.exemplo.com"
+   SMTP_HOST="smtp.gmail.com"
+   SMTP_PORT="587"
+   SMTP_SECURE="false"
+   SMTP_USERNAME="conta@gmail.com"
+   SMTP_PASSWORD="senha-de-aplicativo"
+   EMAIL_FROM="conta@gmail.com"
+   EMAIL_VERIFICATION_SECRET="outra-chave-segura-e-aleatoria"
    ```
 
    O provedor Google só aparece na interface quando as duas credenciais estão preenchidas. Configure no Google a callback `/api/auth/callback/google` para o domínio utilizado.
@@ -85,6 +92,11 @@ Depois disso, esse administrador poderá aprovar, rejeitar, suspender e reativar
   envio e validado no servidor antes da operação protegida. Tokens inválidos,
   reutilizados, com ação ou hostname inesperado, ou score abaixo do limite são
   rejeitados.
+- Cadastros por credenciais recebem um código de seis dígitos por e-mail. O
+  código é armazenado como HMAC, expira em 10 minutos e precisa ser confirmado
+  antes do login. O reenvio tem intervalo mínimo e também usa reCAPTCHA.
+- Contas criadas pelo Google recebem `email_verified` diretamente do provedor e
+  não passam pela etapa de código.
 - Senhas são armazenadas somente como hashes bcrypt.
 - Contas novas ficam pendentes de aprovação.
 - Contas pendentes e suspensas não acessam funcionalidades de negócio.
@@ -94,7 +106,10 @@ Depois disso, esse administrador poderá aprovar, rejeitar, suspender e reativar
 - A visibilidade de projetos é limitada por administração, liderança ou associação à equipe.
 - Ser `ADMIN` não concede automaticamente responsabilidade operacional de desenvolvedor, testador ou gestor.
 
-A recuperação automática de senha ainda não está conectada a um provedor de e-mail. A página de ajuda orienta o usuário a procurar um administrador, sem afirmar que uma mensagem inexistente foi enviada.
+A recuperação de senha usa um código de seis dígitos enviado por e-mail. A API
+mantém a mesma resposta para e-mails existentes e inexistentes, troca o código
+válido por uma autorização `HttpOnly` temporária e consome essa autorização
+depois da redefinição.
 
 ## Formulários e tratamento de entrada
 

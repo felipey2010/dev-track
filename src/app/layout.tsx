@@ -1,11 +1,12 @@
 import GoogleRecaptchaWrapper from '@/components/auth/google-recaptcha-wrapper'
 import { Providers } from '@/components/providers'
 import type { Metadata } from 'next'
+import { APP_IDENTITY } from '@/lib/app-identity'
 import { fraunces, ibmPlexMono, poppins } from './fonts'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Dev Track',
+  title: APP_IDENTITY.name,
   description: 'Acompanhamento de projetos e requisitos de software',
 }
 

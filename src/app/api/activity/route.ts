@@ -1,7 +1,9 @@
 import { apiError, apiSuccess } from '@/lib/http'
 import { prisma } from '@/lib/prisma'
 import { requireActiveUser } from '@/server/authorization/session'
-export async function GET() {
+import { getPagination, paginated } from '@/lib/pagination'
+
+export async function GET(request: Request) {
   try {
     const user = await requireActiveUser()
     const projectScope =
@@ -20,9 +22,10 @@ export async function GET() {
       project.id,
       ...project.requirements.map((requirement) => requirement.id),
     ])
-    return apiSuccess(
-      'Atividades carregadas.',
-      await prisma.audit_logs.findMany({
+    const where = entityIds ? { entity_id: { in: entityIds } } : undefined
+    const { page, pageSize, skip } = getPagination(request)
+    const [items, totalItems] = await prisma.$transaction([
+      prisma.audit_logs.findMany({
         select: {
           id: true,
           action: true,
@@ -30,10 +33,16 @@ export async function GET() {
           entity_type: true,
           created_at: true,
         },
-        where: entityIds ? { entity_id: { in: entityIds } } : undefined,
+        where,
         orderBy: { created_at: 'desc' },
-        take: 6,
-      })
+        skip,
+        take: pageSize,
+      }),
+      prisma.audit_logs.count({ where }),
+    ])
+    return apiSuccess(
+      'Atividades carregadas.',
+      paginated(items, totalItems, page, pageSize)
     )
   } catch (error) {
     return apiError(error, 'Não foi possível carregar as atividades.')

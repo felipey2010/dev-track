@@ -14,9 +14,17 @@ import {
 import type { Team } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
 import { Plus } from 'lucide-react'
+import { Pagination } from '@/components/ui/pagination'
+import type { PaginatedData } from '@/lib/pagination'
+import { useState } from 'react'
 
 export default function TeamsPage() {
-  const { data, error, isLoading } = useApi<Team[]>('teams', '/api/teams')
+  const [page, setPage] = useState(1)
+  const { data, error, isLoading } = useApi<PaginatedData<Team>>(
+    'teams',
+    `/api/teams?page=${page}`
+  )
+  const teams = data?.items
 
   return (
     <div className='mx-auto max-w-7xl'>
@@ -37,7 +45,7 @@ export default function TeamsPage() {
             </div>
           ) : error ? (
             <State text={error.message} error />
-          ) : !data?.length ? (
+          ) : !teams?.length ? (
             <State text='Nenhuma equipe cadastrada.' />
           ) : (
             <Table>
@@ -51,7 +59,7 @@ export default function TeamsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.map((t) => (
+                {teams.map((t) => (
                   <TableRow key={t.id}>
                     <TableCell className='font-semibold'>
                       {t.name}
@@ -69,6 +77,13 @@ export default function TeamsPage() {
                 ))}
               </TableBody>
             </Table>
+          )}
+          {data && (
+            <Pagination
+              page={data.pagination.page}
+              totalPages={data.pagination.totalPages}
+              onPageChange={setPage}
+            />
           )}
         </CardContent>
       </Card>

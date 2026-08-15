@@ -14,12 +14,17 @@ import {
 import { dateLabel, projectStatusLabel } from '@/lib/format'
 import type { Project } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
+import { Pagination } from '@/components/ui/pagination'
+import type { PaginatedData } from '@/lib/pagination'
+import { useState } from 'react'
 
 export default function ProjectsPage() {
-  const { data, error, isLoading } = useApi<Project[]>(
+  const [page, setPage] = useState(1)
+  const { data, error, isLoading } = useApi<PaginatedData<Project>>(
     'projects',
-    '/api/projects'
+    `/api/projects?page=${page}`
   )
+  const projects = data?.items
 
   return (
     <div className='mx-auto max-w-7xl'>
@@ -35,7 +40,7 @@ export default function ProjectsPage() {
             <Loading />
           ) : error ? (
             <State text={error.message} error />
-          ) : !data?.length ? (
+          ) : !projects?.length ? (
             <State text='Nenhum projeto cadastrado.' />
           ) : (
             <Table>
@@ -50,7 +55,7 @@ export default function ProjectsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.map((p) => (
+                {projects.map((p) => (
                   <TableRow key={p.id}>
                     <TableCell>
                       <ProjectLink id={p.id}>{p.name}</ProjectLink>
@@ -80,6 +85,13 @@ export default function ProjectsPage() {
                 ))}
               </TableBody>
             </Table>
+          )}
+          {data && (
+            <Pagination
+              page={data.pagination.page}
+              totalPages={data.pagination.totalPages}
+              onPageChange={setPage}
+            />
           )}
         </CardContent>
       </Card>

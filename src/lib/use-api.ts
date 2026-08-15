@@ -9,5 +9,5 @@ async function request<T>(url: string): Promise<T> {
   return body.data
 }
 export function useApi<T>(key: string, url: string) {
-  return useQuery({ queryKey: [key], queryFn: () => request<T>(url) })
+  return useQuery({ queryKey: [key, url], queryFn: () => request<T>(url) })
 }

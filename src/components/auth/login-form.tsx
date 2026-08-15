@@ -17,6 +17,7 @@ import AuthHeader from './auth-header'
 import GoogleButton from './google-button'
 import { RecaptchaConsent } from './recaptcha-consent'
 import { useRecaptchaToken } from './use-recaptcha-token'
+import { TimedNotification } from './timed-notification'
 
 function LoginForm({
   onRegister,
@@ -120,9 +121,9 @@ function LoginForm({
         </div>
       </AuthField>
       {form.formState.errors.root?.message && (
-        <p role='alert' className='text-xs text-destructive'>
+        <TimedNotification onDismiss={() => form.clearErrors('root')}>
           {form.formState.errors.root.message}
-        </p>
+        </TimedNotification>
       )}
       <Button
         size='lg'

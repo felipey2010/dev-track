@@ -1,31 +1,33 @@
 import type { Metadata } from 'next'
 import { LegalPage } from '@/components/legal-page'
+import { APP_IDENTITY } from '@/lib/app-identity'
 
 export const metadata: Metadata = {
-  title: 'Termos de Serviço | Dev Track',
-  description: 'Termos de serviço do Dev Track.',
+  title: `Termos de Serviço | ${APP_IDENTITY.name}`,
+  description: `Termos de serviço do ${APP_IDENTITY.name}.`,
 }
 
 export default function TermsPage() {
   return (
     <LegalPage
       title='Termos de Serviço'
-      description='Condições para acesso e utilização responsável do Dev Track.'
+      description={`Condições para acesso e utilização responsável do ${APP_IDENTITY.name}.`}
       updatedDate='Última atualização: 13 de agosto de 2026'
     >
       <section>
         <h2>1. Aceitação</h2>
         <p>
-          Estes termos regem o uso do Dev Track. Ao acessar a plataforma com uma
-          conta aprovada, você concorda em utilizá-la de acordo com estas
-          condições e com as políticas internas da sua organização.
+          Estes termos regem o uso do {APP_IDENTITY.name}. Ao acessar a
+          plataforma com uma conta aprovada, você concorda em utilizá-la de
+          acordo com estas condições e com as políticas internas da sua
+          organização.
         </p>
       </section>
       <section>
         <h2>2. Finalidade do serviço</h2>
         <p>
-          O Dev Track é uma ferramenta interna para cadastrar equipes e
-          projetos, acompanhar requisitos pelas etapas de desenvolvimento e
+          O {APP_IDENTITY.name} é uma ferramenta interna para cadastrar equipes
+          e projetos, acompanhar requisitos pelas etapas de desenvolvimento e
           teste e manter um histórico das ações relevantes. A plataforma não
           substitui sistemas especializados de gestão financeira, jurídica ou de
           recursos humanos.
@@ -99,7 +101,7 @@ export default function TermsPage() {
         <h2>10. Contato</h2>
         <p>
           Dúvidas sobre estes termos devem ser encaminhadas ao administrador
-          responsável pelo Dev Track na sua organização.
+          responsável pelo {APP_IDENTITY.name} na sua organização.
         </p>
       </section>
     </LegalPage>

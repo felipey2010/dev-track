@@ -2,26 +2,34 @@ import { apiError, apiSuccess } from '@/lib/http'
 import { prisma } from '@/lib/prisma'
 import { requireActiveUser } from '@/server/authorization/session'
 import { randomUUID } from 'node:crypto'
+import { AUDIT_ACTIONS } from '@/lib/audit/constants'
 import { projectFormSchema } from '@/lib/projects/validation'
+import { getPagination, paginated } from '@/lib/pagination'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const user = await requireActiveUser()
+    const parameters = new URL(request.url).searchParams
+    const shouldPaginate = parameters.has('page')
+    const { page, pageSize, skip } = getPagination(request)
+    const where =
+      user.system_role === 'ADMIN'
+        ? undefined
+        : {
+            OR: [
+              { teams: { leader_id: user.id } },
+              { teams: { team_members: { some: { user_id: user.id } } } },
+            ],
+          }
     const rows = await prisma.projects.findMany({
-      where:
-        user.system_role === 'ADMIN'
-          ? undefined
-          : {
-              OR: [
-                { teams: { leader_id: user.id } },
-                { teams: { team_members: { some: { user_id: user.id } } } },
-              ],
-            },
+      where,
       include: {
         teams: { include: { users: { select: { id: true, name: true } } } },
         requirements: { select: { status: true } },
       },
       orderBy: { updated_at: 'desc' },
+      skip: shouldPaginate ? skip : undefined,
+      take: shouldPaginate ? pageSize : undefined,
     })
     const data = rows.map(({ requirements, teams, ...project }) => ({
       ...project,
@@ -38,7 +46,12 @@ export async function GET() {
           )
         : 0,
     }))
-    return apiSuccess('Projetos carregados.', data)
+    if (!shouldPaginate) return apiSuccess('Projetos carregados.', data)
+    const totalItems = await prisma.projects.count({ where })
+    return apiSuccess(
+      'Projetos carregados.',
+      paginated(data, totalItems, page, pageSize)
+    )
   } catch (error) {
     return apiError(error, 'Não foi possível carregar os projetos.')
   }
@@ -101,7 +114,7 @@ export async function POST(request: Request) {
           id: randomUUID(),
           entity_type: 'PROJECT',
           entity_id: id,
-          action: 'PROJECT_CREATED',
+          action: AUDIT_ACTIONS.projectCreated,
           actor_user_id: actor.id,
           actor_name_snapshot: actor.name,
           actor_system_role_snapshot: actor.system_role,

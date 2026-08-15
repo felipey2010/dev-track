@@ -1,5 +1,7 @@
 import Link from 'next/link'
-import { ArrowLeft, KeyRound } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
+import { PasswordResetRequestForm } from '@/components/auth/password-reset-request-form'
+
 export default function ForgotPasswordPage() {
   return (
     <div className='mt-10'>
@@ -7,17 +9,9 @@ export default function ForgotPasswordPage() {
         href='/login'
         className='flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground'
       >
-        <ArrowLeft className='size-3.5' />
-        Voltar para entrar
+        <ArrowLeft className='size-3.5' /> Voltar para login
       </Link>
-      <div className='mt-7'>
-        <KeyRound className='size-5 text-primary' />
-        <h1 className='mt-4 text-lg font-semibold'>Redefinir senha</h1>
-        <p className='mt-2 text-xs leading-5 text-muted-foreground'>
-          A recuperação automática ainda não está configurada. Solicite ao
-          administrador da sua organização a redefinição segura do acesso.
-        </p>
-      </div>
+      <PasswordResetRequestForm />
     </div>
   )
 }

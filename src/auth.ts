@@ -3,6 +3,7 @@ import Credentials from 'next-auth/providers/credentials'
 import Google from 'next-auth/providers/google'
 import { compare } from 'bcryptjs'
 import { randomUUID } from 'node:crypto'
+import { AUDIT_ACTIONS } from '@/lib/audit/constants'
 import { prisma } from '@/lib/prisma'
 import { credentialsSchema } from '@/lib/auth/validation'
 import { normalizeEmail, sanitizeSingleLine } from '@/lib/security/sanitize'
@@ -12,6 +13,7 @@ import {
   getRequestIp,
   verifyRecaptcha,
 } from '@/server/recaptcha/verify-recaptcha'
+import { emailVerificationIdentifier } from '@/server/email/email-verification'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
@@ -50,6 +52,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           user.password_hash
         )
         if (!passwordMatches || user.status === 'REJECTED') return null
+        if (!user.email_verified && user.status !== 'ACTIVE') {
+          const completedPasswordReset = await prisma.audit_logs.findFirst({
+            where: {
+              entity_type: 'USER',
+              entity_id: user.id,
+              action: AUDIT_ACTIONS.userPasswordReset,
+            },
+            select: { id: true },
+          })
+          if (!completedPasswordReset) return null
+
+          await prisma.users.update({
+            where: { id: user.id },
+            data: { email_verified: new Date() },
+          })
+        }
 
         return {
           id: user.id,
@@ -108,13 +126,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               id: randomUUID(),
               entity_type: 'USER',
               entity_id: userId,
-              action: 'USER_REGISTERED',
+              action: AUDIT_ACTIONS.userRegistered,
               actor_user_id: userId,
               actor_name_snapshot: profile?.name
                 ? sanitizeSingleLine(profile.name)
                 : email.split('@')[0],
               actor_system_role_snapshot: 'USER',
               metadata_json: { status: 'PENDING', method: 'google' },
+            },
+          })
+        } else if (!existingUser.email_verified) {
+          await transaction.users.update({
+            where: { id: existingUser.id },
+            data: { email_verified: new Date() },
+          })
+          await transaction.verification_tokens.deleteMany({
+            where: {
+              identifier: emailVerificationIdentifier(existingUser.id),
             },
           })
         }

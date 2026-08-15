@@ -14,6 +14,9 @@ import {
 import type { User } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
 import { UserStatusActions } from '@/components/users/user-status-actions'
+import { Pagination } from '@/components/ui/pagination'
+import type { PaginatedData } from '@/lib/pagination'
+import { useState } from 'react'
 
 const labels: Record<string, string> = {
   ACTIVE: 'ATIVO',
@@ -23,7 +26,12 @@ const labels: Record<string, string> = {
 }
 
 export default function UsersPage() {
-  const { data, error, isLoading } = useApi<User[]>('users', '/api/users')
+  const [page, setPage] = useState(1)
+  const { data, error, isLoading } = useApi<PaginatedData<User>>(
+    'users',
+    `/api/users?page=${page}`
+  )
+  const users = data?.items
 
   return (
     <div className='mx-auto max-w-7xl'>
@@ -39,8 +47,8 @@ export default function UsersPage() {
             </div>
           ) : error ? (
             <State text={error.message} error />
-          ) : !data?.length ? (
-            <State text='Nenhum usuário cadastrado.' />
+          ) : !users?.length ? (
+            <State text='Nenhum outro usuário cadastrado.' />
           ) : (
             <Table>
               <TableHeader>
@@ -53,7 +61,7 @@ export default function UsersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.map((u) => (
+                {users.map((u) => (
                   <TableRow key={u.id}>
                     <TableCell className='font-semibold'>{u.name}</TableCell>
                     <TableCell>{u.email}</TableCell>
@@ -72,6 +80,13 @@ export default function UsersPage() {
                 ))}
               </TableBody>
             </Table>
+          )}
+          {data && (
+            <Pagination
+              page={data.pagination.page}
+              totalPages={data.pagination.totalPages}
+              onPageChange={setPage}
+            />
           )}
         </CardContent>
       </Card>

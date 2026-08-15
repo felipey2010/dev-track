@@ -18,7 +18,7 @@ export default async function DashboardLayout({
 
   return (
     <div className='grid min-h-screen grid-cols-1 grid-rows-[56px_1fr] bg-background md:grid-cols-[216px_1fr]'>
-      <Topbar user={user} />
+      <Topbar />
       <Sidebar user={user} />
       <main className='min-w-0 px-4 py-8 md:col-start-2 md:px-8 lg:px-12'>
         {children}

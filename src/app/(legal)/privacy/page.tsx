@@ -1,25 +1,26 @@
 import type { Metadata } from 'next'
 import { LegalPage } from '@/components/legal-page'
+import { APP_IDENTITY } from '@/lib/app-identity'
 
 export const metadata: Metadata = {
-  title: 'Política de Privacidade | Dev Track',
-  description: 'Política de privacidade do Dev Track.',
+  title: `Política de Privacidade | ${APP_IDENTITY.name}`,
+  description: `Política de privacidade do ${APP_IDENTITY.name}.`,
 }
 
 export default function PrivacyPage() {
   return (
     <LegalPage
       title='Política de Privacidade'
-      description='Como as informações são coletadas, utilizadas e protegidas no Dev Track.'
+      description={`Como as informações são coletadas, utilizadas e protegidas no ${APP_IDENTITY.name}.`}
       updatedDate='Última atualização: 13 de agosto de 2026'
     >
       <section>
         <h2>1. Sobre esta política</h2>
         <p>
           Esta política descreve o tratamento de dados pessoais realizado pelo
-          Dev Track, uma ferramenta interna de acompanhamento de projetos e
-          requisitos de software. Ao utilizar a plataforma, você reconhece as
-          práticas descritas neste documento.
+          {APP_IDENTITY.name}, uma ferramenta interna de acompanhamento de
+          projetos e requisitos de software. Ao utilizar a plataforma, você
+          reconhece as práticas descritas neste documento.
         </p>
       </section>
       <section>
@@ -77,9 +78,9 @@ export default function PrivacyPage() {
         <p>
           Solicitações relacionadas a acesso, correção, atualização ou
           eliminação de dados devem ser encaminhadas ao administrador
-          responsável pelo Dev Track na sua organização. Algumas informações
-          podem precisar ser preservadas para segurança, auditoria e integridade
-          dos registros.
+          responsável pelo {APP_IDENTITY.name} na sua organização. Algumas
+          informações podem precisar ser preservadas para segurança, auditoria e
+          integridade dos registros.
         </p>
       </section>
       <section>
@@ -94,7 +95,7 @@ export default function PrivacyPage() {
         <h2>9. Contato</h2>
         <p>
           Para dúvidas sobre privacidade, entre em contato com o administrador
-          do Dev Track ou com o canal de privacidade definido pela sua
+          do {APP_IDENTITY.name} ou com o canal de privacidade definido pela sua
           organização.
         </p>
       </section>

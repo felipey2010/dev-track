@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
@@ -16,6 +15,8 @@ import AuthHeader from './auth-header'
 import GoogleButton from './google-button'
 import { RecaptchaConsent } from './recaptcha-consent'
 import { useRecaptchaToken } from './use-recaptcha-token'
+import { PasswordInput } from './password-input'
+import { TimedNotification } from './timed-notification'
 
 function RegistrationForm({
   onLogin,
@@ -51,29 +52,17 @@ function RegistrationForm({
       const body = (await response.json()) as ApiResponse<{
         status: string
         verification: { verified: boolean }
+        verificationId: string
       }>
       if (!response.ok) {
         form.setError('root', { message: body.message })
         return
       }
 
-      // A fresh token is required because reCAPTCHA tokens are single-use.
-      const loginToken = await getRecaptchaToken(RECAPTCHA_ACTIONS.login)
-      const result = await signIn('credentials', {
-        email: values.email,
-        password: values.password,
-        recaptchaToken: loginToken,
-        redirect: false,
-      })
-      if (result?.error) {
-        form.setError('root', {
-          message: 'Conta criada. Entre com suas credenciais.',
-        })
-        onLogin()
-        return
-      }
-      router.push('/account/pending')
-      router.refresh()
+      if (!body.data?.verificationId) throw new Error('INVALID_RESPONSE')
+      router.push(
+        `/verify-email?id=${encodeURIComponent(body.data.verificationId)}`
+      )
     } catch {
       form.setError('root', {
         message:
@@ -122,9 +111,8 @@ function RegistrationForm({
         htmlFor='register-password'
         error={form.formState.errors.password?.message}
       >
-        <Input
+        <PasswordInput
           id='register-password'
-          type='password'
           autoComplete='new-password'
           placeholder='Mínimo de 8 caracteres'
           {...form.register('password')}
@@ -135,9 +123,8 @@ function RegistrationForm({
         htmlFor='register-confirmation'
         error={form.formState.errors.passwordConfirmation?.message}
       >
-        <Input
+        <PasswordInput
           id='register-confirmation'
-          type='password'
           autoComplete='new-password'
           {...form.register('passwordConfirmation')}
         />
@@ -166,9 +153,9 @@ function RegistrationForm({
         </p>
       )}
       {form.formState.errors.root?.message && (
-        <p role='alert' className='text-xs text-destructive'>
+        <TimedNotification onDismiss={() => form.clearErrors('root')}>
           {form.formState.errors.root.message}
-        </p>
+        </TimedNotification>
       )}
       <Button
         size='lg'

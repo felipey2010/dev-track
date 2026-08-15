@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import { AUDIT_ACTIONS } from '@/lib/audit/constants'
 import { z } from 'zod'
 import { apiError, apiSuccess } from '@/lib/http'
 import { prisma } from '@/lib/prisma'
@@ -55,7 +56,7 @@ export async function PATCH(
           id: randomUUID(),
           entity_type: 'USER',
           entity_id: id,
-          action: `USER_STATUS_${parsed.data.status}`,
+          action: AUDIT_ACTIONS.userStatusChanged[parsed.data.status],
           actor_user_id: actor.id,
           actor_name_snapshot: actor.name,
           actor_system_role_snapshot: actor.system_role,

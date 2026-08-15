@@ -1,4 +1,5 @@
 import { AuthBrand } from '@/components/auth/auth-brand'
+
 export default function AuthLayout({
   children,
 }: {

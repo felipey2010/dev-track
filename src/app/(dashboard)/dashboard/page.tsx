@@ -11,9 +11,13 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { dateLabel, dateTimeLabel, projectStatusLabel } from '@/lib/format'
+import { auditActionLabel, auditEntityLabel } from '@/lib/audit/format'
 import { PROJECT_STATUS } from '@/lib/projects/constants'
 import type { Activity, Project, Team } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
+import { Pagination } from '@/components/ui/pagination'
+import type { PaginatedData } from '@/lib/pagination'
+import { useState } from 'react'
 import {
   AlertTriangle,
   CheckCircle2,
@@ -23,8 +27,14 @@ import {
 } from 'lucide-react'
 
 export default function Dashboard() {
+  const [activityPage, setActivityPage] = useState(1)
+  const [projectPage, setProjectPage] = useState(1)
+  const [warningPage, setWarningPage] = useState(1)
   const projects = useApi<Project[]>('projects', '/api/projects')
-  const activity = useApi<Activity[]>('activity', '/api/activity')
+  const activity = useApi<PaginatedData<Activity>>(
+    'activity',
+    `/api/activity?page=${activityPage}&pageSize=6`
+  )
   const teams = useApi<Team[]>('teams', '/api/teams')
   const rows = projects.data ?? []
   const counts = {
@@ -35,6 +45,10 @@ export default function Dashboard() {
   }
   const warnings =
     teams.data?.filter((t) => !t.users || t.users.status !== 'ACTIVE') ?? []
+  const projectPages = Math.max(1, Math.ceil(rows.length / 8))
+  const visibleProjects = rows.slice((projectPage - 1) * 8, projectPage * 8)
+  const warningPages = Math.max(1, Math.ceil(warnings.length / 3))
+  const visibleWarnings = warnings.slice((warningPage - 1) * 3, warningPage * 3)
 
   return (
     <div className='mx-auto max-w-7xl'>
@@ -107,7 +121,7 @@ export default function Dashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {rows.slice(0, 8).map((p) => (
+                  {visibleProjects.map((p) => (
                     <TableRow key={p.id}>
                       <TableCell>
                         <ProjectLink id={p.id}>{p.name}</ProjectLink>
@@ -130,6 +144,11 @@ export default function Dashboard() {
                 </TableBody>
               </Table>
             )}
+            <Pagination
+              page={projectPage}
+              totalPages={projectPages}
+              onPageChange={setProjectPage}
+            />
           </CardContent>
         </Card>
         <aside className='flex flex-col gap-4'>
@@ -145,7 +164,7 @@ export default function Dashboard() {
                   Nenhum aviso no momento.
                 </p>
               ) : (
-                warnings.map((team) => (
+                visibleWarnings.map((team) => (
                   <div
                     key={team.id}
                     className='rounded-md border border-amber-500/20 bg-amber-500/5 p-3'
@@ -165,6 +184,11 @@ export default function Dashboard() {
                   </div>
                 ))
               )}
+              <Pagination
+                page={warningPage}
+                totalPages={warningPages}
+                onPageChange={setWarningPage}
+              />
             </CardContent>
           </Card>
           <Card className='gap-0 py-0'>
@@ -176,22 +200,30 @@ export default function Dashboard() {
                 <Loading />
               ) : activity.error ? (
                 <State text={activity.error.message} error />
-              ) : !activity.data?.length ? (
+              ) : !activity.data?.items.length ? (
                 <State text='Nenhuma atividade registrada.' />
               ) : (
-                activity.data.map((item) => (
+                activity.data.items.map((item) => (
                   <div key={item.id} className='border-b p-4 last:border-0'>
                     <p className='text-xs leading-5'>
                       <span className='font-semibold'>
                         {item.actor_name_snapshot ?? 'Sistema'}
                       </span>{' '}
-                      {item.action.toLowerCase()}
+                      {auditActionLabel(item.action)}
                     </p>
                     <span className='mt-1 block font-mono text-[9px] text-muted-foreground'>
-                      {dateTimeLabel(item.created_at)} · {item.entity_type}
+                      {dateTimeLabel(item.created_at)} ·{' '}
+                      {auditEntityLabel(item.entity_type)}
                     </span>
                   </div>
                 ))
+              )}
+              {activity.data && (
+                <Pagination
+                  page={activity.data.pagination.page}
+                  totalPages={activity.data.pagination.totalPages}
+                  onPageChange={setActivityPage}
+                />
               )}
             </CardContent>
           </Card>
