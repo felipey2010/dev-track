@@ -1,6 +1,7 @@
 'use client'
 import { Progress, ProjectLink, StatusBadge } from '@/components/ui'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Pagination } from '@/components/ui/pagination'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Table,
@@ -10,14 +11,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { dateLabel, dateTimeLabel, projectStatusLabel } from '@/lib/format'
 import { auditActionLabel, auditEntityLabel } from '@/lib/audit/format'
+import { USER_STATUS } from '@/lib/auth/constants'
+import { dateLabel, dateTimeLabel, projectStatusLabel } from '@/lib/format'
+import type { PaginatedData } from '@/lib/pagination'
 import { PROJECT_STATUS } from '@/lib/projects/constants'
 import type { Activity, Project, Team } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
-import { Pagination } from '@/components/ui/pagination'
-import type { PaginatedData } from '@/lib/pagination'
-import { useState } from 'react'
 import {
   AlertTriangle,
   CheckCircle2,
@@ -25,6 +25,7 @@ import {
   FlaskConical,
   FolderKanban,
 } from 'lucide-react'
+import { useState } from 'react'
 
 export default function Dashboard() {
   const [activityPage, setActivityPage] = useState(1)
@@ -44,7 +45,9 @@ export default function Dashboard() {
     completed: rows.filter((p) => p.status === PROJECT_STATUS.COMPLETED).length,
   }
   const warnings =
-    teams.data?.filter((t) => !t.users || t.users.status !== 'ACTIVE') ?? []
+    teams.data?.filter(
+      (t) => !t.users || t.users.status !== USER_STATUS.ACTIVE
+    ) ?? []
   const projectPages = Math.max(1, Math.ceil(rows.length / 8))
   const visibleProjects = rows.slice((projectPage - 1) * 8, projectPage * 8)
   const warningPages = Math.max(1, Math.ceil(warnings.length / 3))

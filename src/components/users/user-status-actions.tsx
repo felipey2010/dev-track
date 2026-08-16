@@ -1,7 +1,8 @@
 'use client'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
-import type { ApiResponse } from '@/lib/api'
+import { USER_STATUS } from '@/lib/auth/constants'
+import { changeUserStatus } from '@/lib/client-api/users'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 export function UserStatusActions({
   id,
@@ -13,23 +14,16 @@ export function UserStatusActions({
   const client = useQueryClient()
   const mutation = useMutation({
     mutationFn: async (nextStatus: string) => {
-      const response = await fetch(`/api/users/${id}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: nextStatus }),
-      })
-      const body = (await response.json()) as ApiResponse<unknown>
-      if (!response.ok) throw new Error(body.message)
-      return body
+      return changeUserStatus(id, nextStatus)
     },
     onSuccess: () => client.invalidateQueries({ queryKey: ['users'] }),
   })
-  if (status === 'PENDING')
+  if (status === USER_STATUS.PENDING)
     return (
       <div className='flex gap-2'>
         <Button
           size='sm'
-          onClick={() => mutation.mutate('ACTIVE')}
+          onClick={() => mutation.mutate(USER_STATUS.ACTIVE)}
           disabled={mutation.isPending}
         >
           Aprovar
@@ -37,29 +31,29 @@ export function UserStatusActions({
         <Button
           size='sm'
           variant='outline'
-          onClick={() => mutation.mutate('REJECTED')}
+          onClick={() => mutation.mutate(USER_STATUS.REJECTED)}
           disabled={mutation.isPending}
         >
           Rejeitar
         </Button>
       </div>
     )
-  if (status === 'ACTIVE')
+  if (status === USER_STATUS.ACTIVE)
     return (
       <Button
         size='sm'
         variant='outline'
-        onClick={() => mutation.mutate('SUSPENDED')}
+        onClick={() => mutation.mutate(USER_STATUS.SUSPENDED)}
         disabled={mutation.isPending}
       >
         Suspender
       </Button>
     )
-  if (status === 'SUSPENDED')
+  if (status === USER_STATUS.SUSPENDED)
     return (
       <Button
         size='sm'
-        onClick={() => mutation.mutate('ACTIVE')}
+        onClick={() => mutation.mutate(USER_STATUS.ACTIVE)}
         disabled={mutation.isPending}
       >
         Reativar

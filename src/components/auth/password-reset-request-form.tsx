@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
-import type { ApiResponse } from '@/lib/api'
+import { requestPasswordReset } from '@/lib/client-api/auth'
 import {
   passwordResetRequestFormSchema,
   type PasswordResetRequestInput,
@@ -31,21 +31,11 @@ export function PasswordResetRequestForm() {
       const recaptchaToken = await getRecaptchaToken(
         RECAPTCHA_ACTIONS.passwordResetRequest
       )
-      const response = await fetch('/api/auth/password-reset/request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...values, recaptchaToken }),
-      })
-
-      const body = (await response.json()) as ApiResponse<{ resetId: string }>
-
-      if (!response.ok || !body.data?.resetId) {
-        form.setError('root', { message: body.message })
-        return
-      }
+      const body = await requestPasswordReset({ ...values, recaptchaToken })
+      if (!body.resetId) throw new Error('INVALID_RESPONSE')
 
       router.push(
-        `/forgot-password/verify?id=${encodeURIComponent(body.data.resetId)}`
+        `/forgot-password/verify?id=${encodeURIComponent(body.resetId)}`
       )
     } catch {
       form.setError('root', {

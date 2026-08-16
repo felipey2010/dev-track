@@ -1,19 +1,24 @@
 import NextAuth from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import Google from 'next-auth/providers/google'
-import { compare } from 'bcryptjs'
 import { randomUUID } from 'node:crypto'
 import { AUDIT_ACTIONS } from '@/lib/audit/constants'
 import { prisma } from '@/lib/prisma'
 import { credentialsSchema } from '@/lib/auth/validation'
 import { normalizeEmail, sanitizeSingleLine } from '@/lib/security/sanitize'
 import { RECAPTCHA_ACTIONS } from '@/lib/recaptcha/constants'
-import { RecaptchaCredentialsError } from '@/lib/auth/errors'
+import {
+  RateLimitCredentialsError,
+  RecaptchaCredentialsError,
+} from '@/lib/auth/errors'
 import {
   getRequestIp,
   verifyRecaptcha,
 } from '@/server/recaptcha/verify-recaptcha'
 import { emailVerificationIdentifier } from '@/server/email/email-verification'
+import { authenticateCredentials } from '@/lib/services/auth/credentials'
+import { requestIp } from '@/lib/services/security/request-identity'
+import { ApplicationError } from '@/server/errors/application-error'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
@@ -42,32 +47,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         })
         if (!verification.verified) throw new RecaptchaCredentialsError()
 
-        const user = await prisma.users.findUnique({
-          where: { email: parsed.data.email },
-        })
-        if (!user?.password_hash) return null
-
-        const passwordMatches = await compare(
-          parsed.data.password,
-          user.password_hash
-        )
-        if (!passwordMatches || user.status === 'REJECTED') return null
-        if (!user.email_verified && user.status !== 'ACTIVE') {
-          const completedPasswordReset = await prisma.audit_logs.findFirst({
-            where: {
-              entity_type: 'USER',
-              entity_id: user.id,
-              action: AUDIT_ACTIONS.userPasswordReset,
-            },
-            select: { id: true },
+        let user
+        try {
+          user = await authenticateCredentials({
+            email: parsed.data.email,
+            password: parsed.data.password,
+            requestIp: requestIp(request.headers),
           })
-          if (!completedPasswordReset) return null
-
-          await prisma.users.update({
-            where: { id: user.id },
-            data: { email_verified: new Date() },
-          })
+        } catch (error) {
+          if (error instanceof ApplicationError && error.status === 429)
+            throw new RateLimitCredentialsError()
+          throw error
         }
+        if (!user) return null
 
         return {
           id: user.id,

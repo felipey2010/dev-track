@@ -10,6 +10,7 @@ import {
   RECAPTCHA_ACTIONS,
   RECAPTCHA_ERROR_CODE,
 } from '@/lib/recaptcha/constants'
+import { RATE_LIMIT_ERROR_CODE } from '@/lib/auth/constants'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import AuthField from './auth-field'
@@ -47,6 +48,13 @@ function LoginForm({
         form.setError('root', {
           message:
             'Não foi possível confirmar a verificação de segurança. Tente novamente.',
+        })
+        return
+      }
+      if (result?.code === RATE_LIMIT_ERROR_CODE) {
+        form.setError('root', {
+          message:
+            'Muitas tentativas. Aguarde alguns minutos e tente novamente.',
         })
         return
       }

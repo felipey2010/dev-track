@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
-import type { ApiResponse } from '@/lib/api'
+import { completePasswordReset } from '@/lib/client-api/auth'
 import {
   passwordResetFormSchema,
   type PasswordResetInput,
@@ -24,16 +24,8 @@ export function PasswordResetForm({ resetId }: { resetId: string }) {
   async function submit(values: PasswordResetInput) {
     form.clearErrors('root')
     try {
-      const response = await fetch('/api/auth/password-reset/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      })
-      const body = (await response.json()) as ApiResponse<{ reset: boolean }>
-      if (!response.ok || !body.data?.reset) {
-        form.setError('root', { message: body.message })
-        return
-      }
+      const body = await completePasswordReset(values)
+      if (!body.reset) throw new Error('INVALID_RESPONSE')
       router.replace('/login?passwordReset=success')
     } catch {
       form.setError('root', {

@@ -4,7 +4,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import type { ApiResponse } from '@/lib/api'
+import {
+  resendRegistrationCode,
+  verifyRegistrationEmail,
+} from '@/lib/client-api/auth'
 import {
   emailVerificationSchema,
   type EmailVerificationInput,
@@ -34,16 +37,8 @@ export function EmailVerificationForm({
   async function submit(values: EmailVerificationInput) {
     form.clearErrors('root')
     try {
-      const response = await fetch('/api/auth/verify-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      })
-      const body = (await response.json()) as ApiResponse<{ verified: boolean }>
-      if (!response.ok || !body.data?.verified) {
-        form.setError('root', { message: body.message })
-        return
-      }
+      const body = await verifyRegistrationEmail(values)
+      if (!body.verified) throw new Error('INVALID_RESPONSE')
       router.replace('/registration/pending')
     } catch {
       form.setError('root', {
@@ -59,13 +54,8 @@ export function EmailVerificationForm({
       const recaptchaToken = await getRecaptchaToken(
         RECAPTCHA_ACTIONS.emailVerificationResend
       )
-      const response = await fetch('/api/auth/verify-email/resend', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ verificationId, recaptchaToken }),
-      })
-      const body = (await response.json()) as ApiResponse<{ sent: boolean }>
-      setResendMessage(body.message)
+      await resendRegistrationCode({ verificationId, recaptchaToken })
+      setResendMessage('Um novo código foi enviado.')
     } catch {
       setResendMessage('Não foi possível reenviar o código. Tente novamente.')
     } finally {

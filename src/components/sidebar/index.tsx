@@ -19,6 +19,7 @@ const primary = [
 ] as const
 const admin = [['/users', 'Usuários', UserCog]] as const
 type CurrentUser = {
+  id: string
   name: string
   email: string
   system_role: 'ADMIN' | 'USER'
@@ -44,7 +45,11 @@ export default function Sidebar({ user }: { user: CurrentUser }) {
           )}
         </div>
         <div className='border-t p-4'>
-          <div className='flex items-center gap-2.5'>
+          <Link
+            href={`/users/${user.id}`}
+            className='P-1 flex items-center gap-2.5 rounded-lg outline-none transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring'
+            aria-label={`Abrir perfil de ${user.name}`}
+          >
             <Avatar className='size-7'>
               <AvatarFallback className='bg-cyan-500/10 text-[10px] text-cyan-600'>
                 {initials}
@@ -57,8 +62,11 @@ export default function Sidebar({ user }: { user: CurrentUser }) {
               <span className='block truncate font-mono text-[9px] text-muted-foreground'>
                 {user.email}
               </span>
+              <span className='block truncate font-mono text-[9px] text-muted-foreground'>
+                {user.system_role === 'ADMIN' ? 'Administrador' : 'Usuário'}
+              </span>
             </div>
-          </div>
+          </Link>
           <div className='mt-4 flex gap-3 text-[9px] text-muted-foreground'>
             <Link href='/privacy'>Privacidade</Link>
             <Link href='/terms'>Termos</Link>
@@ -105,7 +113,7 @@ function NavGroup({
       <p className='mb-2 px-2 font-mono text-[9px] uppercase tracking-[.18em] text-muted-foreground'>
         {label}
       </p>
-      <nav className='space-y-1'>
+      <nav className='flex flex-col gap-1'>
         {items.map(([route, title, icon]) => (
           <SidebarItem key={route} item={{ route, title, icon }} />
         ))}

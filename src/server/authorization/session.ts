@@ -1,5 +1,5 @@
-import 'server-only'
 import { auth } from '@/auth'
+import { USER_STATUS } from '@/lib/auth/constants'
 import { prisma } from '@/lib/prisma'
 import { identifierSchema } from '@/lib/validation/common'
 import {
@@ -7,6 +7,7 @@ import {
   AuthenticationError,
   AuthorizationError,
 } from '@/server/errors/application-error'
+import 'server-only'
 
 export async function getCurrentUser() {
   const session = await auth()
@@ -32,7 +33,7 @@ export async function requireAuthenticatedUser() {
 
 export async function requireActiveUser() {
   const user = await requireAuthenticatedUser()
-  if (user.status !== 'ACTIVE')
+  if (user.status !== USER_STATUS.ACTIVE)
     throw new AuthorizationError('Sua conta não está ativa.')
   return user
 }

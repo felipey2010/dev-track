@@ -2,11 +2,14 @@ import { redirect } from 'next/navigation'
 import { ShieldX } from 'lucide-react'
 import { auth } from '@/auth'
 import { SignOutButton } from '@/components/auth/sign-out-button'
+import { USER_STATUS } from '@/lib/auth/constants'
+
 export default async function SuspendedPage() {
   const session = await auth()
   if (!session?.user) redirect('/login')
-  if (session.user.status === 'ACTIVE') redirect('/dashboard')
-  if (session.user.status === 'PENDING') redirect('/account/pending')
+  if (session.user.status === USER_STATUS.ACTIVE) redirect('/dashboard')
+  if (session.user.status === USER_STATUS.PENDING) redirect('/account/pending')
+
   return (
     <div className='mt-10 rounded-lg border bg-card p-6 text-center'>
       <span className='mx-auto grid size-11 place-items-center rounded-full bg-destructive/10 text-destructive'>

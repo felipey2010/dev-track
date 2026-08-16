@@ -1,7 +1,8 @@
-import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
 import { AuthPanel } from '@/components/auth/auth-panel'
 import { TimedNotification } from '@/components/auth/timed-notification'
+import { USER_STATUS } from '@/lib/auth/constants'
+import { redirect } from 'next/navigation'
 export default async function LoginPage({
   searchParams,
 }: {
@@ -11,9 +12,11 @@ export default async function LoginPage({
   const query = await searchParams
 
   if (session?.user) {
-    if (session.user.status === 'ACTIVE') redirect('/dashboard')
-    if (session.user.status === 'PENDING') redirect('/account/pending')
-    if (session.user.status === 'SUSPENDED') redirect('/account/suspended')
+    if (session.user.status === USER_STATUS.ACTIVE) redirect('/dashboard')
+    if (session.user.status === USER_STATUS.PENDING)
+      redirect('/account/pending')
+    if (session.user.status === USER_STATUS.SUSPENDED)
+      redirect('/account/suspended')
   }
 
   const googleEnabled = Boolean(process.env.NEXT_PUBLIC_GOOGLE_ENABLED)

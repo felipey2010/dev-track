@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
-import type { ApiResponse } from '@/lib/api'
+import { registerAccount } from '@/lib/client-api/auth'
 import {
   registrationSchema,
   type RegistrationInput,
@@ -44,25 +44,12 @@ function RegistrationForm({
       const registrationToken = await getRecaptchaToken(
         RECAPTCHA_ACTIONS.registration
       )
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...values, recaptchaToken: registrationToken }),
+      const body = await registerAccount({
+        ...values,
+        recaptchaToken: registrationToken,
       })
-      const body = (await response.json()) as ApiResponse<{
-        status: string
-        verification: { verified: boolean }
-        verificationId: string
-      }>
-      if (!response.ok) {
-        form.setError('root', { message: body.message })
-        return
-      }
-
-      if (!body.data?.verificationId) throw new Error('INVALID_RESPONSE')
-      router.push(
-        `/verify-email?id=${encodeURIComponent(body.data.verificationId)}`
-      )
+      if (!body.verificationId) throw new Error('INVALID_RESPONSE')
+      router.push(`/verify-email?id=${encodeURIComponent(body.verificationId)}`)
     } catch {
       form.setError('root', {
         message:

@@ -1,56 +1,17 @@
 import { apiError, apiSuccess } from '@/lib/http'
-import { prisma } from '@/lib/prisma'
-import { requireActiveUser } from '@/server/authorization/session'
-import { randomUUID } from 'node:crypto'
-import { AUDIT_ACTIONS } from '@/lib/audit/constants'
+import { getPagination } from '@/lib/pagination'
 import { projectFormSchema } from '@/lib/projects/validation'
-import { getPagination, paginated } from '@/lib/pagination'
+import { createProject, listProjects } from '@/lib/services/projects'
+import { requireActiveUser } from '@/server/authorization/session'
 
 export async function GET(request: Request) {
   try {
-    const user = await requireActiveUser()
-    const parameters = new URL(request.url).searchParams
-    const shouldPaginate = parameters.has('page')
-    const { page, pageSize, skip } = getPagination(request)
-    const where =
-      user.system_role === 'ADMIN'
-        ? undefined
-        : {
-            OR: [
-              { teams: { leader_id: user.id } },
-              { teams: { team_members: { some: { user_id: user.id } } } },
-            ],
-          }
-    const rows = await prisma.projects.findMany({
-      where,
-      include: {
-        teams: { include: { users: { select: { id: true, name: true } } } },
-        requirements: { select: { status: true } },
-      },
-      orderBy: { updated_at: 'desc' },
-      skip: shouldPaginate ? skip : undefined,
-      take: shouldPaginate ? pageSize : undefined,
-    })
-    const data = rows.map(({ requirements, teams, ...project }) => ({
-      ...project,
-      team: { id: teams.id, name: teams.name, leader: teams.users },
-      requirementCount: requirements.length,
-      completedRequirementCount: requirements.filter(
-        (r) => r.status === 'COMPLETED'
-      ).length,
-      progress: requirements.length
-        ? Math.round(
-            (requirements.filter((r) => r.status === 'COMPLETED').length /
-              requirements.length) *
-              100
-          )
-        : 0,
-    }))
-    if (!shouldPaginate) return apiSuccess('Projetos carregados.', data)
-    const totalItems = await prisma.projects.count({ where })
+    const actor = await requireActiveUser()
+    const pagination = getPagination(request)
+    const enabled = new URL(request.url).searchParams.has('page')
     return apiSuccess(
       'Projetos carregados.',
-      paginated(data, totalItems, page, pageSize)
+      await listProjects(actor, { ...pagination, enabled })
     )
   } catch (error) {
     return apiError(error, 'Não foi possível carregar os projetos.')
@@ -70,59 +31,11 @@ export async function POST(request: Request) {
         },
         { status: 422 }
       )
-    const team = await prisma.teams.findUnique({
-      where: { id: parsed.data.teamId },
-      include: { users: { select: { id: true, status: true } } },
-    })
-    if (!team?.users || team.users.status !== 'ACTIVE')
-      return Response.json(
-        {
-          success: false,
-          message: 'A equipe precisa ter uma liderança ativa.',
-          data: null,
-        },
-        { status: 422 }
-      )
-    if (team.leader_id !== actor.id)
-      return Response.json(
-        {
-          success: false,
-          message: 'Somente a liderança da equipe pode criar este projeto.',
-          data: null,
-        },
-        { status: 403 }
-      )
-    const id = randomUUID()
-    await prisma.$transaction([
-      prisma.projects.create({
-        data: {
-          id,
-          name: parsed.data.name,
-          description: parsed.data.description,
-          client: parsed.data.client || null,
-          team_id: team.id,
-          start_date: new Date(`${parsed.data.startDate}T00:00:00.000Z`),
-          expected_completion_date: parsed.data.expectedCompletionDate
-            ? new Date(`${parsed.data.expectedCompletionDate}T00:00:00.000Z`)
-            : null,
-          status: parsed.data.status,
-          created_by_id: actor.id,
-        },
-      }),
-      prisma.audit_logs.create({
-        data: {
-          id: randomUUID(),
-          entity_type: 'PROJECT',
-          entity_id: id,
-          action: AUDIT_ACTIONS.projectCreated,
-          actor_user_id: actor.id,
-          actor_name_snapshot: actor.name,
-          actor_system_role_snapshot: actor.system_role,
-          metadata_json: { teamId: team.id, status: parsed.data.status },
-        },
-      }),
-    ])
-    return apiSuccess('Projeto criado com sucesso.', { id }, 201)
+    return apiSuccess(
+      'Projeto criado com sucesso.',
+      await createProject(parsed.data, actor),
+      201
+    )
   } catch (error) {
     return apiError(error, 'Não foi possível criar o projeto.')
   }

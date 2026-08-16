@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import type { ApiResponse } from '@/lib/api'
+import { createProject } from '@/lib/client-api/projects'
 import {
   projectFormSchema,
   type ProjectFormData,
@@ -32,6 +32,7 @@ import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import ProjectField from './project-label'
+import { USER_STATUS } from '@/lib/auth/constants'
 
 const defaults: ProjectFormInput = {
   name: '',
@@ -49,7 +50,7 @@ export function CreateProjectDialog() {
   const { data: teams, isLoading } = useApi<Team[]>('teams', '/api/teams')
   const eligible =
     teams?.filter(
-      (team) => team.canManage && team.users?.status === 'ACTIVE'
+      (team) => team.canManage && team.users?.status === USER_STATUS.ACTIVE
     ) ?? []
   const form = useForm<ProjectFormInput, unknown, ProjectFormData>({
     resolver: zodResolver(projectFormSchema),
@@ -58,14 +59,7 @@ export function CreateProjectDialog() {
 
   const mutation = useMutation({
     mutationFn: async (payload: ProjectFormData) => {
-      const response = await fetch('/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      const body = (await response.json()) as ApiResponse<{ id: string }>
-      if (!response.ok || !body.success) throw new Error(body.message)
-      return body
+      return createProject(payload)
     },
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: ['projects'] })
@@ -139,6 +133,7 @@ export function CreateProjectDialog() {
               name='teamId'
               render={({ field }) => (
                 <Select
+                  modal={false}
                   value={field.value}
                   onValueChange={field.onChange}
                   disabled={isLoading || !eligible.length}
@@ -170,7 +165,11 @@ export function CreateProjectDialog() {
               control={form.control}
               name='status'
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select
+                  modal={false}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
                   <SelectTrigger id='project-status' className='w-full'>
                     <SelectValue />
                   </SelectTrigger>
@@ -192,6 +191,7 @@ export function CreateProjectDialog() {
             <Input
               id='project-start'
               type='date'
+              lang='pt-BR'
               {...form.register('startDate')}
             />
           </ProjectField>
@@ -203,6 +203,7 @@ export function CreateProjectDialog() {
             <Input
               id='project-due'
               type='date'
+              lang='pt-BR'
               {...form.register('expectedCompletionDate')}
             />
           </ProjectField>

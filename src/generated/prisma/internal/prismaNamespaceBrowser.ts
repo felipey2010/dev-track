@@ -58,6 +58,7 @@ export const ModelName = {
   requirement_assignment_history: 'requirement_assignment_history',
   requirement_history: 'requirement_history',
   requirements: 'requirements',
+  security_rate_limits: 'security_rate_limits',
   sessions: 'sessions',
   team_members: 'team_members',
   teams: 'teams',
@@ -199,6 +200,17 @@ export const RequirementsScalarFieldEnum = {
 } as const
 
 export type RequirementsScalarFieldEnum = (typeof RequirementsScalarFieldEnum)[keyof typeof RequirementsScalarFieldEnum]
+
+
+export const Security_rate_limitsScalarFieldEnum = {
+  key: 'key',
+  attempts: 'attempts',
+  window_started: 'window_started',
+  blocked_until: 'blocked_until',
+  updated_at: 'updated_at'
+} as const
+
+export type Security_rate_limitsScalarFieldEnum = (typeof Security_rate_limitsScalarFieldEnum)[keyof typeof Security_rate_limitsScalarFieldEnum]
 
 
 export const SessionsScalarFieldEnum = {

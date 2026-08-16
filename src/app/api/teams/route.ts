@@ -1,47 +1,42 @@
 import { apiError, apiSuccess } from '@/lib/http'
-import { prisma } from '@/lib/prisma'
-import { requireActiveUser } from '@/server/authorization/session'
-import { getPagination, paginated } from '@/lib/pagination'
+import { getPagination } from '@/lib/pagination'
+import { createTeam, listTeams } from '@/lib/services/teams'
+import { teamFormSchema } from '@/lib/teams/validation'
+import { requireActiveUser, requireAdmin } from '@/server/authorization/session'
 
 export async function GET(request: Request) {
   try {
-    const user = await requireActiveUser()
-    const parameters = new URL(request.url).searchParams
-    const shouldPaginate = parameters.has('page')
-    const { page, pageSize, skip } = getPagination(request)
-    const where =
-      user.system_role === 'ADMIN'
-        ? undefined
-        : {
-            OR: [
-              { leader_id: user.id },
-              { team_members: { some: { user_id: user.id } } },
-            ],
-          }
-    const rows = await prisma.teams.findMany({
-      where,
-      include: {
-        users: { select: { id: true, name: true, status: true } },
-        team_members: { select: { role: true } },
-        _count: { select: { projects: true } },
-      },
-      orderBy: { name: 'asc' },
-      skip: shouldPaginate ? skip : undefined,
-      take: shouldPaginate ? pageSize : undefined,
-    })
-    const data = rows.map(({ team_members, ...t }) => ({
-      ...t,
-      canManage: t.leader_id === user.id,
-      developerCount: team_members.filter((m) => m.role === 'DEVELOPER').length,
-      testerCount: team_members.filter((m) => m.role === 'TESTER').length,
-    }))
-    if (!shouldPaginate) return apiSuccess('Equipes carregadas.', data)
-    const totalItems = await prisma.teams.count({ where })
+    const actor = await requireActiveUser()
+    const pagination = getPagination(request)
+    const enabled = new URL(request.url).searchParams.has('page')
     return apiSuccess(
       'Equipes carregadas.',
-      paginated(data, totalItems, page, pageSize)
+      await listTeams(actor, { ...pagination, enabled })
     )
   } catch (error) {
     return apiError(error, 'Não foi possível carregar as equipes.')
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const actor = await requireAdmin()
+    const parsed = teamFormSchema.safeParse(await request.json())
+    if (!parsed.success)
+      return Response.json(
+        {
+          success: false,
+          message: parsed.error.issues[0]?.message ?? 'Dados inválidos.',
+          data: null,
+        },
+        { status: 422 }
+      )
+    return apiSuccess(
+      'Equipe criada com sucesso.',
+      await createTeam(parsed.data, actor),
+      201
+    )
+  } catch (error) {
+    return apiError(error, 'Não foi possível criar a equipe.')
   }
 }

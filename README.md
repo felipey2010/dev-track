@@ -50,6 +50,7 @@ O produto é uma aplicação monolítica em Next.js, com autenticação, autoriz
    SMTP_PASSWORD="senha-de-aplicativo"
    EMAIL_FROM="conta@gmail.com"
    EMAIL_VERIFICATION_SECRET="outra-chave-segura-e-aleatoria"
+   RATE_LIMIT_SECRET="uma-terceira-chave-segura-e-independente"
    ```
 
    O provedor Google só aparece na interface quando as duas credenciais estão preenchidas. Configure no Google a callback `/api/auth/callback/google` para o domínio utilizado.
@@ -59,7 +60,9 @@ O produto é uma aplicação monolítica em Next.js, com autenticação, autoriz
    `RECAPTCHA_ALLOWED_HOSTNAMES` é opcional e recebe uma lista separada por
    vírgulas.
 
-3. Prepare o banco de dados usando [db/scripts/001_initial_schema.sql](db/scripts/001_initial_schema.sql) ou o fluxo de migrações adotado pelo ambiente.
+3. Prepare o banco executando, em ordem, os scripts da pasta `db/scripts`. Em
+   instalações existentes, aplique ao menos
+   [002_security_rate_limits.sql](db/scripts/002_security_rate_limits.sql).
 
 4. Gere o Prisma Client:
 

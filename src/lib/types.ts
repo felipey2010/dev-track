@@ -38,6 +38,20 @@ export type Team = {
   testerCount: number
   _count: { projects: number }
 }
+export type TeamDetail = {
+  id: string
+  name: string
+  description: string | null
+  leader_id: string | null
+  users: { id: string; name: string; email: string; status: string } | null
+  _count: { projects: number }
+  team_members: {
+    id: string
+    role: 'DEVELOPER' | 'TESTER'
+    users: { id: string; name: string; email: string; status: string }
+  }[]
+}
+export type TeamUserOption = { id: string; name: string; email: string }
 export type User = {
   id: string
   name: string

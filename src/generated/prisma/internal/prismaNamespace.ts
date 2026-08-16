@@ -404,6 +404,7 @@ export const ModelName = {
   requirement_assignment_history: 'requirement_assignment_history',
   requirement_history: 'requirement_history',
   requirements: 'requirements',
+  security_rate_limits: 'security_rate_limits',
   sessions: 'sessions',
   team_members: 'team_members',
   teams: 'teams',
@@ -425,7 +426,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "accounts" | "audit_logs" | "development_records" | "projects" | "requirement_assignment_history" | "requirement_history" | "requirements" | "sessions" | "team_members" | "teams" | "testing_records" | "users" | "verification_tokens"
+    modelProps: "accounts" | "audit_logs" | "development_records" | "projects" | "requirement_assignment_history" | "requirement_history" | "requirements" | "security_rate_limits" | "sessions" | "team_members" | "teams" | "testing_records" | "users" | "verification_tokens"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -944,6 +945,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.requirementsCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.RequirementsCountAggregateOutputType> | number
+        }
+      }
+    }
+    security_rate_limits: {
+      payload: Prisma.$security_rate_limitsPayload<ExtArgs>
+      fields: Prisma.security_rate_limitsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.security_rate_limitsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$security_rate_limitsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.security_rate_limitsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$security_rate_limitsPayload>
+        }
+        findFirst: {
+          args: Prisma.security_rate_limitsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$security_rate_limitsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.security_rate_limitsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$security_rate_limitsPayload>
+        }
+        findMany: {
+          args: Prisma.security_rate_limitsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$security_rate_limitsPayload>[]
+        }
+        create: {
+          args: Prisma.security_rate_limitsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$security_rate_limitsPayload>
+        }
+        createMany: {
+          args: Prisma.security_rate_limitsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.security_rate_limitsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$security_rate_limitsPayload>[]
+        }
+        delete: {
+          args: Prisma.security_rate_limitsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$security_rate_limitsPayload>
+        }
+        update: {
+          args: Prisma.security_rate_limitsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$security_rate_limitsPayload>
+        }
+        deleteMany: {
+          args: Prisma.security_rate_limitsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.security_rate_limitsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.security_rate_limitsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$security_rate_limitsPayload>[]
+        }
+        upsert: {
+          args: Prisma.security_rate_limitsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$security_rate_limitsPayload>
+        }
+        aggregate: {
+          args: Prisma.Security_rate_limitsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSecurity_rate_limits>
+        }
+        groupBy: {
+          args: Prisma.security_rate_limitsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Security_rate_limitsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.security_rate_limitsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Security_rate_limitsCountAggregateOutputType> | number
         }
       }
     }
@@ -1549,6 +1624,17 @@ export const RequirementsScalarFieldEnum = {
 export type RequirementsScalarFieldEnum = (typeof RequirementsScalarFieldEnum)[keyof typeof RequirementsScalarFieldEnum]
 
 
+export const Security_rate_limitsScalarFieldEnum = {
+  key: 'key',
+  attempts: 'attempts',
+  window_started: 'window_started',
+  blocked_until: 'blocked_until',
+  updated_at: 'updated_at'
+} as const
+
+export type Security_rate_limitsScalarFieldEnum = (typeof Security_rate_limitsScalarFieldEnum)[keyof typeof Security_rate_limitsScalarFieldEnum]
+
+
 export const SessionsScalarFieldEnum = {
   session_token: 'session_token',
   user_id: 'user_id',
@@ -2036,6 +2122,7 @@ export type GlobalOmitConfig = {
   requirement_assignment_history?: Prisma.requirement_assignment_historyOmit
   requirement_history?: Prisma.requirement_historyOmit
   requirements?: Prisma.requirementsOmit
+  security_rate_limits?: Prisma.security_rate_limitsOmit
   sessions?: Prisma.sessionsOmit
   team_members?: Prisma.team_membersOmit
   teams?: Prisma.teamsOmit

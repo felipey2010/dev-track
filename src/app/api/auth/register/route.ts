@@ -1,28 +1,17 @@
-import { hash } from 'bcryptjs'
-import { randomUUID } from 'node:crypto'
-import { Prisma } from '@/generated/prisma/client'
-import { AUDIT_ACTIONS } from '@/lib/audit/constants'
-import { USER_STATUS } from '@/lib/auth/constants'
 import { registrationRequestSchema } from '@/lib/auth/validation'
 import { apiError, apiSuccess } from '@/lib/http'
-import { prisma } from '@/lib/prisma'
+import {
+  registerCredentialUser,
+  RegistrationConflictError,
+} from '@/lib/services/auth/registration'
+import { requestIp } from '@/lib/services/security/request-identity'
 import { RECAPTCHA_ACTIONS } from '@/lib/recaptcha/constants'
-import {
-  EMAIL_VERIFICATION_TTL_MINUTES,
-  emailVerificationIdentifier,
-  generateEmailVerificationCode,
-  hashEmailVerificationCode,
-  sendEmailVerificationCode,
-} from '@/server/email/email-verification'
-import {
-  getRequestIp,
-  verifyRecaptcha,
-} from '@/server/recaptcha/verify-recaptcha'
+import { verifyRecaptcha } from '@/server/recaptcha/verify-recaptcha'
 
 export async function POST(request: Request) {
   try {
     const parsed = registrationRequestSchema.safeParse(await request.json())
-    if (!parsed.success) {
+    if (!parsed.success)
       return Response.json(
         {
           success: false,
@@ -31,86 +20,31 @@ export async function POST(request: Request) {
         },
         { status: 422 }
       )
-    }
 
+    const ip = requestIp(request.headers)
     const verification = await verifyRecaptcha({
       token: parsed.data.recaptchaToken,
       expectedAction: RECAPTCHA_ACTIONS.registration,
-      remoteIp: getRequestIp(request.headers),
+      remoteIp: ip === 'unknown' ? null : ip,
     })
-
-    if (!verification.verified) {
+    if (!verification.verified)
       return Response.json(
         {
           success: false,
           message: 'Não foi possível confirmar a verificação de segurança.',
-          data: { verification },
+          data: null,
         },
         { status: 403 }
       )
-    }
 
-    const { name, email, password } = parsed.data
-    const id = randomUUID()
-    const code = generateEmailVerificationCode()
-    const identifier = emailVerificationIdentifier(id)
-    await prisma.$transaction([
-      prisma.users.create({
-        data: {
-          id,
-          name,
-          email,
-          password_hash: await hash(password, 12),
-          system_role: 'USER',
-          status: USER_STATUS.PENDING,
-        },
-      }),
-      prisma.audit_logs.create({
-        data: {
-          id: randomUUID(),
-          entity_type: 'USER',
-          entity_id: id,
-          action: AUDIT_ACTIONS.userRegistered,
-          actor_user_id: id,
-          actor_name_snapshot: name,
-          actor_system_role_snapshot: 'USER',
-          metadata_json: { status: USER_STATUS.PENDING, method: 'credentials' },
-        },
-      }),
-      prisma.verification_tokens.create({
-        data: {
-          identifier,
-          token: hashEmailVerificationCode(id, code),
-          expires: new Date(
-            Date.now() + EMAIL_VERIFICATION_TTL_MINUTES * 60 * 1000
-          ),
-        },
-      }),
-    ])
-
-    try {
-      await sendEmailVerificationCode({ email, name, code })
-    } catch (error) {
-      await prisma.$transaction([
-        prisma.verification_tokens.deleteMany({ where: { identifier } }),
-        prisma.audit_logs.deleteMany({
-          where: { entity_type: 'USER', entity_id: id },
-        }),
-        prisma.users.delete({ where: { id } }),
-      ])
-      throw error
-    }
-
+    const data = await registerCredentialUser({ ...parsed.data, requestIp: ip })
     return apiSuccess(
       'Conta criada. Enviamos um código de verificação para seu e-mail.',
-      { status: USER_STATUS.PENDING, verification, verificationId: id },
+      data,
       201
     )
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === 'P2002'
-    ) {
+    if (error instanceof RegistrationConflictError)
       return Response.json(
         {
           success: false,
@@ -119,7 +53,6 @@ export async function POST(request: Request) {
         },
         { status: 409 }
       )
-    }
     return apiError(
       error,
       'Não foi possível criar a conta e enviar o código de verificação.'

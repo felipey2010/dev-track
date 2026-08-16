@@ -3,6 +3,9 @@ export const AUDIT_ACTIONS = {
   userEmailVerified: 'USER_EMAIL_VERIFIED',
   userPasswordReset: 'USER_PASSWORD_RESET',
   projectCreated: 'PROJECT_CREATED',
+  teamCreated: 'TEAM_CREATED',
+  teamUpdated: 'TEAM_UPDATED',
+  teamDeleted: 'TEAM_DELETED',
   userStatusChanged: {
     PENDING: 'USER_STATUS_PENDING',
     ACTIVE: 'USER_STATUS_ACTIVE',

@@ -53,6 +53,11 @@ export type requirement_history = Prisma.requirement_historyModel
  */
 export type requirements = Prisma.requirementsModel
 /**
+ * Model security_rate_limits
+ * 
+ */
+export type security_rate_limits = Prisma.security_rate_limitsModel
+/**
  * Model sessions
  * 
  */

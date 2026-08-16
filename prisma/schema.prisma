@@ -151,6 +151,17 @@ model requirements {
   @@schema("public")
 }
 
+model security_rate_limits {
+  key            String    @id
+  attempts       Int       @default(0)
+  window_started DateTime  @db.Timestamptz(6)
+  blocked_until  DateTime? @db.Timestamptz(6)
+  updated_at     DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([updated_at], map: "security_rate_limits_updated_idx")
+  @@schema("public")
+}
+
 model sessions {
   session_token String   @id
   user_id       String
