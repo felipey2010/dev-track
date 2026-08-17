@@ -1,6 +1,6 @@
 import { apiError, apiSuccess } from '@/lib/http'
 import { getPagination } from '@/lib/pagination'
-import { projectFormSchema } from '@/lib/projects/validation'
+import { projectCreateSchema } from '@/lib/projects/validation'
 import { createProject, listProjects } from '@/lib/services/projects'
 import { requireActiveUser } from '@/server/authorization/session'
 
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const actor = await requireActiveUser()
-    const parsed = projectFormSchema.safeParse(await request.json())
+    const parsed = projectCreateSchema.safeParse(await request.json())
     if (!parsed.success)
       return Response.json(
         {

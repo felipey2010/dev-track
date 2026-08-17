@@ -54,7 +54,7 @@ export function Progress({ value }: { value: number }) {
   return (
     <div className='flex min-w-28 items-center gap-3'>
       <ProgressBar value={value} className='h-1.5' />
-      <span className='w-8 font-mono text-[10px] text-muted-foreground'>
+      <span className='w-8 font-mono text-base text-muted-foreground'>
         {value}%
       </span>
     </div>

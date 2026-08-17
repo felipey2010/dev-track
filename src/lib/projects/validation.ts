@@ -21,7 +21,14 @@ export const projectFormSchema = z
       .regex(/^[A-Za-z0-9_-]{1,128}$/, 'Equipe inválida.'),
     startDate: dateOnly,
     expectedCompletionDate: z.union([dateOnly, z.literal('')]),
-    status: z.enum(['PLANNING', 'IN_DEVELOPMENT']),
+    status: z.enum([
+      'PLANNING',
+      'IN_DEVELOPMENT',
+      'TESTING',
+      'COMPLETED',
+      'ON_HOLD',
+      'CANCELLED',
+    ]),
   })
   .refine(
     (value) =>
@@ -34,3 +41,8 @@ export const projectFormSchema = z
   )
 export type ProjectFormInput = z.input<typeof projectFormSchema>
 export type ProjectFormData = z.output<typeof projectFormSchema>
+
+export const projectCreateSchema = projectFormSchema.refine(
+  (value) => value.status === 'PLANNING' || value.status === 'IN_DEVELOPMENT',
+  { message: 'Status inicial inválido.', path: ['status'] }
+)

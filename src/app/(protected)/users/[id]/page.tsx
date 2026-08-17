@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -49,6 +50,11 @@ export default async function UserProfilePage({
 
   return (
     <div className='mx-auto max-w-7xl flex flex-col gap-6'>
+      <div className='mb-2'>
+        <Link href='/users'>
+          <Button>Voltar</Button>
+        </Link>
+      </div>
       <p className='font-mono text-[10px] text-muted-foreground'>
         Usuários / {user.name}
       </p>
@@ -104,9 +110,10 @@ export default async function UserProfilePage({
             ) : (
               <div className='divide-y rounded-lg border'>
                 {user.teams.map((team) => (
-                  <div
+                  <Link
                     key={team.id}
-                    className='flex items-center justify-between gap-3 p-3'
+                    href={`/teams/${team.id}`}
+                    className='flex items-center justify-between gap-3 p-3 transition-colors hover:bg-muted'
                   >
                     <div className='min-w-0'>
                       <p className='font-medium'>{team.name}</p>
@@ -116,8 +123,10 @@ export default async function UserProfilePage({
                         </p>
                       )}
                     </div>
-                    <Badge variant='outline'>{teamRoleLabels[team.role]}</Badge>
-                  </div>
+                    <Badge variant='outline' className='text-[10px]'>
+                      {teamRoleLabels[team.role]}
+                    </Badge>
+                  </Link>
                 ))}
               </div>
             )}
@@ -146,7 +155,7 @@ export default async function UserProfilePage({
                     className='flex items-center justify-between gap-3 p-3 transition-colors hover:bg-muted'
                   >
                     <span className='font-medium'>{project.name}</span>
-                    <Badge variant='outline'>
+                    <Badge variant='outline' className='text-[9px]'>
                       {projectStatusLabel(project.status)}
                     </Badge>
                   </Link>

@@ -1,5 +1,6 @@
 export const DEFAULT_PAGE_SIZE = 10
 export const MAX_PAGE_SIZE = 100
+export const DEFAULT_PAGE = 1
 
 export type PaginatedData<T> = {
   items: T[]
@@ -23,7 +24,7 @@ export function getPagination(request: Request) {
     Number.isInteger(requestedPageSize) && requestedPageSize > 0
       ? Math.min(requestedPageSize, MAX_PAGE_SIZE)
       : DEFAULT_PAGE_SIZE
-  return { page, pageSize, skip: (page - 1) * pageSize }
+  return { page, pageSize, skip: (page - DEFAULT_PAGE) * pageSize }
 }
 
 export function paginated<T>(
@@ -38,7 +39,7 @@ export function paginated<T>(
       page,
       pageSize,
       totalItems,
-      totalPages: Math.max(1, Math.ceil(totalItems / pageSize)),
+      totalPages: Math.max(DEFAULT_PAGE, Math.ceil(totalItems / pageSize)),
     },
   }
 }

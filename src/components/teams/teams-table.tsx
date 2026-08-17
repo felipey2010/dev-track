@@ -13,16 +13,18 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import type { PaginatedData } from '@/lib/pagination'
+import { DEFAULT_PAGE, type PaginatedData } from '@/lib/pagination'
 import type { Team } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import Link from 'next/link'
+import { State } from '../content-states'
 import { DeleteTeamDialog } from './delete-team-dialog'
 import { TeamFormDialog } from './team-form-dialog'
 
 export function TeamsTable({ isAdmin }: { isAdmin: boolean }) {
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState(DEFAULT_PAGE)
   const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState<Team | null>(null)
   const [deleting, setDeleting] = useState<Team | null>(null)
@@ -77,7 +79,12 @@ export function TeamsTable({ isAdmin }: { isAdmin: boolean }) {
                 {teams.map((team) => (
                   <TableRow key={team.id}>
                     <TableCell className='font-semibold'>
-                      {team.name}
+                      <Link
+                        href={`/teams/${team.id}`}
+                        className='transition-colors hover:text-cyan-600 dark:hover:text-cyan-400'
+                      >
+                        {team.name}
+                      </Link>
                       {team.description && (
                         <span className='mt-1 block text-[10px] font-normal text-muted-foreground'>
                           {team.description}
@@ -142,16 +149,6 @@ export function TeamsTable({ isAdmin }: { isAdmin: boolean }) {
           />
         </>
       )}
-    </div>
-  )
-}
-
-function State({ text, error }: { text: string; error?: boolean }) {
-  return (
-    <div
-      className={`p-8 text-sm ${error ? 'text-destructive' : 'text-muted-foreground'}`}
-    >
-      {text}
     </div>
   )
 }

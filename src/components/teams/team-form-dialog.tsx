@@ -146,7 +146,6 @@ export function TeamFormDialog({ team, open, onOpenChange }: Props) {
                   name='leaderId'
                   render={({ field }) => (
                     <Select
-                      modal={false}
                       value={field.value || '__none'}
                       onValueChange={(value) => {
                         const nextLeader = value === '__none' ? '' : value
@@ -191,8 +190,11 @@ export function TeamFormDialog({ team, open, onOpenChange }: Props) {
             </div>
             <div className='flex flex-col gap-2'>
               <div>
-                <Label>Membros</Label>
-                <p className='text-xs text-muted-foreground'>
+                <Label htmlFor='selecionar_usuario_descricao'>Membros</Label>
+                <p
+                  id='selecionar_usuario_descricao'
+                  className='text-xs text-muted-foreground'
+                >
                   Selecione os membros e atribua a função de cada um.
                 </p>
               </div>
@@ -236,7 +238,6 @@ export function TeamFormDialog({ team, open, onOpenChange }: Props) {
                           </div>
                           {member && (
                             <Select
-                              modal={false}
                               value={member.role}
                               onValueChange={(role) =>
                                 changeRole(
@@ -245,10 +246,10 @@ export function TeamFormDialog({ team, open, onOpenChange }: Props) {
                                 )
                               }
                             >
-                              <SelectTrigger size='sm' className='w-36'>
+                              <SelectTrigger className='w-36'>
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent>
+                              <SelectContent className='text-sm'>
                                 <SelectItem value='DEVELOPER'>
                                   Desenvolvedor
                                 </SelectItem>

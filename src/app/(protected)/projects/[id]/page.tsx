@@ -19,6 +19,15 @@ import {
 import type { ProjectDetail } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
 import { Pagination } from '@/components/ui/pagination'
+import { DEFAULT_PAGE } from '@/lib/pagination'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { RequirementFormDialog } from '@/components/requirements/requirement-form-dialog'
+import { DeleteRequirementDialog } from '@/components/requirements/delete-requirement-dialog'
+import type { Requirement } from '@/lib/types'
+import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { ProjectFormDialog } from '@/components/projects/create-project-dialog'
+import { DeleteProjectDialog } from '@/components/projects/delete-project-dialog'
 
 const REQUIREMENTS_PAGE_SIZE = 10
 
@@ -40,11 +49,19 @@ export default function ProjectPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
-  const [requirementsPage, setRequirementsPage] = useState(1)
+  const [requirementsPage, setRequirementsPage] = useState(DEFAULT_PAGE)
+  const [creatingRequirement, setCreatingRequirement] = useState(false)
+  const [editingRequirement, setEditingRequirement] =
+    useState<Requirement | null>(null)
+  const [deletingRequirement, setDeletingRequirement] =
+    useState<Requirement | null>(null)
+  const [editingProject, setEditingProject] = useState(false)
+  const [deletingProject, setDeletingProject] = useState(false)
   const { data, error, isLoading } = useApi<ProjectDetail>(
     `project-${id}`,
     `/api/projects/${id}`
   )
+
   if (isLoading) return <Skeleton className='h-72 w-full' />
 
   if (error)
@@ -57,31 +74,54 @@ export default function ProjectPage({
     )
 
   if (!data) return null
+
   const requirementPages = Math.max(
-    1,
+    DEFAULT_PAGE,
     Math.ceil(data.requirements.length / REQUIREMENTS_PAGE_SIZE)
   )
   const visibleRequirements = data.requirements.slice(
-    (requirementsPage - 1) * REQUIREMENTS_PAGE_SIZE,
+    (requirementsPage - DEFAULT_PAGE) * REQUIREMENTS_PAGE_SIZE,
     requirementsPage * REQUIREMENTS_PAGE_SIZE
   )
 
   return (
     <div className='mx-auto max-w-7xl'>
+      <div className='mb-2'>
+        <Link href='/projects'>
+          <Button>Voltar</Button>
+        </Link>
+      </div>
       <p className='mb-3 font-mono text-[10px] text-muted-foreground'>
         Projetos / {data.name}
       </p>
       <PageHeader
         title={data.name}
         description={data.client ?? 'Sem cliente informado'}
+        action={
+          data.canEditProject ? (
+            <div className='flex gap-2'>
+              <Button variant='outline' onClick={() => setEditingProject(true)}>
+                <Pencil /> Editar
+              </Button>
+              <Button
+                variant='destructive'
+                onClick={() => setDeletingProject(true)}
+              >
+                <Trash2 /> Excluir
+              </Button>
+            </div>
+          ) : undefined
+        }
       />
       <section className='mb-6 grid overflow-hidden rounded-md border bg-card sm:grid-cols-2 lg:grid-cols-4'>
         <Summary label='Equipe responsável'>
           <strong>{data.team.name}</strong>
         </Summary>
         <Summary label='Gestor atual'>
-          <strong>{data.team.leader?.name ?? 'Não definido'}</strong>
-          <span>Derivado da liderança da equipe</span>
+          <div className='flex flex-col gap-1'>
+            <strong>{data.team.leader?.name ?? 'Não definido'}</strong>
+            <span>Derivado da liderança da equipe</span>
+          </div>
         </Summary>
         <Summary label='Status do projeto'>
           <StatusBadge value={projectStatusLabel(data.status)} />
@@ -92,13 +132,18 @@ export default function ProjectPage({
         </Summary>
       </section>
       <Card className='gap-0 overflow-hidden py-0'>
-        <CardHeader className='border-b py-4'>
+        <CardHeader className='flex flex-row items-center justify-between border-b py-4'>
           <CardTitle className='text-sm'>
             Requisitos{' '}
             <span className='ml-2 font-normal text-muted-foreground'>
               Requisitos → Desenvolvimento → Testes → Concluído
             </span>
           </CardTitle>
+          {data.canManage && (
+            <Button size='lg' onClick={() => setCreatingRequirement(true)}>
+              <Plus /> Novo requisito
+            </Button>
+          )}
         </CardHeader>
         <CardContent className='p-0'>
           {!data.requirements.length ? (
@@ -116,13 +161,21 @@ export default function ProjectPage({
                     <TableHead>Status</TableHead>
                     <TableHead>Responsável atual</TableHead>
                     <TableHead>Prazo</TableHead>
+                    {data.canManage && (
+                      <TableHead className='w-24 text-right'>Ações</TableHead>
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {visibleRequirements.map((r) => (
                     <TableRow key={r.id}>
                       <TableCell className='font-semibold'>
-                        {r.code}
+                        <Link
+                          href={`/projects/${id}/requirements/${r.id}`}
+                          className='transition-colors hover:text-cyan-600 dark:hover:text-cyan-400'
+                        >
+                          {r.code}
+                        </Link>
                         <span className='mt-1 block text-[10px] font-normal text-muted-foreground'>
                           {r.title}
                         </span>
@@ -146,6 +199,29 @@ export default function ProjectPage({
                       <TableCell className='font-mono text-[10px]'>
                         {dateLabel(r.deadline)}
                       </TableCell>
+                      {data.canManage && (
+                        <TableCell>
+                          <div className='flex justify-end gap-1'>
+                            <Button
+                              size='icon-sm'
+                              variant='ghost'
+                              aria-label={`Editar ${r.code}`}
+                              onClick={() => setEditingRequirement(r)}
+                            >
+                              <Pencil />
+                            </Button>
+                            <Button
+                              size='icon-sm'
+                              variant='ghost'
+                              className='text-destructive'
+                              aria-label={`Excluir ${r.code}`}
+                              onClick={() => setDeletingRequirement(r)}
+                            >
+                              <Trash2 />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -159,6 +235,41 @@ export default function ProjectPage({
           )}
         </CardContent>
       </Card>
+      {data.canManage && (
+        <>
+          <RequirementFormDialog
+            projectId={id}
+            open={creatingRequirement}
+            onOpenChange={setCreatingRequirement}
+          />
+          <RequirementFormDialog
+            projectId={id}
+            requirement={editingRequirement}
+            open={editingRequirement !== null}
+            onOpenChange={(open) => !open && setEditingRequirement(null)}
+          />
+          <DeleteRequirementDialog
+            projectId={id}
+            requirement={deletingRequirement}
+            open={deletingRequirement !== null}
+            onOpenChange={(open) => !open && setDeletingRequirement(null)}
+          />
+        </>
+      )}
+      {data.canEditProject && (
+        <>
+          <ProjectFormDialog
+            project={data}
+            open={editingProject}
+            onOpenChange={setEditingProject}
+          />
+          <DeleteProjectDialog
+            project={data}
+            open={deletingProject}
+            onOpenChange={setDeletingProject}
+          />
+        </>
+      )}
     </div>
   )
 }

@@ -1,8 +1,9 @@
 'use client'
+import { Loading, State } from '@/components/content-states'
 import { PageHeader } from '@/components/ui'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Pagination } from '@/components/ui/pagination'
 import {
   Table,
   TableBody,
@@ -11,12 +12,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { UserStatusActions } from '@/components/users/user-status-actions'
+import { DEFAULT_PAGE, type PaginatedData } from '@/lib/pagination'
 import type { User } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
-import { UserStatusActions } from '@/components/users/user-status-actions'
-import { Pagination } from '@/components/ui/pagination'
-import type { PaginatedData } from '@/lib/pagination'
 import { useState } from 'react'
+import Link from 'next/link'
 
 const labels: Record<string, string> = {
   ACTIVE: 'ATIVO',
@@ -26,7 +27,7 @@ const labels: Record<string, string> = {
 }
 
 export default function UsersPage() {
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState(DEFAULT_PAGE)
   const { data, error, isLoading } = useApi<PaginatedData<User>>(
     'users',
     `/api/users?page=${page}`
@@ -42,9 +43,7 @@ export default function UsersPage() {
       <Card className='gap-0 overflow-hidden py-0'>
         <CardContent className='p-0'>
           {isLoading ? (
-            <div className='p-5'>
-              <Skeleton className='h-24' />
-            </div>
+            <Loading />
           ) : error ? (
             <State text={error.message} error />
           ) : !users?.length ? (
@@ -63,7 +62,14 @@ export default function UsersPage() {
               <TableBody>
                 {users.map((u) => (
                   <TableRow key={u.id}>
-                    <TableCell className='font-semibold'>{u.name}</TableCell>
+                    <TableCell>
+                      <Link
+                        href={`/users/${u.id}`}
+                        className='font-semibold text-foreground transition-colors hover:text-cyan-600 dark:hover:text-cyan-400'
+                      >
+                        {u.name}
+                      </Link>
+                    </TableCell>
                     <TableCell>{u.email}</TableCell>
                     <TableCell className='font-mono text-[10px]'>
                       {u.system_role}
@@ -90,16 +96,6 @@ export default function UsersPage() {
           )}
         </CardContent>
       </Card>
-    </div>
-  )
-}
-
-function State({ text, error }: { text: string; error?: boolean }) {
-  return (
-    <div
-      className={`p-8 text-sm ${error ? 'text-destructive' : 'text-muted-foreground'}`}
-    >
-      {text}
     </div>
   )
 }

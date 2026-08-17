@@ -72,3 +72,16 @@ export async function requireProjectManager(projectId: string) {
   if (project.teams.leader_id !== user.id) throw new AuthorizationError()
   return user
 }
+
+export async function requireProjectManagerOrAdmin(projectId: string) {
+  const safeProjectId = identifierSchema.parse(projectId)
+  const user = await requireActiveUser()
+  const project = await prisma.projects.findUnique({
+    where: { id: safeProjectId },
+    select: { teams: { select: { leader_id: true } } },
+  })
+  if (!project) throw new ApplicationError('Projeto não encontrado.', 404)
+  if (user.system_role !== 'ADMIN' && project.teams.leader_id !== user.id)
+    throw new AuthorizationError()
+  return user
+}

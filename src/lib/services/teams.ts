@@ -67,9 +67,30 @@ const teamInclude = {
     select: {
       id: true,
       role: true,
-      users: { select: { id: true, name: true, email: true, status: true } },
+      users: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+          status: true,
+        },
+      },
     },
     orderBy: { created_at: 'asc' as const },
+  },
+  projects: {
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      client: true,
+      status: true,
+      start_date: true,
+      expected_completion_date: true,
+      updated_at: true,
+    },
+    orderBy: { name: 'asc' as const },
   },
   _count: { select: { projects: true } },
 }

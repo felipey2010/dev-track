@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from './button'
+import { DEFAULT_PAGE } from '@/lib/pagination'
 
 export function Pagination({
   page,
@@ -10,13 +11,16 @@ export function Pagination({
   totalPages: number
   onPageChange: (page: number) => void
 }) {
-  if (totalPages <= 1) return null
+  if (totalPages <= DEFAULT_PAGE) return null
 
   const pages = Array.from(
     { length: totalPages },
-    (_, index) => index + 1
+    (_, index) => index + DEFAULT_PAGE
   ).filter(
-    (item) => item === 1 || item === totalPages || Math.abs(item - page) <= 1
+    (item) =>
+      item === DEFAULT_PAGE ||
+      item === totalPages ||
+      Math.abs(item - page) <= DEFAULT_PAGE
   )
 
   return (
@@ -28,15 +32,15 @@ export function Pagination({
         type='button'
         variant='outline'
         size='icon-sm'
-        disabled={page === 1}
-        onClick={() => onPageChange(page - 1)}
+        disabled={page === DEFAULT_PAGE}
+        onClick={() => onPageChange(page - DEFAULT_PAGE)}
         aria-label='Página anterior'
       >
         <ChevronLeft />
       </Button>
       {pages.map((item, index) => (
         <span key={item} className='contents'>
-          {index > 0 && item - pages[index - 1] > 1 && (
+          {index > 0 && item - pages[index - DEFAULT_PAGE] > DEFAULT_PAGE && (
             <span className='px-1 text-xs text-muted-foreground'>…</span>
           )}
           <Button
@@ -55,7 +59,7 @@ export function Pagination({
         variant='outline'
         size='icon-sm'
         disabled={page === totalPages}
-        onClick={() => onPageChange(page + 1)}
+        onClick={() => onPageChange(page + DEFAULT_PAGE)}
         aria-label='Próxima página'
       >
         <ChevronRight />

@@ -47,10 +47,10 @@ export default function Sidebar({ user }: { user: CurrentUser }) {
         <div className='border-t p-4'>
           <Link
             href={`/users/${user.id}`}
-            className='P-1 flex items-center gap-2.5 rounded-lg outline-none transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring'
+            className='p-1 flex items-center gap-2.5 rounded-lg outline-none transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring'
             aria-label={`Abrir perfil de ${user.name}`}
           >
-            <Avatar className='size-7'>
+            <Avatar className='size-10'>
               <AvatarFallback className='bg-cyan-500/10 text-[10px] text-cyan-600'>
                 {initials}
               </AvatarFallback>

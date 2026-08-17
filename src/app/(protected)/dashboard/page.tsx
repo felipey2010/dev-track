@@ -1,4 +1,5 @@
 'use client'
+import { Loading, State } from '@/components/content-states'
 import { Progress, ProjectLink, StatusBadge } from '@/components/ui'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Pagination } from '@/components/ui/pagination'
@@ -14,7 +15,7 @@ import {
 import { auditActionLabel, auditEntityLabel } from '@/lib/audit/format'
 import { USER_STATUS } from '@/lib/auth/constants'
 import { dateLabel, dateTimeLabel, projectStatusLabel } from '@/lib/format'
-import type { PaginatedData } from '@/lib/pagination'
+import { DEFAULT_PAGE, type PaginatedData } from '@/lib/pagination'
 import { PROJECT_STATUS } from '@/lib/projects/constants'
 import type { Activity, Project, Team } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
@@ -28,9 +29,9 @@ import {
 import { useState } from 'react'
 
 export default function Dashboard() {
-  const [activityPage, setActivityPage] = useState(1)
-  const [projectPage, setProjectPage] = useState(1)
-  const [warningPage, setWarningPage] = useState(1)
+  const [activityPage, setActivityPage] = useState(DEFAULT_PAGE)
+  const [projectPage, setProjectPage] = useState(DEFAULT_PAGE)
+  const [warningPage, setWarningPage] = useState(DEFAULT_PAGE)
   const projects = useApi<Project[]>('projects', '/api/projects')
   const activity = useApi<PaginatedData<Activity>>(
     'activity',
@@ -48,10 +49,16 @@ export default function Dashboard() {
     teams.data?.filter(
       (t) => !t.users || t.users.status !== USER_STATUS.ACTIVE
     ) ?? []
-  const projectPages = Math.max(1, Math.ceil(rows.length / 8))
-  const visibleProjects = rows.slice((projectPage - 1) * 8, projectPage * 8)
-  const warningPages = Math.max(1, Math.ceil(warnings.length / 3))
-  const visibleWarnings = warnings.slice((warningPage - 1) * 3, warningPage * 3)
+  const projectPages = Math.max(DEFAULT_PAGE, Math.ceil(rows.length / 8))
+  const visibleProjects = rows.slice(
+    (projectPage - DEFAULT_PAGE) * 8,
+    projectPage * 8
+  )
+  const warningPages = Math.max(DEFAULT_PAGE, Math.ceil(warnings.length / 3))
+  const visibleWarnings = warnings.slice(
+    (warningPage - DEFAULT_PAGE) * 3,
+    warningPage * 3
+  )
 
   return (
     <div className='mx-auto max-w-7xl'>
@@ -159,13 +166,11 @@ export default function Dashboard() {
             <CardHeader className='border-b py-4'>
               <CardTitle className='text-sm'>Avisos</CardTitle>
             </CardHeader>
-            <CardContent className='p-4'>
+            <CardContent className='p-0'>
               {teams.isLoading ? (
                 <Skeleton className='h-24' />
               ) : !warnings.length ? (
-                <p className='text-xs text-muted-foreground'>
-                  Nenhum aviso no momento.
-                </p>
+                <State text='Nenhum aviso no momento' />
               ) : (
                 visibleWarnings.map((team) => (
                   <div
@@ -265,22 +270,4 @@ function percentage(value: number, total: number) {
   return total
     ? `${Math.round((value / total) * 100)}% dos projetos`
     : 'Nenhum projeto'
-}
-
-function Loading() {
-  return (
-    <div className='flex flex-col gap-2 p-4'>
-      <Skeleton className='h-10' />
-      <Skeleton className='h-10' />
-    </div>
-  )
-}
-function State({ text, error }: { text: string; error?: boolean }) {
-  return (
-    <div
-      className={`p-6 text-xs ${error ? 'text-destructive' : 'text-muted-foreground'}`}
-    >
-      {text}
-    </div>
-  )
 }

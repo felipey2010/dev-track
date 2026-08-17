@@ -18,18 +18,18 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { createProject } from '@/lib/client-api/projects'
+import { createProject, updateProject } from '@/lib/client-api/projects'
 import {
   projectFormSchema,
   type ProjectFormData,
   type ProjectFormInput,
 } from '@/lib/projects/validation'
-import type { Team } from '@/lib/types'
+import type { ProjectDetail, Team } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import ProjectField from './project-label'
 import { USER_STATUS } from '@/lib/auth/constants'
@@ -46,6 +46,31 @@ const defaults: ProjectFormInput = {
 
 export function CreateProjectDialog() {
   const [open, setOpen] = useState(false)
+  return (
+    <ProjectFormDialog
+      open={open}
+      onOpenChange={setOpen}
+      trigger={
+        <Button size='lg' className='gap-2'>
+          <Plus className='size-4' />
+          Novo projeto
+        </Button>
+      }
+    />
+  )
+}
+
+export function ProjectFormDialog({
+  project,
+  open,
+  onOpenChange,
+  trigger,
+}: {
+  project?: ProjectDetail | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  trigger?: React.ReactNode
+}) {
   const client = useQueryClient()
   const { data: teams, isLoading } = useApi<Team[]>('teams', '/api/teams')
   const eligible =
@@ -57,30 +82,51 @@ export function CreateProjectDialog() {
     defaultValues: defaults,
   })
 
+  useEffect(() => {
+    if (!open) return
+    form.reset(
+      project
+        ? {
+            name: project.name,
+            client: project.client ?? '',
+            description: project.description,
+            teamId: project.team.id,
+            status: project.status as ProjectFormInput['status'],
+            startDate: project.start_date.slice(0, 10),
+            expectedCompletionDate:
+              project.expected_completion_date?.slice(0, 10) ?? '',
+          }
+        : defaults
+    )
+  }, [form, open, project])
+
   const mutation = useMutation({
     mutationFn: async (payload: ProjectFormData) => {
-      return createProject(payload)
+      return project
+        ? updateProject(project.id, payload)
+        : createProject(payload)
     },
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: ['projects'] })
+      if (project)
+        await client.invalidateQueries({ queryKey: [`project-${project.id}`] })
       form.reset(defaults)
-      setOpen(false)
+      onOpenChange(false)
     },
   })
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size='lg' className='gap-2'>
-          <Plus className='size-4' />
-          Novo projeto
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className='max-h-[90vh] overflow-y-auto sm:max-w-2xl'>
         <DialogHeader>
-          <DialogTitle>Novo projeto</DialogTitle>
+          <DialogTitle>
+            {project ? 'Editar projeto' : 'Novo projeto'}
+          </DialogTitle>
           <DialogDescription>
-            Somente projetos das equipes que você lidera podem ser criados.
+            {project
+              ? 'Atualize as informações e o status gerencial do projeto.'
+              : 'Somente projetos das equipes que você lidera podem ser criados.'}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -133,7 +179,6 @@ export function CreateProjectDialog() {
               name='teamId'
               render={({ field }) => (
                 <Select
-                  modal={false}
                   value={field.value}
                   onValueChange={field.onChange}
                   disabled={isLoading || !eligible.length}
@@ -157,7 +202,7 @@ export function CreateProjectDialog() {
             />
           </ProjectField>
           <ProjectField
-            label='Status inicial'
+            label={project ? 'Status' : 'Status inicial'}
             htmlFor='project-status'
             error={form.formState.errors.status?.message}
           >
@@ -165,11 +210,7 @@ export function CreateProjectDialog() {
               control={form.control}
               name='status'
               render={({ field }) => (
-                <Select
-                  modal={false}
-                  value={field.value}
-                  onValueChange={field.onChange}
-                >
+                <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger id='project-status' className='w-full'>
                     <SelectValue />
                   </SelectTrigger>
@@ -178,6 +219,14 @@ export function CreateProjectDialog() {
                     <SelectItem value='IN_DEVELOPMENT'>
                       Em desenvolvimento
                     </SelectItem>
+                    {project && (
+                      <>
+                        <SelectItem value='TESTING'>Em testes</SelectItem>
+                        <SelectItem value='COMPLETED'>Concluído</SelectItem>
+                        <SelectItem value='ON_HOLD'>Em espera</SelectItem>
+                        <SelectItem value='CANCELLED'>Cancelado</SelectItem>
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               )}
@@ -217,7 +266,11 @@ export function CreateProjectDialog() {
               type='submit'
               disabled={mutation.isPending || form.formState.isSubmitting}
             >
-              {mutation.isPending ? 'Criando...' : 'Criar projeto'}
+              {mutation.isPending
+                ? 'Salvando...'
+                : project
+                  ? 'Salvar projeto'
+                  : 'Criar projeto'}
             </Button>
           </DialogFooter>
         </form>

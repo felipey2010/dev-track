@@ -1,8 +1,9 @@
 'use client'
+import { Loading, State } from '@/components/content-states'
 import { CreateProjectDialog } from '@/components/projects/create-project-dialog'
 import { PageHeader, Progress, ProjectLink, StatusBadge } from '@/components/ui'
 import { Card, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Pagination } from '@/components/ui/pagination'
 import {
   Table,
   TableBody,
@@ -12,14 +13,13 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { dateLabel, projectStatusLabel } from '@/lib/format'
+import { DEFAULT_PAGE, type PaginatedData } from '@/lib/pagination'
 import type { Project } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
-import { Pagination } from '@/components/ui/pagination'
-import type { PaginatedData } from '@/lib/pagination'
 import { useState } from 'react'
 
 export default function ProjectsPage() {
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState(DEFAULT_PAGE)
   const { data, error, isLoading } = useApi<PaginatedData<Project>>(
     'projects',
     `/api/projects?page=${page}`
@@ -95,24 +95,6 @@ export default function ProjectsPage() {
           )}
         </CardContent>
       </Card>
-    </div>
-  )
-}
-function Loading() {
-  return (
-    <div className='flex flex-col gap-2 p-5'>
-      <Skeleton className='h-10' />
-      <Skeleton className='h-10' />
-      <Skeleton className='h-10' />
-    </div>
-  )
-}
-function State({ text, error }: { text: string; error?: boolean }) {
-  return (
-    <div
-      className={`p-8 text-sm ${error ? 'text-destructive' : 'text-muted-foreground'}`}
-    >
-      {text}
     </div>
   )
 }

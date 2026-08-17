@@ -18,16 +18,20 @@ export type Requirement = {
   code: string
   title: string
   description: string
-  type: string
-  priority: string
-  status: string
+  type: 'FUNCTIONAL' | 'NON_FUNCTIONAL'
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
+  status: 'REQUIREMENTS' | 'DEVELOPMENT' | 'TESTING' | 'COMPLETED'
   deadline: string | null
   users_requirements_assigned_user_idTousers: Leader
 }
 export type ProjectDetail = Omit<
   Project,
   'requirementCount' | 'completedRequirementCount'
-> & { requirements: Requirement[] }
+> & {
+  requirements: Requirement[]
+  canManage: boolean
+  canEditProject: boolean
+}
 export type Team = {
   id: string
   name: string
@@ -45,10 +49,26 @@ export type TeamDetail = {
   leader_id: string | null
   users: { id: string; name: string; email: string; status: string } | null
   _count: { projects: number }
+  projects: {
+    id: string
+    name: string
+    description: string
+    client: string | null
+    status: string
+    start_date: string
+    expected_completion_date: string | null
+    updated_at: string
+  }[]
   team_members: {
     id: string
     role: 'DEVELOPER' | 'TESTER'
-    users: { id: string; name: string; email: string; status: string }
+    users: {
+      id: string
+      name: string
+      email: string
+      image: string | null
+      status: string
+    }
   }[]
 }
 export type TeamUserOption = { id: string; name: string; email: string }
