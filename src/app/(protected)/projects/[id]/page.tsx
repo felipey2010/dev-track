@@ -21,13 +21,14 @@ import { useApi } from '@/lib/use-api'
 import { Pagination } from '@/components/ui/pagination'
 import { DEFAULT_PAGE } from '@/lib/pagination'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { RequirementFormDialog } from '@/components/requirements/requirement-form-dialog'
 import { DeleteRequirementDialog } from '@/components/requirements/delete-requirement-dialog'
 import type { Requirement } from '@/lib/types'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { Download, Pencil, Plus, Trash2 } from 'lucide-react'
 import { ProjectFormDialog } from '@/components/projects/create-project-dialog'
 import { DeleteProjectDialog } from '@/components/projects/delete-project-dialog'
+import { cn } from '@/lib/utils'
 
 const REQUIREMENTS_PAGE_SIZE = 10
 
@@ -98,19 +99,30 @@ export default function ProjectPage({
         title={data.name}
         description={data.client ?? 'Sem cliente informado'}
         action={
-          data.canEditProject ? (
-            <div className='flex gap-2'>
-              <Button variant='outline' onClick={() => setEditingProject(true)}>
-                <Pencil /> Editar
-              </Button>
-              <Button
-                variant='destructive'
-                onClick={() => setDeletingProject(true)}
-              >
-                <Trash2 /> Excluir
-              </Button>
-            </div>
-          ) : undefined
+          <div className='flex flex-wrap gap-2'>
+            <a
+              href={`/api/projects/${id}/pdf`}
+              className={cn(buttonVariants({ variant: 'outline' }))}
+            >
+              <Download /> Baixar PDF
+            </a>
+            {data.canEditProject && (
+              <>
+                <Button
+                  variant='outline'
+                  onClick={() => setEditingProject(true)}
+                >
+                  <Pencil /> Editar
+                </Button>
+                <Button
+                  variant='destructive'
+                  onClick={() => setDeletingProject(true)}
+                >
+                  <Trash2 /> Excluir
+                </Button>
+              </>
+            )}
+          </div>
         }
       />
       <section className='mb-6 grid overflow-hidden rounded-md border bg-card sm:grid-cols-2 lg:grid-cols-4'>
