@@ -11,6 +11,7 @@
 export type * from './models/accounts'
 export type * from './models/audit_logs'
 export type * from './models/development_records'
+export type * from './models/notifications'
 export type * from './models/projects'
 export type * from './models/requirement_assignment_history'
 export type * from './models/requirement_history'

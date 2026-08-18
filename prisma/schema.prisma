@@ -1,6 +1,7 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["partialIndexes"]
 }
 
 datasource db {
@@ -58,6 +59,34 @@ model development_records {
   requirements   requirements @relation(fields: [requirement_id], references: [id], onUpdate: NoAction)
 
   @@index([requirement_id, created_at], map: "development_requirement_created_idx")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model notifications {
+  id                                           String             @id
+  recipient_user_id                            String
+  actor_user_id                                String?
+  actor_name_snapshot                          String?
+  actor_system_role_snapshot                   system_role?
+  event_key                                    String
+  title                                        String
+  message                                      String
+  entity_type                                  audit_entity_type?
+  entity_id                                    String?
+  action_url                                   String?
+  metadata_json                                Json?
+  deduplication_key                            String?            @unique(map: "notifications_deduplication_key_uidx", where: raw("(deduplication_key IS NOT NULL)"))
+  read_at                                      DateTime?          @db.Timestamptz(6)
+  expires_at                                   DateTime?          @db.Timestamptz(6)
+  created_at                                   DateTime           @default(now()) @db.Timestamptz(6)
+  users_notifications_actor_user_idTousers     users?             @relation("notifications_actor_user_idTousers", fields: [actor_user_id], references: [id], onUpdate: NoAction)
+  users_notifications_recipient_user_idTousers users              @relation("notifications_recipient_user_idTousers", fields: [recipient_user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([created_at], map: "notifications_created_idx")
+  @@index([entity_type, entity_id, created_at(sort: Desc)], map: "notifications_entity_idx", where: raw("((entity_type IS NOT NULL) AND (entity_id IS NOT NULL))"))
+  @@index([recipient_user_id, created_at(sort: Desc)], map: "notifications_recipient_created_idx")
+  @@index([recipient_user_id, created_at(sort: Desc)], map: "notifications_recipient_unread_idx", where: raw("(read_at IS NULL)"))
   @@schema("public")
 }
 
@@ -232,6 +261,8 @@ model users {
   accounts                                                                                  accounts[]
   audit_logs                                                                                audit_logs[]
   development_records                                                                       development_records[]
+  notifications_notifications_actor_user_idTousers                                          notifications[]                  @relation("notifications_actor_user_idTousers")
+  notifications_notifications_recipient_user_idTousers                                      notifications[]                  @relation("notifications_recipient_user_idTousers")
   projects                                                                                  projects[]
   requirement_assignment_history_requirement_assignment_history_new_assignee_idTousers      requirement_assignment_history[] @relation("requirement_assignment_history_new_assignee_idTousers")
   requirement_assignment_history_requirement_assignment_history_performed_by_idTousers      requirement_assignment_history[] @relation("requirement_assignment_history_performed_by_idTousers")

@@ -54,6 +54,7 @@ export const ModelName = {
   accounts: 'accounts',
   audit_logs: 'audit_logs',
   development_records: 'development_records',
+  notifications: 'notifications',
   projects: 'projects',
   requirement_assignment_history: 'requirement_assignment_history',
   requirement_history: 'requirement_history',
@@ -129,6 +130,28 @@ export const Development_recordsScalarFieldEnum = {
 } as const
 
 export type Development_recordsScalarFieldEnum = (typeof Development_recordsScalarFieldEnum)[keyof typeof Development_recordsScalarFieldEnum]
+
+
+export const NotificationsScalarFieldEnum = {
+  id: 'id',
+  recipient_user_id: 'recipient_user_id',
+  actor_user_id: 'actor_user_id',
+  actor_name_snapshot: 'actor_name_snapshot',
+  actor_system_role_snapshot: 'actor_system_role_snapshot',
+  event_key: 'event_key',
+  title: 'title',
+  message: 'message',
+  entity_type: 'entity_type',
+  entity_id: 'entity_id',
+  action_url: 'action_url',
+  metadata_json: 'metadata_json',
+  deduplication_key: 'deduplication_key',
+  read_at: 'read_at',
+  expires_at: 'expires_at',
+  created_at: 'created_at'
+} as const
+
+export type NotificationsScalarFieldEnum = (typeof NotificationsScalarFieldEnum)[keyof typeof NotificationsScalarFieldEnum]
 
 
 export const ProjectsScalarFieldEnum = {

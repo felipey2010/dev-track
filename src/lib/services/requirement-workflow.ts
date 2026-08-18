@@ -3,6 +3,7 @@ import 'server-only'
 import { AUDIT_ACTIONS } from '@/lib/audit/constants'
 import { prisma } from '@/lib/prisma'
 import type { RequirementWorkflowAction } from '@/lib/requirements/workflow'
+import { createNotifications } from '@/lib/services/notifications'
 import {
   ApplicationError,
   AuthorizationError,
@@ -109,6 +110,7 @@ export async function executeRequirementWorkflow(
   action: RequirementWorkflowAction,
   actor: Actor
 ) {
+  const notificationEventId = randomUUID()
   return prisma.$transaction(
     async (transaction) => {
       const requirement = await transaction.requirements.findFirst({
@@ -335,10 +337,120 @@ export async function executeRequirementWorkflow(
           metadata_json: { projectId, action },
         },
       })
+      const notificationContext = await transaction.requirements.findUnique({
+        where: { id: requirementId },
+        select: {
+          code: true,
+          title: true,
+          projects: {
+            select: {
+              name: true,
+              teams: {
+                select: {
+                  leader_id: true,
+                  team_members: {
+                    where: { users: { status: 'ACTIVE' } },
+                    select: { user_id: true, role: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+      if (notificationContext) {
+        const recipients = new Set<string>()
+        const leaderId = notificationContext.projects.teams.leader_id
+        if (leaderId) recipients.add(leaderId)
+        if (action === 'READY_FOR_TESTING')
+          notificationContext.projects.teams.team_members
+            .filter((member) => member.role === 'TESTER')
+            .forEach((member) => recipients.add(member.user_id))
+        if (action === 'RETURN_TO_DEVELOPMENT')
+          notificationContext.projects.teams.team_members
+            .filter((member) => member.role === 'DEVELOPER')
+            .forEach((member) => recipients.add(member.user_id))
+        if (action === 'COMPLETE') {
+          const developers = await transaction.development_records.findMany({
+            where: { requirement_id: requirementId },
+            select: { developer_id: true },
+            distinct: ['developer_id'],
+          })
+          developers.forEach((developer) =>
+            recipients.add(developer.developer_id)
+          )
+        }
+        const copy = workflowNotificationCopy(
+          action,
+          notificationContext.code,
+          notificationContext.title,
+          notificationContext.projects.name
+        )
+        await createNotifications(
+          transaction,
+          actor,
+          Array.from(recipients).map((recipientUserId) => ({
+            recipientUserId,
+            eventKey: copy.eventKey,
+            title: copy.title,
+            message: copy.message,
+            entityType: 'REQUIREMENT',
+            entityId: requirementId,
+            actionUrl: `/projects/${projectId}/requirements/${requirementId}`,
+            metadata: { projectId, action },
+            deduplicationKey: `${notificationEventId}:${recipientUserId}`,
+          }))
+        )
+      }
       return { id: requirementId, action }
     },
     { isolationLevel: 'Serializable' }
   )
+}
+
+function workflowNotificationCopy(
+  action: RequirementWorkflowAction,
+  code: string,
+  title: string,
+  projectName: string
+) {
+  const requirement = `${code} - ${title}`
+  const copies: Record<
+    RequirementWorkflowAction,
+    { eventKey: string; title: string; message: string }
+  > = {
+    START_DEVELOPMENT: {
+      eventKey: 'REQUIREMENT_DEVELOPMENT_STARTED',
+      title: 'Desenvolvimento iniciado',
+      message: `${requirement} foi iniciado em ${projectName}.`,
+    },
+    CLAIM_DEVELOPMENT: {
+      eventKey: 'REQUIREMENT_DEVELOPMENT_CLAIMED',
+      title: 'Desenvolvimento assumido',
+      message: `${requirement} foi assumido novamente em ${projectName}.`,
+    },
+    READY_FOR_TESTING: {
+      eventKey: 'REQUIREMENT_READY_FOR_TESTING',
+      title: 'Requisito pronto para testes',
+      message: `${requirement} está disponível para testes em ${projectName}.`,
+    },
+    CLAIM_TESTING: {
+      eventKey: 'REQUIREMENT_TESTING_CLAIMED',
+      title: 'Testes iniciados',
+      message: `${requirement} foi assumido para testes em ${projectName}.`,
+    },
+    COMPLETE: {
+      eventKey: 'REQUIREMENT_COMPLETED',
+      title: 'Requisito concluído',
+      message: `${requirement} foi aprovado e concluído em ${projectName}.`,
+    },
+    RETURN_TO_DEVELOPMENT: {
+      eventKey: 'REQUIREMENT_RETURNED_TO_DEVELOPMENT',
+      title: 'Requisito devolvido ao desenvolvimento',
+      message: `${requirement} falhou nos testes e precisa de ajustes em ${projectName}.`,
+    },
+  }
+  return copies[action]
 }
 
 type Transaction = Parameters<Parameters<typeof prisma.$transaction>[0]>[0]

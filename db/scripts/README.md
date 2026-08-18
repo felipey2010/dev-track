@@ -4,6 +4,7 @@ Execute os scripts numerados em ordem:
 
 1. `001_initial_schema.sql`: cria o esquema inicial da aplicação.
 2. `002_security_rate_limits.sql`: adiciona o armazenamento persistente usado para limitar tentativas de autenticação e OTP.
+3. `003_notifications.sql`: adiciona notificações internas por destinatário, estado de leitura, contexto histórico, destino de navegação e proteção contra duplicidade.
 
 `001_initial_schema.sql` cria o modelo PostgreSQL completo do MVP. Execute-o em um banco vazio com uma ferramenta compatível com PostgreSQL, por exemplo `psql`.
 

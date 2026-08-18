@@ -16,12 +16,14 @@ const typeLabels: Record<string, string> = {
   FUNCTIONAL: 'Funcional',
   NON_FUNCTIONAL: 'Não funcional',
 }
+
 const priorityLabels: Record<string, string> = {
   LOW: 'Baixa',
   MEDIUM: 'Média',
   HIGH: 'Alta',
   CRITICAL: 'Crítica',
 }
+
 const columns = [
   { label: 'Código', width: 60 },
   { label: 'Requisito', width: 185 },
@@ -29,9 +31,8 @@ const columns = [
   { label: 'Prioridade', width: 70 },
   { label: 'Status', width: 105 },
   { label: 'Responsável', width: 150 },
-  { label: 'Prazo', width: 107 },
+  { label: 'Prazo', width: 80 },
 ] as const
-const tableWidth = columns.reduce((total, column) => total + column.width, 0)
 
 export async function generateProjectPdf(project: ProjectPdfData) {
   const document = await PDFDocument.create()
@@ -183,7 +184,7 @@ export async function generateProjectPdf(project: ProjectPdfData) {
       page.drawRectangle({
         x: margin,
         y: y - rowHeight + 4,
-        width: tableWidth,
+        width: contentWidth,
         height: rowHeight,
         color: rgb(1, 1, 1),
         borderColor: rgb(0.88, 0.89, 0.91),
@@ -238,7 +239,7 @@ function drawTableHeader(
   page.drawRectangle({
     x,
     y: y - 17,
-    width: tableWidth,
+    width: columns.reduce((total, column) => total + column.width, 0),
     height: 22,
     color: rgb(0.12, 0.15, 0.19),
   })

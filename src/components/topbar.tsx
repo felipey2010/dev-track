@@ -1,10 +1,9 @@
 import { SignOutButton } from '@/components/auth/sign-out-button'
-import { Button } from '@/components/ui/button'
-import { Bell } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ThemeToggle } from './theme-toggle'
 import { APP_IDENTITY } from '@/lib/app-identity'
+import { NotificationBell } from '@/components/notifications/notification-bell'
 
 export default function Topbar() {
   return (
@@ -35,15 +34,7 @@ export default function Topbar() {
           / Painel
         </p>
         <div className='ml-auto flex items-center gap-1'>
-          <Button
-            variant='ghost'
-            size='icon'
-            className='relative text-muted-foreground'
-            aria-label='Notificações'
-          >
-            <Bell className='size-4' />
-            <span className='absolute right-2 top-2 size-1.5 rounded-full bg-amber-400' />
-          </Button>
+          <NotificationBell />
           <ThemeToggle />
           <div className='ml-2 hidden items-center gap-2 border-l pl-3 sm:flex'>
             <SignOutButton />

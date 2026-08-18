@@ -264,6 +264,23 @@ export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
 }
 
+export type Enumaudit_entity_typeNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.audit_entity_type | Prisma.Enumaudit_entity_typeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.audit_entity_type[] | Prisma.ListEnumaudit_entity_typeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.audit_entity_type[] | Prisma.ListEnumaudit_entity_typeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumaudit_entity_typeNullableFilter<$PrismaModel> | $Enums.audit_entity_type | null
+}
+
+export type Enumaudit_entity_typeNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.audit_entity_type | Prisma.Enumaudit_entity_typeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.audit_entity_type[] | Prisma.ListEnumaudit_entity_typeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.audit_entity_type[] | Prisma.ListEnumaudit_entity_typeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumaudit_entity_typeNullableWithAggregatesFilter<$PrismaModel> | $Enums.audit_entity_type | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumaudit_entity_typeNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumaudit_entity_typeNullableFilter<$PrismaModel>
+}
+
 export type Enumproject_statusFilter<$PrismaModel = never> = {
   equals?: $Enums.project_status | Prisma.Enumproject_statusFieldRefInput<$PrismaModel>
   in?: $Enums.project_status[] | Prisma.ListEnumproject_statusFieldRefInput<$PrismaModel>
@@ -695,6 +712,23 @@ export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
   _max?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumaudit_entity_typeNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.audit_entity_type | Prisma.Enumaudit_entity_typeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.audit_entity_type[] | Prisma.ListEnumaudit_entity_typeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.audit_entity_type[] | Prisma.ListEnumaudit_entity_typeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumaudit_entity_typeNullableFilter<$PrismaModel> | $Enums.audit_entity_type | null
+}
+
+export type NestedEnumaudit_entity_typeNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.audit_entity_type | Prisma.Enumaudit_entity_typeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.audit_entity_type[] | Prisma.ListEnumaudit_entity_typeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.audit_entity_type[] | Prisma.ListEnumaudit_entity_typeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumaudit_entity_typeNullableWithAggregatesFilter<$PrismaModel> | $Enums.audit_entity_type | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumaudit_entity_typeNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumaudit_entity_typeNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumproject_statusFilter<$PrismaModel = never> = {

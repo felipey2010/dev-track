@@ -57,6 +57,11 @@ export type audit_logs = Prisma.audit_logsModel
  */
 export type development_records = Prisma.development_recordsModel
 /**
+ * Model notifications
+ * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ */
+export type notifications = Prisma.notificationsModel
+/**
  * Model projects
  * 
  */

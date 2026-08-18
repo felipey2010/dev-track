@@ -132,7 +132,7 @@ export default function ProjectPage({
         <Summary label='Gestor atual'>
           <div className='flex flex-col gap-1'>
             <strong>{data.team.leader?.name ?? 'Não definido'}</strong>
-            <span>Derivado da liderança da equipe</span>
+            <span className='text-xs'>Derivado da liderança da equipe</span>
           </div>
         </Summary>
         <Summary label='Status do projeto'>
@@ -140,7 +140,7 @@ export default function ProjectPage({
         </Summary>
         <Summary label='Progresso calculado'>
           <Progress value={data.progress} />
-          <span>Requisitos concluídos / total</span>
+          <span className='text-xs'>Requisitos concluídos / total</span>
         </Summary>
       </section>
       <Card className='gap-0 overflow-hidden py-0'>
