@@ -4,11 +4,12 @@ import { paginated } from '@/lib/pagination'
 import { prisma } from '@/lib/prisma'
 import { ApplicationError } from '@/server/errors/application-error'
 import { randomUUID } from 'node:crypto'
+import { ACCOUNT_ROLE } from '@/types/next-auth'
 
 type Actor = {
   id: string
   name: string
-  system_role: 'ADMIN' | 'USER'
+  system_role: ACCOUNT_ROLE
 }
 
 export type NotificationInput = {

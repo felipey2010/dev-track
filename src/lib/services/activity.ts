@@ -1,6 +1,7 @@
 import 'server-only'
 import { paginated } from '@/lib/pagination'
 import { prisma } from '@/lib/prisma'
+import { USER_ROLE } from '../auth/constants'
 
 type Actor = { id: string; system_role: 'ADMIN' | 'USER' }
 export async function listActivity(
@@ -8,7 +9,7 @@ export async function listActivity(
   pagination: { page: number; pageSize: number; skip: number }
 ) {
   const projects =
-    actor.system_role === 'ADMIN'
+    actor.system_role === USER_ROLE.ADMIN
       ? undefined
       : await prisma.projects.findMany({
           where: {

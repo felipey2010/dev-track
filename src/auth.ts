@@ -1,24 +1,25 @@
-import NextAuth from 'next-auth'
-import Credentials from 'next-auth/providers/credentials'
-import Google from 'next-auth/providers/google'
-import { randomUUID } from 'node:crypto'
 import { AUDIT_ACTIONS } from '@/lib/audit/constants'
-import { prisma } from '@/lib/prisma'
-import { credentialsSchema } from '@/lib/auth/validation'
-import { normalizeEmail, sanitizeSingleLine } from '@/lib/security/sanitize'
-import { RECAPTCHA_ACTIONS } from '@/lib/recaptcha/constants'
 import {
   RateLimitCredentialsError,
   RecaptchaCredentialsError,
 } from '@/lib/auth/errors'
+import { credentialsSchema } from '@/lib/auth/validation'
+import { prisma } from '@/lib/prisma'
+import { RECAPTCHA_ACTIONS } from '@/lib/recaptcha/constants'
+import { normalizeEmail, sanitizeSingleLine } from '@/lib/security/sanitize'
+import { authenticateCredentials } from '@/lib/services/auth/credentials'
+import { requestIp } from '@/lib/services/security/request-identity'
+import { emailVerificationIdentifier } from '@/server/email/email-verification'
+import { ApplicationError } from '@/server/errors/application-error'
 import {
   getRequestIp,
   verifyRecaptcha,
 } from '@/server/recaptcha/verify-recaptcha'
-import { emailVerificationIdentifier } from '@/server/email/email-verification'
-import { authenticateCredentials } from '@/lib/services/auth/credentials'
-import { requestIp } from '@/lib/services/security/request-identity'
-import { ApplicationError } from '@/server/errors/application-error'
+import NextAuth from 'next-auth'
+import Credentials from 'next-auth/providers/credentials'
+import Google from 'next-auth/providers/google'
+import { randomUUID } from 'node:crypto'
+import { USER_ROLE, USER_STATUS } from './lib/auth/constants'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
@@ -95,7 +96,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       const existingUser = await prisma.users.findUnique({ where: { email } })
       const userId = existingUser?.id ?? randomUUID()
-      if (existingUser?.status === 'REJECTED') return false
+      if (existingUser?.status === USER_STATUS.REJECTED) return false
 
       await prisma.$transaction(async (transaction) => {
         if (!existingUser) {
@@ -109,22 +110,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               image:
                 typeof profile?.picture === 'string' ? profile.picture : null,
               email_verified: new Date(),
-              system_role: 'USER',
-              status: 'PENDING',
+              system_role: USER_ROLE.USER,
+              status: USER_STATUS.PENDING,
             },
           })
           await transaction.audit_logs.create({
             data: {
               id: randomUUID(),
-              entity_type: 'USER',
+              entity_type: USER_ROLE.USER,
               entity_id: userId,
               action: AUDIT_ACTIONS.userRegistered,
               actor_user_id: userId,
               actor_name_snapshot: profile?.name
                 ? sanitizeSingleLine(profile.name)
                 : email.split('@')[0],
-              actor_system_role_snapshot: 'USER',
-              metadata_json: { status: 'PENDING', method: 'google' },
+              actor_system_role_snapshot: USER_ROLE.USER,
+              metadata_json: { status: USER_STATUS.PENDING, method: 'google' },
             },
           })
         } else if (!existingUser.email_verified) {
@@ -145,16 +146,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             type: account.type,
             provider: account.provider,
             provider_account_id: account.providerAccountId,
-            access_token: account.access_token,
-            refresh_token: account.refresh_token,
-            expires_at: account.expires_at,
-            token_type: account.token_type,
-            scope: account.scope,
-            id_token: account.id_token,
-            session_state:
-              typeof account.session_state === 'string'
-                ? account.session_state
-                : null,
           },
         })
       })

@@ -4,7 +4,7 @@ import { hash } from 'bcryptjs'
 import { randomUUID } from 'node:crypto'
 import { Prisma } from '@/generated/prisma/client'
 import { AUDIT_ACTIONS } from '@/lib/audit/constants'
-import { USER_STATUS } from '@/lib/auth/constants'
+import { USER_ROLE, USER_STATUS } from '@/lib/auth/constants'
 import { prisma } from '@/lib/prisma'
 import {
   EMAIL_VERIFICATION_TTL_MINUTES,
@@ -41,19 +41,19 @@ export async function registerCredentialUser(input: {
           name: input.name,
           email: input.email,
           password_hash: await hash(input.password, 12),
-          system_role: 'USER',
+          system_role: USER_ROLE.USER,
           status: USER_STATUS.PENDING,
         },
       }),
       prisma.audit_logs.create({
         data: {
           id: randomUUID(),
-          entity_type: 'USER',
+          entity_type: USER_ROLE.USER,
           entity_id: id,
           action: AUDIT_ACTIONS.userRegistered,
           actor_user_id: id,
           actor_name_snapshot: input.name,
-          actor_system_role_snapshot: 'USER',
+          actor_system_role_snapshot: USER_ROLE.USER,
           metadata_json: { status: USER_STATUS.PENDING, method: 'credentials' },
         },
       }),
@@ -76,7 +76,7 @@ export async function registerCredentialUser(input: {
     await prisma.$transaction([
       prisma.verification_tokens.deleteMany({ where: { identifier } }),
       prisma.audit_logs.deleteMany({
-        where: { entity_type: 'USER', entity_id: id },
+        where: { entity_type: USER_ROLE.USER, entity_id: id },
       }),
       prisma.users.deleteMany({ where: { id } }),
     ])

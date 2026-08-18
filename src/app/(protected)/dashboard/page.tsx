@@ -35,7 +35,7 @@ export default function Dashboard() {
   const projects = useApi<Project[]>('projects', '/api/projects')
   const activity = useApi<PaginatedData<Activity>>(
     'activity',
-    `/api/activity?page=${activityPage}&pageSize=6`
+    `/api/activity?page=${activityPage}&pageSize=4`
   )
   const teams = useApi<Team[]>('teams', '/api/teams')
   const rows = projects.data ?? []
@@ -107,9 +107,11 @@ export default function Dashboard() {
           <CardHeader className='border-b py-4'>
             <CardTitle className='text-sm'>
               Projetos{' '}
-              <span className='ml-2 font-normal text-muted-foreground'>
-                {rows.length} no total
-              </span>
+              {rows.length > 0 && (
+                <span className='ml-2 font-normal text-muted-foreground'>
+                  {rows.length} no total
+                </span>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className='p-0'>

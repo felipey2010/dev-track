@@ -425,6 +425,10 @@ export type Enumaudit_entity_typeFieldUpdateOperationsInput = {
   set?: $Enums.audit_entity_type
 }
 
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
 export type NullableEnumsystem_roleFieldUpdateOperationsInput = {
   set?: $Enums.system_role | null
 }

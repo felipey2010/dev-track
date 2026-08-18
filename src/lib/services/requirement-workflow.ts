@@ -9,8 +9,9 @@ import {
   AuthorizationError,
 } from '@/server/errors/application-error'
 import { randomUUID } from 'node:crypto'
+import { ACCOUNT_ROLE } from '@/types/next-auth'
 
-type Actor = { id: string; name: string; system_role: 'ADMIN' | 'USER' }
+type Actor = { id: string; name: string; system_role: ACCOUNT_ROLE }
 type TeamRole = 'DEVELOPER' | 'TESTER' | null
 type Stage = 'REQUIREMENTS' | 'DEVELOPMENT' | 'TESTING' | 'COMPLETED'
 

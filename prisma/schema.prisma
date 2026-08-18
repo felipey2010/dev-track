@@ -10,19 +10,12 @@ datasource db {
 }
 
 model accounts {
-  id                  String  @id
+  id                  String @id
   user_id             String
   type                String
   provider            String
   provider_account_id String
-  refresh_token       String?
-  access_token        String?
-  expires_at          Int?
-  token_type          String?
-  scope               String?
-  id_token            String?
-  session_state       String?
-  users               users   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users               users  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([provider, provider_account_id])
   @@index([user_id], map: "accounts_user_idx")

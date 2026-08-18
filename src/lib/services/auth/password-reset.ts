@@ -21,6 +21,7 @@ import {
   clearRateLimit,
   enforceRateLimit,
 } from '@/lib/services/security/rate-limit'
+import { USER_ROLE } from '@/lib/auth/constants'
 
 export async function requestPasswordReset(email: string, requestIp: string) {
   await enforceRateLimit(
@@ -135,7 +136,7 @@ export async function completePasswordReset(
     prisma.audit_logs.create({
       data: {
         id: randomUUID(),
-        entity_type: 'USER',
+        entity_type: USER_ROLE.USER,
         entity_id: user.id,
         action: AUDIT_ACTIONS.userPasswordReset,
         actor_user_id: user.id,

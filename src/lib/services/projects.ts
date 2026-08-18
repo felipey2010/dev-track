@@ -8,10 +8,11 @@ import {
   ApplicationError,
   AuthorizationError,
 } from '@/server/errors/application-error'
+import { ACCOUNT_ROLE } from '@/types/next-auth'
 import { randomUUID } from 'node:crypto'
-import { USER_STATUS } from '../auth/constants'
+import { USER_ROLE, USER_STATUS } from '../auth/constants'
 
-type Actor = { id: string; name: string; system_role: 'ADMIN' | 'USER' }
+type Actor = { id: string; name: string; system_role: ACCOUNT_ROLE }
 type Pagination = {
   page: number
   pageSize: number
@@ -21,7 +22,7 @@ type Pagination = {
 
 export async function listProjects(actor: Actor, pagination: Pagination) {
   const where =
-    actor.system_role === 'ADMIN'
+    actor.system_role === USER_ROLE.ADMIN
       ? undefined
       : {
           OR: [

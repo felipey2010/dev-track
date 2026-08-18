@@ -5,7 +5,7 @@ import { paginated } from '@/lib/pagination'
 import { prisma } from '@/lib/prisma'
 import { ApplicationError } from '@/server/errors/application-error'
 import { randomUUID } from 'node:crypto'
-import { USER_STATUS } from '../auth/constants'
+import { USER_ROLE, USER_STATUS } from '../auth/constants'
 
 export async function listUsersExcept(
   currentUserId: string,
@@ -59,7 +59,7 @@ export async function updateUserStatus(input: {
     prisma.audit_logs.create({
       data: {
         id: randomUUID(),
-        entity_type: 'USER',
+        entity_type: USER_ROLE.USER,
         entity_id: input.targetId,
         action: AUDIT_ACTIONS.userStatusChanged[input.status],
         actor_user_id: input.actor.id,

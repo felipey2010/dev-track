@@ -1,7 +1,7 @@
 import 'server-only'
 
 import { AUDIT_ACTIONS } from '@/lib/audit/constants'
-import { USER_STATUS } from '@/lib/auth/constants'
+import { USER_ROLE, USER_STATUS } from '@/lib/auth/constants'
 import { prisma } from '@/lib/prisma'
 import {
   RATE_LIMIT_POLICIES,
@@ -33,7 +33,7 @@ export async function authenticateCredentials(input: {
   if (!user.email_verified && user.status !== USER_STATUS.ACTIVE) {
     const completedPasswordReset = await prisma.audit_logs.findFirst({
       where: {
-        entity_type: 'USER',
+        entity_type: USER_ROLE.USER,
         entity_id: user.id,
         action: AUDIT_ACTIONS.userPasswordReset,
       },

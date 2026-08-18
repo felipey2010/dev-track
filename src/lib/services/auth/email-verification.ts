@@ -16,6 +16,7 @@ import {
   clearRateLimit,
   enforceRateLimit,
 } from '@/lib/services/security/rate-limit'
+import { USER_ROLE } from '@/lib/auth/constants'
 
 export async function verifyRegistrationEmail(
   verificationId: string,
@@ -54,12 +55,12 @@ export async function verifyRegistrationEmail(
     prisma.audit_logs.create({
       data: {
         id: randomUUID(),
-        entity_type: 'USER',
+        entity_type: USER_ROLE.USER,
         entity_id: user.id,
         action: AUDIT_ACTIONS.userEmailVerified,
         actor_user_id: user.id,
         actor_name_snapshot: user.name,
-        actor_system_role_snapshot: 'USER',
+        actor_system_role_snapshot: USER_ROLE.USER,
         metadata_json: { method: 'otp' },
       },
     }),

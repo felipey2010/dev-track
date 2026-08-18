@@ -11,6 +11,8 @@ import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import SidebarItem from './sidebar-item'
+import { USER_ROLE } from '@/lib/auth/constants'
+import { ACCOUNT_ROLE } from '@/types/next-auth'
 
 const primary = [
   ['/dashboard', 'Painel', LayoutDashboard],
@@ -22,7 +24,7 @@ type CurrentUser = {
   id: string
   name: string
   email: string
-  system_role: 'ADMIN' | 'USER'
+  system_role: ACCOUNT_ROLE
 }
 export default function Sidebar({ user }: { user: CurrentUser }) {
   const pathname = usePathname()
@@ -33,7 +35,7 @@ export default function Sidebar({ user }: { user: CurrentUser }) {
     .join('')
     .toUpperCase()
   const mobileItems =
-    user.system_role === 'ADMIN' ? [...primary, ...admin] : primary
+    user.system_role === USER_ROLE.ADMIN ? [...primary, ...admin] : primary
 
   return (
     <>
@@ -101,6 +103,7 @@ export default function Sidebar({ user }: { user: CurrentUser }) {
     </>
   )
 }
+
 function NavGroup({
   label,
   items,

@@ -6,18 +6,20 @@ import type { TeamFormData } from '@/lib/teams/validation'
 import { ApplicationError } from '@/server/errors/application-error'
 import { randomUUID } from 'node:crypto'
 import { createNotifications, type NotificationInput } from './notifications'
+import { USER_ROLE } from '../auth/constants'
+import { ACCOUNT_ROLE } from '@/types/next-auth'
 
 type Actor = {
   id: string
   name: string
-  system_role: 'ADMIN' | 'USER'
+  system_role: ACCOUNT_ROLE
 }
 export async function listTeams(
   actor: Actor,
   pagination: { page: number; pageSize: number; skip: number; enabled: boolean }
 ) {
   const where =
-    actor.system_role === 'ADMIN'
+    actor.system_role === USER_ROLE.ADMIN
       ? undefined
       : {
           OR: [
