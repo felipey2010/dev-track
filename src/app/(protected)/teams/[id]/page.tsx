@@ -1,7 +1,8 @@
+import GoBack from '@/components/go-back-button'
+import { TeamNotFound } from '@/components/feedback/entity-not-found'
 import { PageHeader, ProjectLink, StatusBadge } from '@/components/ui'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Table,
@@ -18,7 +19,6 @@ import { requireActiveUser } from '@/server/authorization/session'
 import { ApplicationError } from '@/server/errors/application-error'
 import { FolderKanban, UserRoundCheck, Users } from 'lucide-react'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
 
 const roleLabels = {
   DEVELOPER: 'Desenvolvedor',
@@ -32,13 +32,14 @@ export default async function TeamDetailsPage({
 }) {
   const actor = await requireActiveUser()
   const parsedId = identifierSchema.safeParse((await params).id)
-  if (!parsedId.success) notFound()
+  if (!parsedId.success) return <TeamNotFound />
 
   let team
   try {
     team = await getTeam(parsedId.data, actor)
   } catch (error) {
-    if (error instanceof ApplicationError && error.status === 404) notFound()
+    if (error instanceof ApplicationError && error.status === 404)
+      return <TeamNotFound />
     throw error
   }
 
@@ -49,11 +50,7 @@ export default async function TeamDetailsPage({
 
   return (
     <div className='mx-auto max-w-7xl'>
-      <div className='mb-2'>
-        <Link href='/teams'>
-          <Button>Voltar</Button>
-        </Link>
-      </div>
+      <GoBack />
       <p className='mb-3 font-mono text-[10px] text-muted-foreground'>
         Equipes / {team.name}
       </p>

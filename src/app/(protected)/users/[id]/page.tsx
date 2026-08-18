@@ -1,6 +1,7 @@
+import { UserNotFound } from '@/components/feedback/user-not-found'
+import GoBack from '@/components/go-back-button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -15,7 +16,6 @@ import { identifierSchema } from '@/lib/validation/common'
 import { requireActiveUser } from '@/server/authorization/session'
 import { FolderKanban, Mail, ShieldCheck, Users } from 'lucide-react'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
 
 const statusLabels = {
   ACTIVE: 'Ativo',
@@ -37,9 +37,9 @@ export default async function UserProfilePage({
 }) {
   await requireActiveUser()
   const parsedId = identifierSchema.safeParse((await params).id)
-  if (!parsedId.success) notFound()
+  if (!parsedId.success) return <UserNotFound />
   const user = await getUserProfile(parsedId.data)
-  if (!user) notFound()
+  if (!user) return <UserNotFound />
 
   const initials = user.name
     .split(' ')
@@ -50,11 +50,7 @@ export default async function UserProfilePage({
 
   return (
     <div className='mx-auto max-w-7xl flex flex-col gap-6'>
-      <div className='mb-2'>
-        <Link href='/users'>
-          <Button>Voltar</Button>
-        </Link>
-      </div>
+      <GoBack />
       <p className='font-mono text-[10px] text-muted-foreground'>
         Usuários / {user.name}
       </p>

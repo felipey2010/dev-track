@@ -89,6 +89,7 @@ export async function createProject(input: ProjectFormData, actor: Actor) {
         expected_completion_date: input.expectedCompletionDate
           ? new Date(`${input.expectedCompletionDate}T00:00:00.000Z`)
           : null,
+        tech_stack: input.techStack,
         status: input.status,
         created_by_id: actor.id,
       },
@@ -102,7 +103,11 @@ export async function createProject(input: ProjectFormData, actor: Actor) {
         actor_user_id: actor.id,
         actor_name_snapshot: actor.name,
         actor_system_role_snapshot: actor.system_role,
-        metadata_json: { teamId: team.id, status: input.status },
+        metadata_json: {
+          teamId: team.id,
+          status: input.status,
+          techStack: input.techStack,
+        },
       },
     }),
   ])
@@ -168,6 +173,7 @@ export async function updateProject(
       team_id: true,
       start_date: true,
       expected_completion_date: true,
+      tech_stack: true,
       status: true,
       teams: { select: { leader_id: true } },
     },
@@ -188,6 +194,7 @@ export async function updateProject(
         expected_completion_date: input.expectedCompletionDate
           ? new Date(`${input.expectedCompletionDate}T00:00:00.000Z`)
           : null,
+        tech_stack: input.techStack,
         status: input.status,
         updated_at: new Date(),
       },

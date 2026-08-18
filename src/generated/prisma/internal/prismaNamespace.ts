@@ -1654,7 +1654,8 @@ export const ProjectsScalarFieldEnum = {
   status: 'status',
   created_by_id: 'created_by_id',
   created_at: 'created_at',
-  updated_at: 'updated_at'
+  updated_at: 'updated_at',
+  tech_stack: 'tech_stack'
 } as const
 
 export type ProjectsScalarFieldEnum = (typeof ProjectsScalarFieldEnum)[keyof typeof ProjectsScalarFieldEnum]

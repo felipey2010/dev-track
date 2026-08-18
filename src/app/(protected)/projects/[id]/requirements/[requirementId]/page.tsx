@@ -1,18 +1,17 @@
-import { PageHeader, StatusBadge } from '@/components/ui'
+import GoBack from '@/components/go-back-button'
+import { RequirementNotFound } from '@/components/feedback/entity-not-found'
 import { RequirementWorkflowActions } from '@/components/requirements/requirement-workflow-actions'
+import { PageHeader, StatusBadge } from '@/components/ui'
 import { Badge } from '@/components/ui/badge'
-import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { dateLabel, dateTimeLabel, requirementStatusLabel } from '@/lib/format'
-import { getRequirement } from '@/lib/services/requirements'
 import { getAvailableRequirementActions } from '@/lib/services/requirement-workflow'
-import { cn } from '@/lib/utils'
+import { getRequirement } from '@/lib/services/requirements'
 import { identifierSchema } from '@/lib/validation/common'
 import { requireProjectAccess } from '@/server/authorization/session'
 import { ApplicationError } from '@/server/errors/application-error'
-import { ArrowLeft, CalendarDays, FolderKanban, UserRound } from 'lucide-react'
+import { CalendarDays, FolderKanban, UserRound } from 'lucide-react'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
 
 const typeLabels = {
   FUNCTIONAL: 'Funcional',
@@ -34,7 +33,8 @@ export default async function RequirementDetailsPage({
   const routeParams = await params
   const projectId = identifierSchema.safeParse(routeParams.id)
   const requirementId = identifierSchema.safeParse(routeParams.requirementId)
-  if (!projectId.success || !requirementId.success) notFound()
+  if (!projectId.success || !requirementId.success)
+    return <RequirementNotFound projectId={projectId.data} />
 
   let actor
   let requirement
@@ -42,7 +42,8 @@ export default async function RequirementDetailsPage({
     actor = await requireProjectAccess(projectId.data)
     requirement = await getRequirement(projectId.data, requirementId.data)
   } catch (error) {
-    if (error instanceof ApplicationError && error.status === 404) notFound()
+    if (error instanceof ApplicationError && error.status === 404)
+      return <RequirementNotFound projectId={projectId.data} />
     throw error
   }
 
@@ -77,12 +78,7 @@ export default async function RequirementDetailsPage({
 
   return (
     <div className='mx-auto max-w-7xl'>
-      <Link
-        href={`/projects/${projectId.data}`}
-        className={cn(buttonVariants({ variant: 'outline' }), 'mb-5')}
-      >
-        <ArrowLeft /> Voltar ao projeto
-      </Link>
+      <GoBack className='mb-5' />
       <p className='mb-3 font-mono text-[10px] text-muted-foreground'>
         Projetos / {requirement.projects.name} / {requirement.code}
       </p>

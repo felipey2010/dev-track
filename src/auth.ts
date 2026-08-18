@@ -79,7 +79,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ account, profile }) {
+    async signIn({ account, profile, user }) {
       if (account?.provider !== 'google') return true
       const email = profile?.email ? normalizeEmail(profile.email) : undefined
       if (!email) return false
@@ -96,7 +96,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       const existingUser = await prisma.users.findUnique({ where: { email } })
       const userId = existingUser?.id ?? randomUUID()
+
       if (existingUser?.status === USER_STATUS.REJECTED) return false
+
+      const image =
+        typeof profile?.picture === 'string' ? profile.picture : user.image
 
       await prisma.$transaction(async (transaction) => {
         if (!existingUser) {
@@ -107,8 +111,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 ? sanitizeSingleLine(profile.name)
                 : email.split('@')[0],
               email,
-              image:
-                typeof profile?.picture === 'string' ? profile.picture : null,
+              image: image ?? null,
               email_verified: new Date(),
               system_role: USER_ROLE.USER,
               status: USER_STATUS.PENDING,

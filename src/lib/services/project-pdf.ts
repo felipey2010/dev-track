@@ -129,6 +129,37 @@ export async function generateProjectPdf(project: ProjectPdfData) {
     })
   }
   y -= 72
+
+  page.drawText('Stack tecnológica', {
+    x: margin,
+    y,
+    size: 9,
+    font: bold,
+    color: rgb(0.3, 0.33, 0.37),
+  })
+  y -= 14
+  const stackLines = wrapText(
+    pdfText(
+      project.tech_stack.length
+        ? project.tech_stack.join(', ')
+        : 'Nenhuma tecnologia informada.'
+    ),
+    regular,
+    9,
+    contentWidth
+  )
+  for (const line of stackLines) {
+    page.drawText(line, {
+      x: margin,
+      y,
+      size: 9,
+      font: regular,
+      color: rgb(0.12, 0.14, 0.17),
+    })
+    y -= 12
+  }
+  y -= 18
+
   page.drawText(`Requisitos (${project.requirements.length})`, {
     x: margin,
     y,

@@ -1,7 +1,15 @@
 'use client'
-import { use, useState } from 'react'
+import { ProjectNotFound } from '@/components/feedback/entity-not-found'
+import GoBack from '@/components/go-back-button'
+import { ProjectFormDialog } from '@/components/projects/create-project-dialog'
+import { DeleteProjectDialog } from '@/components/projects/delete-project-dialog'
+import { DeleteRequirementDialog } from '@/components/requirements/delete-requirement-dialog'
+import { RequirementFormDialog } from '@/components/requirements/requirement-form-dialog'
 import { PageHeader, Progress, StatusBadge } from '@/components/ui'
+import { Badge } from '@/components/ui/badge'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Pagination } from '@/components/ui/pagination'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Table,
@@ -11,24 +19,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { ApiClientError } from '@/lib/client-api/http'
 import {
   dateLabel,
   projectStatusLabel,
   requirementStatusLabel,
 } from '@/lib/format'
-import type { ProjectDetail } from '@/lib/types'
-import { useApi } from '@/lib/use-api'
-import { Pagination } from '@/components/ui/pagination'
 import { DEFAULT_PAGE } from '@/lib/pagination'
-import Link from 'next/link'
-import { Button, buttonVariants } from '@/components/ui/button'
-import { RequirementFormDialog } from '@/components/requirements/requirement-form-dialog'
-import { DeleteRequirementDialog } from '@/components/requirements/delete-requirement-dialog'
-import type { Requirement } from '@/lib/types'
-import { Download, Pencil, Plus, Trash2 } from 'lucide-react'
-import { ProjectFormDialog } from '@/components/projects/create-project-dialog'
-import { DeleteProjectDialog } from '@/components/projects/delete-project-dialog'
+import type { ProjectDetail, Requirement } from '@/lib/types'
+import { useApi } from '@/lib/use-api'
 import { cn } from '@/lib/utils'
+import { Download, Pencil, Plus, Trash2 } from 'lucide-react'
+import Link from 'next/link'
+import { use, useState } from 'react'
 
 const REQUIREMENTS_PAGE_SIZE = 10
 
@@ -65,6 +68,9 @@ export default function ProjectPage({
 
   if (isLoading) return <Skeleton className='h-72 w-full' />
 
+  if (error instanceof ApiClientError && error.status === 404)
+    return <ProjectNotFound />
+
   if (error)
     return (
       <Card>
@@ -74,7 +80,7 @@ export default function ProjectPage({
       </Card>
     )
 
-  if (!data) return null
+  if (!data) return <ProjectNotFound />
 
   const requirementPages = Math.max(
     DEFAULT_PAGE,
@@ -87,11 +93,7 @@ export default function ProjectPage({
 
   return (
     <div className='mx-auto max-w-7xl'>
-      <div className='mb-2'>
-        <Link href='/projects'>
-          <Button>Voltar</Button>
-        </Link>
-      </div>
+      <GoBack />
       <p className='mb-3 font-mono text-[10px] text-muted-foreground'>
         Projetos / {data.name}
       </p>
@@ -143,6 +145,26 @@ export default function ProjectPage({
           <span className='text-xs'>Requisitos concluídos / total</span>
         </Summary>
       </section>
+      <Card className='mb-6'>
+        <CardHeader>
+          <CardTitle className='text-sm'>Stack tecnológica</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {data.tech_stack.length ? (
+            <div className='flex flex-wrap gap-2'>
+              {data.tech_stack.map((technology) => (
+                <Badge key={technology} variant='secondary'>
+                  {technology}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className='text-sm text-muted-foreground'>
+              Nenhuma tecnologia informada.
+            </p>
+          )}
+        </CardContent>
+      </Card>
       <Card className='gap-0 overflow-hidden py-0'>
         <CardHeader className='flex flex-row items-center justify-between border-b py-4'>
           <CardTitle className='text-sm'>

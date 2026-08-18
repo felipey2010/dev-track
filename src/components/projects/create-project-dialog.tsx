@@ -33,6 +33,7 @@ import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import ProjectField from './project-label'
 import { USER_STATUS } from '@/lib/auth/constants'
+import { TechStackInput } from './tech-stack-input'
 
 const defaults: ProjectFormInput = {
   name: '',
@@ -42,6 +43,7 @@ const defaults: ProjectFormInput = {
   status: 'PLANNING',
   startDate: '',
   expectedCompletionDate: '',
+  techStack: [],
 }
 
 export function CreateProjectDialog() {
@@ -95,6 +97,7 @@ export function ProjectFormDialog({
             startDate: project.start_date.slice(0, 10),
             expectedCompletionDate:
               project.expected_completion_date?.slice(0, 10) ?? '',
+            techStack: project.tech_stack,
           }
         : defaults
     )
@@ -198,6 +201,20 @@ export function ProjectFormDialog({
                     ))}
                   </SelectContent>
                 </Select>
+              )}
+            />
+          </ProjectField>
+          <ProjectField
+            label='Tecnologias'
+            htmlFor='project-tech-stack'
+            error={form.formState.errors.techStack?.message}
+            wide
+          >
+            <Controller
+              control={form.control}
+              name='techStack'
+              render={({ field }) => (
+                <TechStackInput value={field.value} onChange={field.onChange} />
               )}
             />
           </ProjectField>

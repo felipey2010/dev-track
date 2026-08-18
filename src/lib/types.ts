@@ -7,6 +7,7 @@ export type Project = {
   status: string
   start_date: string
   expected_completion_date: string | null
+  tech_stack: string[]
   updated_at: string
   team: { id: string; name: string; leader: Leader }
   progress: number

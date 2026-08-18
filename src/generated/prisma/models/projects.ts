@@ -64,6 +64,7 @@ export type ProjectsCountAggregateOutputType = {
   created_by_id: number
   created_at: number
   updated_at: number
+  tech_stack: number
   _all: number
 }
 
@@ -108,6 +109,7 @@ export type ProjectsCountAggregateInputType = {
   created_by_id?: true
   created_at?: true
   updated_at?: true
+  tech_stack?: true
   _all?: true
 }
 
@@ -195,6 +197,7 @@ export type ProjectsGroupByOutputType = {
   created_by_id: string
   created_at: Date
   updated_at: Date
+  tech_stack: string[]
   _count: ProjectsCountAggregateOutputType | null
   _min: ProjectsMinAggregateOutputType | null
   _max: ProjectsMaxAggregateOutputType | null
@@ -230,6 +233,7 @@ export type projectsWhereInput = {
   created_by_id?: Prisma.StringFilter<"projects"> | string
   created_at?: Prisma.DateTimeFilter<"projects"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"projects"> | Date | string
+  tech_stack?: Prisma.StringNullableListFilter<"projects">
   users?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
   teams?: Prisma.XOR<Prisma.TeamsScalarRelationFilter, Prisma.teamsWhereInput>
   requirements?: Prisma.RequirementsListRelationFilter
@@ -247,6 +251,7 @@ export type projectsOrderByWithRelationInput = {
   created_by_id?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  tech_stack?: Prisma.SortOrder
   users?: Prisma.usersOrderByWithRelationInput
   teams?: Prisma.teamsOrderByWithRelationInput
   requirements?: Prisma.requirementsOrderByRelationAggregateInput
@@ -267,6 +272,7 @@ export type projectsWhereUniqueInput = Prisma.AtLeast<{
   created_by_id?: Prisma.StringFilter<"projects"> | string
   created_at?: Prisma.DateTimeFilter<"projects"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"projects"> | Date | string
+  tech_stack?: Prisma.StringNullableListFilter<"projects">
   users?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
   teams?: Prisma.XOR<Prisma.TeamsScalarRelationFilter, Prisma.teamsWhereInput>
   requirements?: Prisma.RequirementsListRelationFilter
@@ -284,6 +290,7 @@ export type projectsOrderByWithAggregationInput = {
   created_by_id?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  tech_stack?: Prisma.SortOrder
   _count?: Prisma.projectsCountOrderByAggregateInput
   _max?: Prisma.projectsMaxOrderByAggregateInput
   _min?: Prisma.projectsMinOrderByAggregateInput
@@ -304,6 +311,7 @@ export type projectsScalarWhereWithAggregatesInput = {
   created_by_id?: Prisma.StringWithAggregatesFilter<"projects"> | string
   created_at?: Prisma.DateTimeWithAggregatesFilter<"projects"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"projects"> | Date | string
+  tech_stack?: Prisma.StringNullableListFilter<"projects">
 }
 
 export type projectsCreateInput = {
@@ -316,6 +324,7 @@ export type projectsCreateInput = {
   status?: $Enums.project_status
   created_at?: Date | string
   updated_at?: Date | string
+  tech_stack?: Prisma.projectsCreatetech_stackInput | string[]
   users: Prisma.usersCreateNestedOneWithoutProjectsInput
   teams: Prisma.teamsCreateNestedOneWithoutProjectsInput
   requirements?: Prisma.requirementsCreateNestedManyWithoutProjectsInput
@@ -333,6 +342,7 @@ export type projectsUncheckedCreateInput = {
   created_by_id: string
   created_at?: Date | string
   updated_at?: Date | string
+  tech_stack?: Prisma.projectsCreatetech_stackInput | string[]
   requirements?: Prisma.requirementsUncheckedCreateNestedManyWithoutProjectsInput
 }
 
@@ -346,6 +356,7 @@ export type projectsUpdateInput = {
   status?: Prisma.Enumproject_statusFieldUpdateOperationsInput | $Enums.project_status
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tech_stack?: Prisma.projectsUpdatetech_stackInput | string[]
   users?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   teams?: Prisma.teamsUpdateOneRequiredWithoutProjectsNestedInput
   requirements?: Prisma.requirementsUpdateManyWithoutProjectsNestedInput
@@ -363,6 +374,7 @@ export type projectsUncheckedUpdateInput = {
   created_by_id?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tech_stack?: Prisma.projectsUpdatetech_stackInput | string[]
   requirements?: Prisma.requirementsUncheckedUpdateManyWithoutProjectsNestedInput
 }
 
@@ -378,6 +390,7 @@ export type projectsCreateManyInput = {
   created_by_id: string
   created_at?: Date | string
   updated_at?: Date | string
+  tech_stack?: Prisma.projectsCreatetech_stackInput | string[]
 }
 
 export type projectsUpdateManyMutationInput = {
@@ -390,6 +403,7 @@ export type projectsUpdateManyMutationInput = {
   status?: Prisma.Enumproject_statusFieldUpdateOperationsInput | $Enums.project_status
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tech_stack?: Prisma.projectsUpdatetech_stackInput | string[]
 }
 
 export type projectsUncheckedUpdateManyInput = {
@@ -404,6 +418,15 @@ export type projectsUncheckedUpdateManyInput = {
   created_by_id?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tech_stack?: Prisma.projectsUpdatetech_stackInput | string[]
+}
+
+export type StringNullableListFilter<$PrismaModel = never> = {
+  equals?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
+  has?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
+  hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
 }
 
 export type projectsCountOrderByAggregateInput = {
@@ -418,6 +441,7 @@ export type projectsCountOrderByAggregateInput = {
   created_by_id?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  tech_stack?: Prisma.SortOrder
 }
 
 export type projectsMaxOrderByAggregateInput = {
@@ -463,8 +487,17 @@ export type projectsOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type projectsCreatetech_stackInput = {
+  set: string[]
+}
+
 export type Enumproject_statusFieldUpdateOperationsInput = {
   set?: $Enums.project_status
+}
+
+export type projectsUpdatetech_stackInput = {
+  set?: string[]
+  push?: string | string[]
 }
 
 export type projectsCreateNestedOneWithoutRequirementsInput = {
@@ -575,6 +608,7 @@ export type projectsCreateWithoutRequirementsInput = {
   status?: $Enums.project_status
   created_at?: Date | string
   updated_at?: Date | string
+  tech_stack?: Prisma.projectsCreatetech_stackInput | string[]
   users: Prisma.usersCreateNestedOneWithoutProjectsInput
   teams: Prisma.teamsCreateNestedOneWithoutProjectsInput
 }
@@ -591,6 +625,7 @@ export type projectsUncheckedCreateWithoutRequirementsInput = {
   created_by_id: string
   created_at?: Date | string
   updated_at?: Date | string
+  tech_stack?: Prisma.projectsCreatetech_stackInput | string[]
 }
 
 export type projectsCreateOrConnectWithoutRequirementsInput = {
@@ -619,6 +654,7 @@ export type projectsUpdateWithoutRequirementsInput = {
   status?: Prisma.Enumproject_statusFieldUpdateOperationsInput | $Enums.project_status
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tech_stack?: Prisma.projectsUpdatetech_stackInput | string[]
   users?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   teams?: Prisma.teamsUpdateOneRequiredWithoutProjectsNestedInput
 }
@@ -635,6 +671,7 @@ export type projectsUncheckedUpdateWithoutRequirementsInput = {
   created_by_id?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tech_stack?: Prisma.projectsUpdatetech_stackInput | string[]
 }
 
 export type projectsCreateWithoutTeamsInput = {
@@ -647,6 +684,7 @@ export type projectsCreateWithoutTeamsInput = {
   status?: $Enums.project_status
   created_at?: Date | string
   updated_at?: Date | string
+  tech_stack?: Prisma.projectsCreatetech_stackInput | string[]
   users: Prisma.usersCreateNestedOneWithoutProjectsInput
   requirements?: Prisma.requirementsCreateNestedManyWithoutProjectsInput
 }
@@ -662,6 +700,7 @@ export type projectsUncheckedCreateWithoutTeamsInput = {
   created_by_id: string
   created_at?: Date | string
   updated_at?: Date | string
+  tech_stack?: Prisma.projectsCreatetech_stackInput | string[]
   requirements?: Prisma.requirementsUncheckedCreateNestedManyWithoutProjectsInput
 }
 
@@ -706,6 +745,7 @@ export type projectsScalarWhereInput = {
   created_by_id?: Prisma.StringFilter<"projects"> | string
   created_at?: Prisma.DateTimeFilter<"projects"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"projects"> | Date | string
+  tech_stack?: Prisma.StringNullableListFilter<"projects">
 }
 
 export type projectsCreateWithoutUsersInput = {
@@ -718,6 +758,7 @@ export type projectsCreateWithoutUsersInput = {
   status?: $Enums.project_status
   created_at?: Date | string
   updated_at?: Date | string
+  tech_stack?: Prisma.projectsCreatetech_stackInput | string[]
   teams: Prisma.teamsCreateNestedOneWithoutProjectsInput
   requirements?: Prisma.requirementsCreateNestedManyWithoutProjectsInput
 }
@@ -733,6 +774,7 @@ export type projectsUncheckedCreateWithoutUsersInput = {
   status?: $Enums.project_status
   created_at?: Date | string
   updated_at?: Date | string
+  tech_stack?: Prisma.projectsCreatetech_stackInput | string[]
   requirements?: Prisma.requirementsUncheckedCreateNestedManyWithoutProjectsInput
 }
 
@@ -773,6 +815,7 @@ export type projectsCreateManyTeamsInput = {
   created_by_id: string
   created_at?: Date | string
   updated_at?: Date | string
+  tech_stack?: Prisma.projectsCreatetech_stackInput | string[]
 }
 
 export type projectsUpdateWithoutTeamsInput = {
@@ -785,6 +828,7 @@ export type projectsUpdateWithoutTeamsInput = {
   status?: Prisma.Enumproject_statusFieldUpdateOperationsInput | $Enums.project_status
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tech_stack?: Prisma.projectsUpdatetech_stackInput | string[]
   users?: Prisma.usersUpdateOneRequiredWithoutProjectsNestedInput
   requirements?: Prisma.requirementsUpdateManyWithoutProjectsNestedInput
 }
@@ -800,6 +844,7 @@ export type projectsUncheckedUpdateWithoutTeamsInput = {
   created_by_id?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tech_stack?: Prisma.projectsUpdatetech_stackInput | string[]
   requirements?: Prisma.requirementsUncheckedUpdateManyWithoutProjectsNestedInput
 }
 
@@ -814,6 +859,7 @@ export type projectsUncheckedUpdateManyWithoutTeamsInput = {
   created_by_id?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tech_stack?: Prisma.projectsUpdatetech_stackInput | string[]
 }
 
 export type projectsCreateManyUsersInput = {
@@ -827,6 +873,7 @@ export type projectsCreateManyUsersInput = {
   status?: $Enums.project_status
   created_at?: Date | string
   updated_at?: Date | string
+  tech_stack?: Prisma.projectsCreatetech_stackInput | string[]
 }
 
 export type projectsUpdateWithoutUsersInput = {
@@ -839,6 +886,7 @@ export type projectsUpdateWithoutUsersInput = {
   status?: Prisma.Enumproject_statusFieldUpdateOperationsInput | $Enums.project_status
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tech_stack?: Prisma.projectsUpdatetech_stackInput | string[]
   teams?: Prisma.teamsUpdateOneRequiredWithoutProjectsNestedInput
   requirements?: Prisma.requirementsUpdateManyWithoutProjectsNestedInput
 }
@@ -854,6 +902,7 @@ export type projectsUncheckedUpdateWithoutUsersInput = {
   status?: Prisma.Enumproject_statusFieldUpdateOperationsInput | $Enums.project_status
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tech_stack?: Prisma.projectsUpdatetech_stackInput | string[]
   requirements?: Prisma.requirementsUncheckedUpdateManyWithoutProjectsNestedInput
 }
 
@@ -868,6 +917,7 @@ export type projectsUncheckedUpdateManyWithoutUsersInput = {
   status?: Prisma.Enumproject_statusFieldUpdateOperationsInput | $Enums.project_status
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tech_stack?: Prisma.projectsUpdatetech_stackInput | string[]
 }
 
 
@@ -913,6 +963,7 @@ export type projectsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   created_by_id?: boolean
   created_at?: boolean
   updated_at?: boolean
+  tech_stack?: boolean
   users?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   teams?: boolean | Prisma.teamsDefaultArgs<ExtArgs>
   requirements?: boolean | Prisma.projects$requirementsArgs<ExtArgs>
@@ -931,6 +982,7 @@ export type projectsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   created_by_id?: boolean
   created_at?: boolean
   updated_at?: boolean
+  tech_stack?: boolean
   users?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   teams?: boolean | Prisma.teamsDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["projects"]>
@@ -947,6 +999,7 @@ export type projectsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   created_by_id?: boolean
   created_at?: boolean
   updated_at?: boolean
+  tech_stack?: boolean
   users?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   teams?: boolean | Prisma.teamsDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["projects"]>
@@ -963,9 +1016,10 @@ export type projectsSelectScalar = {
   created_by_id?: boolean
   created_at?: boolean
   updated_at?: boolean
+  tech_stack?: boolean
 }
 
-export type projectsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "client" | "team_id" | "start_date" | "expected_completion_date" | "status" | "created_by_id" | "created_at" | "updated_at", ExtArgs["result"]["projects"]>
+export type projectsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "client" | "team_id" | "start_date" | "expected_completion_date" | "status" | "created_by_id" | "created_at" | "updated_at" | "tech_stack", ExtArgs["result"]["projects"]>
 export type projectsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   users?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   teams?: boolean | Prisma.teamsDefaultArgs<ExtArgs>
@@ -1000,6 +1054,7 @@ export type $projectsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     created_by_id: string
     created_at: Date
     updated_at: Date
+    tech_stack: string[]
   }, ExtArgs["result"]["projects"]>
   composites: {}
 }
@@ -1437,6 +1492,7 @@ export interface projectsFieldRefs {
   readonly created_by_id: Prisma.FieldRef<"projects", 'String'>
   readonly created_at: Prisma.FieldRef<"projects", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"projects", 'DateTime'>
+  readonly tech_stack: Prisma.FieldRef<"projects", 'String[]'>
 }
     
 
