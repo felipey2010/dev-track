@@ -15,7 +15,7 @@ function GoBack({ text = 'Voltar', className }: Props) {
   return (
     <div className={cn('mb-2', className)}>
       <Button onClick={() => router.back()}>
-        <ArrowLeft className='mr-2' /> {text}
+        <ArrowLeft className='mr-1' /> {text}
       </Button>
     </div>
   )

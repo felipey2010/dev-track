@@ -127,7 +127,7 @@ export default function ProjectPage({
           </div>
         }
       />
-      <section className='mb-6 grid overflow-hidden rounded-md border bg-card sm:grid-cols-2 lg:grid-cols-4'>
+      <section className='mb-6 grid gap-px overflow-hidden rounded-md border bg-border sm:grid-cols-2 lg:grid-cols-3'>
         <Summary label='Equipe responsável'>
           <strong>{data.team.name}</strong>
         </Summary>
@@ -136,6 +136,12 @@ export default function ProjectPage({
             <strong>{data.team.leader?.name ?? 'Não definido'}</strong>
             <span className='text-xs'>Derivado da liderança da equipe</span>
           </div>
+        </Summary>
+        <Summary label='Data de início'>
+          <strong>{dateLabel(data.start_date)}</strong>
+        </Summary>
+        <Summary label='Conclusão prevista'>
+          <strong>{dateLabel(data.expected_completion_date)}</strong>
         </Summary>
         <Summary label='Status do projeto'>
           <StatusBadge value={projectStatusLabel(data.status)} />
@@ -166,7 +172,7 @@ export default function ProjectPage({
         </CardContent>
       </Card>
       <Card className='gap-0 overflow-hidden py-0'>
-        <CardHeader className='flex flex-row items-center justify-between border-b py-4'>
+        <CardHeader className='flex flex-col md:flex-row md:items-center justify-between border-b py-4'>
           <CardTitle className='text-sm'>
             Requisitos{' '}
             <span className='ml-2 font-normal text-muted-foreground'>
@@ -316,7 +322,7 @@ function Summary({
   children: React.ReactNode
 }) {
   return (
-    <div className='flex min-h-24 flex-col gap-2 border-b p-5 last:border-0 sm:border-r lg:border-b-0'>
+    <div className='flex min-h-24 flex-col gap-2 bg-card p-5'>
       <span className='text-[9px] uppercase tracking-wider text-muted-foreground'>
         {label}
       </span>

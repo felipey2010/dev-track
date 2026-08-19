@@ -14,14 +14,17 @@ const requirementLabels: Record<string, string> = {
 }
 export const projectStatusLabel = (value: string) =>
   projectLabels[value] ?? value
+
 export const requirementStatusLabel = (value: string) =>
   requirementLabels[value] ?? value
+
 export const dateLabel = (value: string | Date | null) =>
   value
     ? new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(
         new Date(value)
       )
     : '—'
+
 export const dateTimeLabel = (value: string | Date) =>
   new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'short',

@@ -37,6 +37,8 @@
   --sidebar-accent-foreground: oklch(0.28 0.05 223);
   --sidebar-border: oklch(0.9 0.008 247);
   --sidebar-ring: oklch(0.62 0.12 223);
+  --success: oklch(0.58 0.18 145);
+  --success-foreground: oklch(1 0 0);
 }
 
 .dark {
@@ -66,6 +68,8 @@
   --sidebar-accent-foreground: oklch(0.9 0.04 220);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.67 0.12 220);
+  --success: oklch(0.87 0.27 144);
+  --success-foreground: oklch(1 0 0);
 }
 
 @theme inline {
@@ -89,6 +93,8 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);

@@ -18,7 +18,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { USER_STATUS } from '@/lib/auth/constants'
 import { createProject, updateProject } from '@/lib/client-api/projects'
+import { PROJECT_DEVELOPMENT_STATUS } from '@/lib/projects/constants'
 import {
   projectFormSchema,
   type ProjectFormData,
@@ -32,8 +34,8 @@ import { Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import ProjectField from './project-label'
-import { USER_STATUS } from '@/lib/auth/constants'
 import { TechStackInput } from './tech-stack-input'
+import { LocalizedDateInput } from './localized-date-input'
 
 const defaults: ProjectFormInput = {
   name: '',
@@ -205,20 +207,6 @@ export function ProjectFormDialog({
             />
           </ProjectField>
           <ProjectField
-            label='Tecnologias'
-            htmlFor='project-tech-stack'
-            error={form.formState.errors.techStack?.message}
-            wide
-          >
-            <Controller
-              control={form.control}
-              name='techStack'
-              render={({ field }) => (
-                <TechStackInput value={field.value} onChange={field.onChange} />
-              )}
-            />
-          </ProjectField>
-          <ProjectField
             label={project ? 'Status' : 'Status inicial'}
             htmlFor='project-status'
             error={form.formState.errors.status?.message}
@@ -238,10 +226,11 @@ export function ProjectFormDialog({
                     </SelectItem>
                     {project && (
                       <>
-                        <SelectItem value='TESTING'>Em testes</SelectItem>
-                        <SelectItem value='COMPLETED'>Concluído</SelectItem>
-                        <SelectItem value='ON_HOLD'>Em espera</SelectItem>
-                        <SelectItem value='CANCELLED'>Cancelado</SelectItem>
+                        {PROJECT_DEVELOPMENT_STATUS.map((status) => (
+                          <SelectItem value={status.value} key={status.value}>
+                            {status.label}
+                          </SelectItem>
+                        ))}
                       </>
                     )}
                   </SelectContent>
@@ -250,15 +239,36 @@ export function ProjectFormDialog({
             />
           </ProjectField>
           <ProjectField
+            label='Tecnologias'
+            htmlFor='project-tech-stack'
+            error={form.formState.errors.techStack?.message}
+            wide
+          >
+            <Controller
+              control={form.control}
+              name='techStack'
+              render={({ field }) => (
+                <TechStackInput value={field.value} onChange={field.onChange} />
+              )}
+            />
+          </ProjectField>
+          <ProjectField
             label='Data de início'
             htmlFor='project-start'
             error={form.formState.errors.startDate?.message}
           >
-            <Input
-              id='project-start'
-              type='date'
-              lang='pt-BR'
-              {...form.register('startDate')}
+            <Controller
+              control={form.control}
+              name='startDate'
+              render={({ field }) => (
+                <LocalizedDateInput
+                  key={`${open}-${project?.id ?? 'new'}-start`}
+                  id='project-start'
+                  value={field.value}
+                  onChange={field.onChange}
+                  required
+                />
+              )}
             />
           </ProjectField>
           <ProjectField
@@ -266,11 +276,17 @@ export function ProjectFormDialog({
             htmlFor='project-due'
             error={form.formState.errors.expectedCompletionDate?.message}
           >
-            <Input
-              id='project-due'
-              type='date'
-              lang='pt-BR'
-              {...form.register('expectedCompletionDate')}
+            <Controller
+              control={form.control}
+              name='expectedCompletionDate'
+              render={({ field }) => (
+                <LocalizedDateInput
+                  key={`${open}-${project?.id ?? 'new'}-due`}
+                  id='project-due'
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
             />
           </ProjectField>
           {mutation.error && (
@@ -280,7 +296,16 @@ export function ProjectFormDialog({
           )}
           <DialogFooter className='sm:col-span-2'>
             <Button
+              type='button'
+              variant='outline'
+              size='lg'
+              onClick={() => onOpenChange(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
               type='submit'
+              size='lg'
               disabled={mutation.isPending || form.formState.isSubmitting}
             >
               {mutation.isPending

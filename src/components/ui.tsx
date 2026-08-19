@@ -52,9 +52,9 @@ export function StatusBadge({ value }: { value: string }) {
 }
 export function Progress({ value }: { value: number }) {
   return (
-    <div className='flex min-w-28 items-center gap-3'>
-      <ProgressBar value={value} className='h-1.5' />
-      <span className='w-8 font-mono text-base text-muted-foreground'>
+    <div className='w-full flex min-w-28 items-center gap-3'>
+      <ProgressBar value={value} className='flex-1 h-1.5' />
+      <span className='w-8 font-mono text-[13px] text-muted-foreground'>
         {value}%
       </span>
     </div>
