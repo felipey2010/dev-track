@@ -15,7 +15,13 @@ import { getUserProfile } from '@/lib/services/users'
 import { identifierSchema } from '@/lib/validation/common'
 import { requireActiveUser } from '@/server/authorization/session'
 import { FolderKanban, Mail, ShieldCheck, Users } from 'lucide-react'
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Perfil do usuário',
+  description: 'Consulte os dados, equipes e projetos do usuário.',
+}
 
 const statusLabels = {
   ACTIVE: 'Ativo',

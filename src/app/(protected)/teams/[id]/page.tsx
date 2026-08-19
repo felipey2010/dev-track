@@ -1,5 +1,5 @@
-import GoBack from '@/components/go-back-button'
 import { TeamNotFound } from '@/components/feedback/entity-not-found'
+import GoBack from '@/components/go-back-button'
 import { PageHeader, ProjectLink, StatusBadge } from '@/components/ui'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -18,7 +18,13 @@ import { identifierSchema } from '@/lib/validation/common'
 import { requireActiveUser } from '@/server/authorization/session'
 import { ApplicationError } from '@/server/errors/application-error'
 import { FolderKanban, UserRoundCheck, Users } from 'lucide-react'
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Detalhes da equipe',
+  description: 'Consulte integrantes e projetos vinculados à equipe.',
+}
 
 const roleLabels = {
   DEVELOPER: 'Desenvolvedor',

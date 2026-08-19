@@ -2,7 +2,13 @@ import { auth } from '@/auth'
 import { SignOutButton } from '@/components/auth/sign-out-button'
 import { USER_STATUS } from '@/lib/auth/constants'
 import { Clock3 } from 'lucide-react'
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+
+export const metadata: Metadata = {
+  title: 'Conta pendente',
+  description: 'Sua conta aguarda aprovação administrativa.',
+}
 
 export default async function PendingPage() {
   const session = await auth()

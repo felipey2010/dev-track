@@ -1,6 +1,12 @@
-import { redirect } from 'next/navigation'
 import { EmailVerificationForm } from '@/components/auth/email-verification-form'
 import { emailVerificationSchema } from '@/lib/auth/validation'
+import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
+
+export const metadata: Metadata = {
+  title: 'Verificar e-mail',
+  description: 'Confirme o endereço de e-mail da sua conta.',
+}
 
 export default async function VerifyEmailPage({
   searchParams,

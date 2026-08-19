@@ -16,8 +16,8 @@ import { UserStatusActions } from '@/components/users/user-status-actions'
 import { DEFAULT_PAGE, type PaginatedData } from '@/lib/pagination'
 import type { User } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
-import { useState } from 'react'
 import Link from 'next/link'
+import { useState } from 'react'
 
 const labels: Record<string, string> = {
   ACTIVE: 'ATIVO',

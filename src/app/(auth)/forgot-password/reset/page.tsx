@@ -1,6 +1,12 @@
-import { redirect } from 'next/navigation'
 import { PasswordResetForm } from '@/components/auth/password-reset-form'
 import { passwordResetCodeSchema } from '@/lib/auth/validation'
+import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
+
+export const metadata: Metadata = {
+  title: 'Redefinir senha',
+  description: 'Defina uma nova senha para sua conta.',
+}
 
 export default async function PasswordResetPage({
   searchParams,

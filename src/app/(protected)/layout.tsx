@@ -2,7 +2,13 @@ import Sidebar from '@/components/sidebar'
 import Topbar from '@/components/topbar'
 import { USER_STATUS } from '@/lib/auth/constants'
 import { getCurrentUser } from '@/server/authorization/session'
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+
+export const metadata: Metadata = {
+  title: 'Sistema',
+  robots: { index: false, follow: false, nocache: true },
+}
 
 export default async function DashboardLayout({
   children,

@@ -1,8 +1,14 @@
-import { redirect } from 'next/navigation'
-import { ShieldX } from 'lucide-react'
 import { auth } from '@/auth'
 import { SignOutButton } from '@/components/auth/sign-out-button'
 import { USER_STATUS } from '@/lib/auth/constants'
+import { ShieldX } from 'lucide-react'
+import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
+
+export const metadata: Metadata = {
+  title: 'Conta suspensa',
+  description: 'O acesso desta conta ao Dev Track está suspenso.',
+}
 
 export default async function SuspendedPage() {
   const session = await auth()

@@ -1,6 +1,9 @@
 {
-  "name": "",
-  "short_name": "",
+  "name": "Dev Track",
+  "short_name": "Dev Track",
+  "description": "Acompanhamento interno de projetos e requisitos de software.",
+  "lang": "pt-BR",
+  "start_url": "/",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -13,7 +16,7 @@
       "type": "image/png"
     }
   ],
-  "theme_color": "#ffffff",
+  "theme_color": "#111827",
   "background_color": "#ffffff",
   "display": "standalone"
 }

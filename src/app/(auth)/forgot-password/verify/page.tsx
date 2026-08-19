@@ -1,8 +1,14 @@
 import { PasswordResetCodeForm } from '@/components/auth/password-reset-code-form'
 import { passwordResetCodeSchema } from '@/lib/auth/validation'
 import { ArrowLeft } from 'lucide-react'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+
+export const metadata: Metadata = {
+  title: 'Verificar código',
+  description: 'Confirme o código de recuperação da sua conta.',
+}
 
 export default async function PasswordResetVerifyPage({
   searchParams,

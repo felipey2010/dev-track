@@ -2,7 +2,13 @@ import { auth } from '@/auth'
 import { AuthPanel } from '@/components/auth/auth-panel'
 import { TimedNotification } from '@/components/auth/timed-notification'
 import { USER_STATUS } from '@/lib/auth/constants'
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+
+export const metadata: Metadata = {
+  title: 'Entrar',
+  description: 'Entre com sua conta para acessar o Dev Track.',
+}
 export default async function LoginPage({
   searchParams,
 }: {

@@ -1,10 +1,16 @@
-import type { Metadata } from 'next'
 import { LegalPage } from '@/components/legal-page'
 import { APP_IDENTITY } from '@/lib/app-identity'
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: `Política de Privacidade | ${APP_IDENTITY.name}`,
-  description: `Política de privacidade do ${APP_IDENTITY.name}.`,
+  title: 'Política de Privacidade',
+  description: `Saiba como o ${APP_IDENTITY.name} coleta, utiliza, armazena e protege dados pessoais e informações de uso.`,
+  alternates: { canonical: '/privacy' },
+  openGraph: {
+    title: `Política de Privacidade | ${APP_IDENTITY.name}`,
+    description: `Como os dados são tratados e protegidos no ${APP_IDENTITY.name}.`,
+    url: '/privacy',
+  },
 }
 
 export default function PrivacyPage() {

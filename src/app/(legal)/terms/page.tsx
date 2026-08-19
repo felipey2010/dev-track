@@ -1,10 +1,16 @@
-import type { Metadata } from 'next'
 import { LegalPage } from '@/components/legal-page'
 import { APP_IDENTITY } from '@/lib/app-identity'
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: `Termos de Serviço | ${APP_IDENTITY.name}`,
-  description: `Termos de serviço do ${APP_IDENTITY.name}.`,
+  title: 'Termos de Serviço',
+  description: `Consulte as condições de acesso, uso responsável e segurança aplicáveis ao ${APP_IDENTITY.name}.`,
+  alternates: { canonical: '/terms' },
+  openGraph: {
+    title: `Termos de Serviço | ${APP_IDENTITY.name}`,
+    description: `Condições de acesso e uso responsável do ${APP_IDENTITY.name}.`,
+    url: '/terms',
+  },
 }
 
 export default function TermsPage() {

@@ -1,6 +1,12 @@
-import { CheckCircle2 } from 'lucide-react'
-import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
+import { CheckCircle2 } from 'lucide-react'
+import type { Metadata } from 'next'
+import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Cadastro confirmado',
+  description: 'Seu e-mail foi confirmado e a conta aguarda aprovação.',
+}
 
 export default function RegistrationPendingPage() {
   return (

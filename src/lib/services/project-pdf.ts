@@ -168,7 +168,7 @@ export async function generateProjectPdf(project: ProjectPdfData) {
     color: rgb(0.08, 0.1, 0.13),
   })
   y -= 22
-  drawTableHeader(page, y, margin, bold)
+  drawTableHeader(page, y, margin, contentWidth, bold)
   y -= 22
 
   if (!project.requirements.length) {
@@ -209,7 +209,7 @@ export async function generateProjectPdf(project: ProjectPdfData) {
           color: rgb(0.08, 0.1, 0.13),
         })
         y -= 24
-        drawTableHeader(page, y, margin, bold)
+        drawTableHeader(page, y, margin, contentWidth, bold)
         y -= 22
       }
       page.drawRectangle({
@@ -265,12 +265,13 @@ function drawTableHeader(
   page: ReturnType<PDFDocument['addPage']>,
   y: number,
   x: number,
+  width: number,
   font: Font
 ) {
   page.drawRectangle({
     x,
     y: y - 17,
-    width: columns.reduce((total, column) => total + column.width, 0),
+    width,
     height: 22,
     color: rgb(0.12, 0.15, 0.19),
   })

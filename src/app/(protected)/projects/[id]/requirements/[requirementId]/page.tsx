@@ -1,5 +1,5 @@
-import GoBack from '@/components/go-back-button'
 import { RequirementNotFound } from '@/components/feedback/entity-not-found'
+import GoBack from '@/components/go-back-button'
 import { RequirementWorkflowActions } from '@/components/requirements/requirement-workflow-actions'
 import { PageHeader, StatusBadge } from '@/components/ui'
 import { Badge } from '@/components/ui/badge'
@@ -11,7 +11,13 @@ import { identifierSchema } from '@/lib/validation/common'
 import { requireProjectAccess } from '@/server/authorization/session'
 import { ApplicationError } from '@/server/errors/application-error'
 import { CalendarDays, FolderKanban, UserRound } from 'lucide-react'
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Detalhes do requisito',
+  description: 'Consulte o requisito, suas atribuições e seu histórico.',
+}
 
 const typeLabels = {
   FUNCTIONAL: 'Funcional',

@@ -1,6 +1,12 @@
 import { NotAuthorized } from '@/components/feedback/not-authorized'
 import { USER_ROLE } from '@/lib/auth/constants'
 import { requireActiveUser } from '@/server/authorization/session'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Usuários',
+  description: 'Administre aprovações e o acesso dos usuários.',
+}
 
 export default async function UsersAdminLayout({
   children,

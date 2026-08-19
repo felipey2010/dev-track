@@ -1,7 +1,9 @@
+import { buttonVariants } from '@/components/ui/button'
+import { APP_IDENTITY } from '@/lib/app-identity'
+import { cn } from '@/lib/utils'
 import { ArrowLeft } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { APP_IDENTITY } from '@/lib/app-identity'
 
 function LegalPageLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -25,15 +27,20 @@ function LegalPageLayout({ children }: { children: React.ReactNode }) {
             </div>
           </Link>
         </div>
+      </header>
+      <main className='mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:py-14'>
         <Link
-          href='/dashboard'
-          className='flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground'
+          href='/'
+          className={cn(
+            buttonVariants({ variant: 'ghost' }),
+            'w-fit flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground mb-2'
+          )}
         >
           <ArrowLeft size={15} />
           Voltar ao sistema
         </Link>
-      </header>
-      {children}
+        {children}
+      </main>
       <footer className='flex flex-col gap-3 border-t bg-card px-4 py-5 text-[11px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8'>
         <span>© 2026 {APP_IDENTITY.name}</span>
         <nav className='flex gap-5'>
