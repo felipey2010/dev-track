@@ -1,7 +1,15 @@
-import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Progress as ProgressBar } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
+import Linkify from 'linkify-react'
+import Link from 'next/link'
+
+const linkifyOptions = {
+  defaultProtocol: 'http',
+  target: '_blank',
+  rel: 'noopener noreferrer',
+  className: 'text-blue-600 dark:text-blue-700 hover:underline break-all',
+}
 
 export function PageHeader({
   eyebrow,
@@ -23,7 +31,9 @@ export function PageHeader({
           </p>
         )}
         <h1 className='text-2xl font-semibold tracking-tight'>{title}</h1>
-        <p className='mt-1 text-sm text-muted-foreground'>{description}</p>
+        <Linkify options={linkifyOptions}>
+          <p className='mt-1 text-sm text-muted-foreground'>{description}</p>
+        </Linkify>
       </div>
       {action}
     </div>
