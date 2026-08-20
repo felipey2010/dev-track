@@ -1,6 +1,7 @@
 'use client'
 
 import { PageHeader } from '@/components/ui'
+import { ListSearch } from '@/components/list-search'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Pagination } from '@/components/ui/pagination'
@@ -17,7 +18,7 @@ import { DEFAULT_PAGE, type PaginatedData } from '@/lib/pagination'
 import type { Team } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useDeferredValue, useState } from 'react'
 import Link from 'next/link'
 import { State } from '../content-states'
 import { DeleteTeamDialog } from './delete-team-dialog'
@@ -25,12 +26,16 @@ import { TeamFormDialog } from './team-form-dialog'
 
 export function TeamsTable({ isAdmin }: { isAdmin: boolean }) {
   const [page, setPage] = useState(DEFAULT_PAGE)
+  const [search, setSearch] = useState('')
+  const deferredSearch = useDeferredValue(search.trim())
   const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState<Team | null>(null)
   const [deleting, setDeleting] = useState<Team | null>(null)
+  const searchParameters = new URLSearchParams({ page: String(page) })
+  if (deferredSearch) searchParameters.set('search', deferredSearch)
   const { data, error, isLoading } = useApi<PaginatedData<Team>>(
     'teams',
-    `/api/teams?page=${page}`
+    `/api/teams?${searchParameters}`
   )
   const teams = data?.items
 
@@ -52,6 +57,17 @@ export function TeamsTable({ isAdmin }: { isAdmin: boolean }) {
         }
       />
       <Card className='gap-0 overflow-hidden py-0'>
+        <div className='border-b p-4'>
+          <ListSearch
+            value={search}
+            onChange={(value) => {
+              setSearch(value)
+              setPage(DEFAULT_PAGE)
+            }}
+            placeholder='Buscar por equipe, descrição ou liderança...'
+            label='Buscar equipes'
+          />
+        </div>
         <CardContent className='p-0'>
           {isLoading ? (
             <div className='p-5'>
@@ -60,7 +76,13 @@ export function TeamsTable({ isAdmin }: { isAdmin: boolean }) {
           ) : error ? (
             <State text={error.message} error />
           ) : !teams?.length ? (
-            <State text='Nenhuma equipe cadastrada.' />
+            <State
+              text={
+                deferredSearch
+                  ? 'Nenhuma equipe encontrada para esta busca.'
+                  : 'Nenhuma equipe cadastrada.'
+              }
+            />
           ) : (
             <Table>
               <TableHeader>

@@ -8,10 +8,12 @@ export async function GET(request: Request) {
   try {
     const actor = await requireActiveUser()
     const pagination = getPagination(request)
-    const enabled = new URL(request.url).searchParams.has('page')
+    const parameters = new URL(request.url).searchParams
+    const enabled = parameters.has('page')
+    const search = parameters.get('search')?.trim().slice(0, 100) ?? ''
     return apiSuccess(
       'Projetos carregados.',
-      await listProjects(actor, { ...pagination, enabled })
+      await listProjects(actor, { ...pagination, enabled, search })
     )
   } catch (error) {
     return apiError(error, 'Não foi possível carregar os projetos.')

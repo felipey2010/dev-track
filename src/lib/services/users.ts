@@ -11,9 +11,20 @@ export async function listUsersExcept(
   currentUserId: string,
   page: number,
   pageSize: number,
-  skip: number
+  skip: number,
+  search: string
 ) {
-  const where = { id: { not: currentUserId } }
+  const where = {
+    id: { not: currentUserId },
+    ...(search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' as const } },
+            { email: { contains: search, mode: 'insensitive' as const } },
+          ],
+        }
+      : {}),
+  }
   const [items, totalItems] = await prisma.$transaction([
     prisma.users.findMany({
       where,

@@ -18,10 +18,11 @@ type Pagination = {
   pageSize: number
   skip: number
   enabled: boolean
+  search: string
 }
 
 export async function listProjects(actor: Actor, pagination: Pagination) {
-  const where =
+  const accessWhere =
     actor.system_role === USER_ROLE.ADMIN
       ? undefined
       : {
@@ -30,6 +31,39 @@ export async function listProjects(actor: Actor, pagination: Pagination) {
             { teams: { team_members: { some: { user_id: actor.id } } } },
           ],
         }
+  const searchWhere = pagination.search
+    ? {
+        OR: [
+          {
+            name: { contains: pagination.search, mode: 'insensitive' as const },
+          },
+          {
+            client: {
+              contains: pagination.search,
+              mode: 'insensitive' as const,
+            },
+          },
+          {
+            description: {
+              contains: pagination.search,
+              mode: 'insensitive' as const,
+            },
+          },
+          {
+            teams: {
+              name: {
+                contains: pagination.search,
+                mode: 'insensitive' as const,
+              },
+            },
+          },
+        ],
+      }
+    : undefined
+  const where =
+    accessWhere && searchWhere
+      ? { AND: [accessWhere, searchWhere] }
+      : (accessWhere ?? searchWhere)
   const rows = await prisma.projects.findMany({
     where,
     include: {

@@ -1,5 +1,6 @@
 'use client'
 import { Loading, State } from '@/components/content-states'
+import { ListSearch } from '@/components/list-search'
 import { PageHeader } from '@/components/ui'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -17,7 +18,7 @@ import { DEFAULT_PAGE, type PaginatedData } from '@/lib/pagination'
 import type { User } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useDeferredValue, useState } from 'react'
 
 const labels: Record<string, string> = {
   ACTIVE: 'ATIVO',
@@ -28,9 +29,13 @@ const labels: Record<string, string> = {
 
 export default function UsersPage() {
   const [page, setPage] = useState(DEFAULT_PAGE)
+  const [search, setSearch] = useState('')
+  const deferredSearch = useDeferredValue(search.trim())
+  const searchParameters = new URLSearchParams({ page: String(page) })
+  if (deferredSearch) searchParameters.set('search', deferredSearch)
   const { data, error, isLoading } = useApi<PaginatedData<User>>(
     'users',
-    `/api/users?page=${page}`
+    `/api/users?${searchParameters}`
   )
   const users = data?.items
 
@@ -41,13 +46,30 @@ export default function UsersPage() {
         description='Aprovação e controle de acesso à plataforma.'
       />
       <Card className='gap-0 overflow-hidden py-0'>
+        <div className='border-b p-4'>
+          <ListSearch
+            value={search}
+            onChange={(value) => {
+              setSearch(value)
+              setPage(DEFAULT_PAGE)
+            }}
+            placeholder='Buscar por nome ou e-mail...'
+            label='Buscar usuários'
+          />
+        </div>
         <CardContent className='p-0'>
           {isLoading ? (
             <Loading />
           ) : error ? (
             <State text={error.message} error />
           ) : !users?.length ? (
-            <State text='Nenhum outro usuário cadastrado.' />
+            <State
+              text={
+                deferredSearch
+                  ? 'Nenhum usuário encontrado para esta busca.'
+                  : 'Nenhum outro usuário cadastrado.'
+              }
+            />
           ) : (
             <Table>
               <TableHeader>

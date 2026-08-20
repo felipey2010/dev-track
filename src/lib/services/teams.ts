@@ -16,9 +16,15 @@ type Actor = {
 }
 export async function listTeams(
   actor: Actor,
-  pagination: { page: number; pageSize: number; skip: number; enabled: boolean }
+  pagination: {
+    page: number
+    pageSize: number
+    skip: number
+    enabled: boolean
+    search: string
+  }
 ) {
-  const where =
+  const accessWhere =
     actor.system_role === USER_ROLE.ADMIN
       ? undefined
       : {
@@ -27,6 +33,33 @@ export async function listTeams(
             { team_members: { some: { user_id: actor.id } } },
           ],
         }
+  const searchWhere = pagination.search
+    ? {
+        OR: [
+          {
+            name: { contains: pagination.search, mode: 'insensitive' as const },
+          },
+          {
+            description: {
+              contains: pagination.search,
+              mode: 'insensitive' as const,
+            },
+          },
+          {
+            users: {
+              name: {
+                contains: pagination.search,
+                mode: 'insensitive' as const,
+              },
+            },
+          },
+        ],
+      }
+    : undefined
+  const where =
+    accessWhere && searchWhere
+      ? { AND: [accessWhere, searchWhere] }
+      : (accessWhere ?? searchWhere)
   const rows = await prisma.teams.findMany({
     where,
     include: {

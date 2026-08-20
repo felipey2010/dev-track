@@ -1,6 +1,7 @@
 'use client'
 import { ProjectNotFound } from '@/components/feedback/entity-not-found'
 import GoBack from '@/components/go-back-button'
+import { ListSearch } from '@/components/list-search'
 import { ProjectFormDialog } from '@/components/projects/create-project-dialog'
 import { DeleteProjectDialog } from '@/components/projects/delete-project-dialog'
 import { DeleteRequirementDialog } from '@/components/requirements/delete-requirement-dialog'
@@ -54,6 +55,7 @@ export default function ProjectPage({
 }) {
   const { id } = use(params)
   const [requirementsPage, setRequirementsPage] = useState(DEFAULT_PAGE)
+  const [requirementsSearch, setRequirementsSearch] = useState('')
   const [creatingRequirement, setCreatingRequirement] = useState(false)
   const [editingRequirement, setEditingRequirement] =
     useState<Requirement | null>(null)
@@ -82,11 +84,28 @@ export default function ProjectPage({
 
   if (!data) return <ProjectNotFound />
 
+  const normalizedRequirementsSearch = requirementsSearch
+    .trim()
+    .toLocaleLowerCase('pt-BR')
+  const filteredRequirements = normalizedRequirementsSearch
+    ? data.requirements.filter((requirement) =>
+        [
+          requirement.code,
+          requirement.title,
+          requirement.description,
+          requirement.users_requirements_assigned_user_idTousers?.name,
+        ].some((value) =>
+          value
+            ?.toLocaleLowerCase('pt-BR')
+            .includes(normalizedRequirementsSearch)
+        )
+      )
+    : data.requirements
   const requirementPages = Math.max(
     DEFAULT_PAGE,
-    Math.ceil(data.requirements.length / REQUIREMENTS_PAGE_SIZE)
+    Math.ceil(filteredRequirements.length / REQUIREMENTS_PAGE_SIZE)
   )
-  const visibleRequirements = data.requirements.slice(
+  const visibleRequirements = filteredRequirements.slice(
     (requirementsPage - DEFAULT_PAGE) * REQUIREMENTS_PAGE_SIZE,
     requirementsPage * REQUIREMENTS_PAGE_SIZE
   )
@@ -185,10 +204,25 @@ export default function ProjectPage({
             </Button>
           )}
         </CardHeader>
+        <div className='border-b p-4'>
+          <ListSearch
+            value={requirementsSearch}
+            onChange={(value) => {
+              setRequirementsSearch(value)
+              setRequirementsPage(DEFAULT_PAGE)
+            }}
+            placeholder='Buscar por código, requisito ou responsável...'
+            label='Buscar requisitos'
+          />
+        </div>
         <CardContent className='p-0'>
           {!data.requirements.length ? (
             <div className='p-8 text-sm text-muted-foreground'>
               Nenhum requisito cadastrado neste projeto.
+            </div>
+          ) : !filteredRequirements.length ? (
+            <div className='p-8 text-sm text-muted-foreground'>
+              Nenhum requisito encontrado para esta busca.
             </div>
           ) : (
             <>

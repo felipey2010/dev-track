@@ -2,10 +2,14 @@
 import { LogOut } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
+import useIsMobile from '@/hooks/use-mobile'
+
 export function SignOutButton() {
+  const isMobile = useIsMobile()
+
   return (
     <Button
-      variant='outline'
+      variant={isMobile ? 'ghost' : 'outline'}
       size='icon'
       className='sm:w-auto sm:px-4'
       aria-label='Sair'

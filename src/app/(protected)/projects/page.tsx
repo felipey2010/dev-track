@@ -1,5 +1,6 @@
 'use client'
 import { Loading, State } from '@/components/content-states'
+import { ListSearch } from '@/components/list-search'
 import { CreateProjectDialog } from '@/components/projects/create-project-dialog'
 import { PageHeader, Progress, ProjectLink, StatusBadge } from '@/components/ui'
 import { Card, CardContent } from '@/components/ui/card'
@@ -16,13 +17,17 @@ import { dateLabel, projectStatusLabel } from '@/lib/format'
 import { DEFAULT_PAGE, type PaginatedData } from '@/lib/pagination'
 import type { Project } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
-import { useState } from 'react'
+import { useDeferredValue, useState } from 'react'
 
 export default function ProjectsPage() {
   const [page, setPage] = useState(DEFAULT_PAGE)
+  const [search, setSearch] = useState('')
+  const deferredSearch = useDeferredValue(search.trim())
+  const searchParameters = new URLSearchParams({ page: String(page) })
+  if (deferredSearch) searchParameters.set('search', deferredSearch)
   const { data, error, isLoading } = useApi<PaginatedData<Project>>(
     'projects',
-    `/api/projects?page=${page}`
+    `/api/projects?${searchParameters}`
   )
   const projects = data?.items
 
@@ -35,13 +40,30 @@ export default function ProjectsPage() {
         action={<CreateProjectDialog />}
       />
       <Card className='gap-0 overflow-hidden py-0'>
+        <div className='border-b p-4'>
+          <ListSearch
+            value={search}
+            onChange={(value) => {
+              setSearch(value)
+              setPage(DEFAULT_PAGE)
+            }}
+            placeholder='Buscar por projeto, cliente ou equipe...'
+            label='Buscar projetos'
+          />
+        </div>
         <CardContent className='p-0'>
           {isLoading ? (
             <Loading />
           ) : error ? (
             <State text={error.message} error />
           ) : !projects?.length ? (
-            <State text='Nenhum projeto cadastrado.' />
+            <State
+              text={
+                deferredSearch
+                  ? 'Nenhum projeto encontrado para esta busca.'
+                  : 'Nenhum projeto cadastrado.'
+              }
+            />
           ) : (
             <Table>
               <TableHeader>
