@@ -1,5 +1,11 @@
 'use client'
-import { FolderKanban, LayoutDashboard, UserCog, Users } from 'lucide-react'
+import {
+  BriefcaseBusiness,
+  FolderKanban,
+  LayoutDashboard,
+  UserCog,
+  Users,
+} from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -9,6 +15,7 @@ import { ACCOUNT_ROLE } from '@/types/next-auth'
 
 const primary = [
   ['/dashboard', 'Painel', LayoutDashboard],
+  ['/my-work', 'Meu trabalho', BriefcaseBusiness],
   ['/projects', 'Projetos', FolderKanban],
   ['/teams', 'Equipes', Users],
 ] as const
