@@ -90,7 +90,7 @@ export default async function TeamDetailsPage({
       </section>
 
       <div className='grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]'>
-        <Card className='gap-0 overflow-hidden py-0'>
+        <Card className='h-fit gap-0 overflow-hidden py-0'>
           <CardHeader className='border-b py-4'>
             <CardTitle>Projetos</CardTitle>
           </CardHeader>
@@ -137,7 +137,7 @@ export default async function TeamDetailsPage({
           </CardContent>
         </Card>
 
-        <Card className='gap-0 overflow-hidden py-0'>
+        <Card className='h-fit gap-0 overflow-hidden py-0'>
           <CardHeader className='border-b py-4'>
             <CardTitle>Membros</CardTitle>
           </CardHeader>
@@ -199,13 +199,13 @@ function Summary({
   children: React.ReactNode
 }) {
   return (
-    <div className='flex min-h-24 items-center gap-3 border-b p-5 last:border-0 sm:border-r lg:border-b-0'>
-      <span className='text-muted-foreground [&>svg]:size-5'>{icon}</span>
-      <div>
+    <div className='flex min-h-24 gap-3 border-b p-5 last:border-0 sm:border-r lg:border-b-0'>
+      <span className='text-muted-foreground [&>svg]:size-6'>{icon}</span>
+      <div className='flex flex-col gap-2'>
         <span className='block text-[9px] uppercase tracking-wider text-muted-foreground'>
           {label}
         </span>
-        <div className='mt-1 text-sm'>{children}</div>
+        <div className='mt-1 text-base'>{children}</div>
       </div>
     </div>
   )

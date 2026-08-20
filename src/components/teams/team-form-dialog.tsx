@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import useIsMobile from '@/hooks/use-mobile'
 import { apiRequest } from '@/lib/client-api/http'
 import { createTeam, updateTeam } from '@/lib/client-api/teams'
 import { teamFormSchema, type TeamFormData } from '@/lib/teams/validation'
@@ -59,6 +60,7 @@ export function TeamFormDialog({ team, open, onOpenChange }: Props) {
     resolver: zodResolver(teamFormSchema),
     defaultValues: defaults,
   })
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     if (!open) return
@@ -122,14 +124,17 @@ export function TeamFormDialog({ team, open, onOpenChange }: Props) {
     )
   }
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    setMemberSearch('')
+    onOpenChange(nextOpen)
+  }
+
   return (
     <Drawer
-      swipeDirection='right'
+      showSwipeHandle={isMobile}
+      swipeDirection={isMobile ? 'down' : 'right'}
       open={open}
-      onOpenChange={(nextOpen) => {
-        setMemberSearch('')
-        onOpenChange(nextOpen)
-      }}
+      onOpenChange={handleOpenChange}
     >
       <DrawerContent>
         <DrawerHeader className='border-b px-6 py-5 pr-12'>
@@ -148,160 +153,192 @@ export function TeamFormDialog({ team, open, onOpenChange }: Props) {
             onSubmit={form.handleSubmit((input) => mutation.mutate(input))}
             noValidate
           >
-            <div className='grid gap-4 border-b p-6 sm:grid-cols-2'>
-              <Field label='Nome' error={form.formState.errors.name?.message}>
-                <Input
-                  autoFocus
-                  disabled={loading}
-                  {...form.register('name')}
-                />
-              </Field>
-              <Field
-                label='Liderança'
-                error={form.formState.errors.leaderId?.message}
-              >
-                <Controller
-                  control={form.control}
-                  name='leaderId'
-                  render={({ field }) => (
-                    <Select
-                      value={field.value || '__none'}
-                      onValueChange={(value) => {
-                        const nextLeader = value === '__none' ? '' : value
-                        field.onChange(nextLeader)
-                        if (nextLeader)
-                          form.setValue(
-                            'members',
-                            form
-                              .getValues('members')
-                              .filter((member) => member.userId !== nextLeader),
-                            { shouldDirty: true, shouldValidate: true }
-                          )
-                      }}
-                      disabled={loading}
-                    >
-                      <SelectTrigger className='w-full'>
-                        <SelectValue placeholder='Selecione uma liderança' />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value='__none'>Sem liderança</SelectItem>
-                        {users?.map((user) => (
-                          <SelectItem key={user.id} value={user.id}>
-                            {user.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </Field>
-              <Field
-                label='Descrição'
-                error={form.formState.errors.description?.message}
-                wide
-              >
-                <Textarea
-                  rows={3}
-                  disabled={loading}
-                  {...form.register('description')}
-                />
-              </Field>
-            </div>
-            <div className='flex min-h-0 flex-1 flex-col gap-3 p-6'>
-              <div>
-                <Label htmlFor='selecionar_usuario_descricao'>Membros</Label>
-                <p
-                  id='selecionar_usuario_descricao'
-                  className='text-xs text-muted-foreground'
+            <div className='h-full overflow-y-auto scroll-smooth'>
+              <div className='grid gap-4 border-b p-6 sm:grid-cols-2'>
+                <Field
+                  label='Nome'
+                  htmlFor='team-name'
+                  error={form.formState.errors.name?.message}
                 >
-                  Selecione os membros e atribua a função de cada um.
-                </p>
-              </div>
-              <div className='relative'>
-                <Search
-                  className='pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground'
-                  aria-hidden='true'
-                />
-                <Input
-                  value={memberSearch}
-                  onChange={(event) => setMemberSearch(event.target.value)}
-                  placeholder='Buscar por nome ou e-mail'
-                  aria-label='Buscar membros'
-                  className='pl-9'
-                  disabled={loading}
-                />
-              </div>
-              <div className='min-h-0 flex-1 divide-y overflow-y-auto overscroll-contain rounded-lg border'>
-                {loading ? (
-                  <p className='p-4 text-sm text-muted-foreground'>
-                    Carregando usuários...
-                  </p>
-                ) : !users?.length ? (
-                  <p className='p-4 text-sm text-muted-foreground'>
-                    Nenhum usuário ativo disponível.
-                  </p>
-                ) : !visibleUsers.length ? (
-                  <p className='p-4 text-sm text-muted-foreground'>
-                    Nenhum usuário corresponde à busca.
-                  </p>
-                ) : (
-                  visibleUsers.map((user) => {
-                    const member = members.find(
-                      (item) => item.userId === user.id
-                    )
-                    return (
-                      <div
-                        key={user.id}
-                        className='flex items-center gap-3 p-3'
+                  <Input
+                    id='team-name'
+                    autoFocus
+                    disabled={loading}
+                    {...form.register('name')}
+                  />
+                </Field>
+                <Field
+                  label='Liderança'
+                  htmlFor='team-leader'
+                  error={form.formState.errors.leaderId?.message}
+                >
+                  <Controller
+                    control={form.control}
+                    name='leaderId'
+                    render={({ field }) => (
+                      <Select
+                        name={field.name}
+                        value={field.value || '__none'}
+                        onValueChange={(value) => {
+                          const nextLeader = value === '__none' ? '' : value
+                          field.onChange(nextLeader)
+                          if (nextLeader)
+                            form.setValue(
+                              'members',
+                              form
+                                .getValues('members')
+                                .filter(
+                                  (member) => member.userId !== nextLeader
+                                ),
+                              { shouldDirty: true, shouldValidate: true }
+                            )
+                        }}
+                        disabled={loading}
                       >
-                        <input
-                          type='checkbox'
-                          className='size-4 accent-primary'
-                          checked={Boolean(member)}
-                          onChange={(event) =>
-                            toggleMember(user.id, event.target.checked)
-                          }
-                          aria-label={`Adicionar ${user.name}`}
-                        />
-                        <div className='min-w-0 flex-1'>
-                          <p className='truncate text-sm font-medium'>
-                            {user.name}
-                          </p>
-                          <p className='truncate text-xs text-muted-foreground'>
-                            {user.email}
-                          </p>
-                        </div>
-                        {member && (
-                          <Select
-                            value={member.role}
-                            onValueChange={(role) =>
-                              changeRole(
-                                user.id,
-                                role as 'DEVELOPER' | 'TESTER'
-                              )
+                        <SelectTrigger id='team-leader' className='w-full'>
+                          <SelectValue placeholder='Selecione uma liderança' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value='__none'>Sem liderança</SelectItem>
+                          {users?.map((user) => (
+                            <SelectItem key={user.id} value={user.id}>
+                              {user.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </Field>
+                <Field
+                  label='Descrição'
+                  htmlFor='team-description'
+                  error={form.formState.errors.description?.message}
+                  wide
+                >
+                  <Textarea
+                    id='team-description'
+                    rows={3}
+                    disabled={loading}
+                    {...form.register('description')}
+                  />
+                </Field>
+              </div>
+              <div className='flex min-h-0 flex-1 flex-col gap-3 p-6'>
+                <div>
+                  <p id='team-members-label' className='text-sm font-medium'>
+                    Membros
+                  </p>
+                  <p
+                    id='team-members-description'
+                    className='text-xs text-muted-foreground'
+                  >
+                    Selecione os membros e atribua a função de cada um.
+                  </p>
+                </div>
+                <div className='relative'>
+                  <Search
+                    className='pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground'
+                    aria-hidden='true'
+                  />
+                  <Input
+                    id='team-member-search'
+                    name='memberSearch'
+                    value={memberSearch}
+                    onChange={(event) => setMemberSearch(event.target.value)}
+                    placeholder='Buscar por nome ou e-mail'
+                    aria-label='Buscar membros'
+                    className='pl-9'
+                    disabled={loading}
+                  />
+                </div>
+                <div
+                  role='group'
+                  aria-labelledby='team-members-label'
+                  aria-describedby='team-members-description'
+                  className='min-h-0 flex-1 divide-y overflow-y-auto overscroll-contain rounded-lg border'
+                >
+                  {loading ? (
+                    <p className='p-4 text-sm text-muted-foreground'>
+                      Carregando usuários...
+                    </p>
+                  ) : !users?.length ? (
+                    <p className='p-4 text-sm text-muted-foreground'>
+                      Nenhum usuário ativo disponível.
+                    </p>
+                  ) : !visibleUsers.length ? (
+                    <p className='p-4 text-sm text-muted-foreground'>
+                      Nenhum usuário corresponde à busca.
+                    </p>
+                  ) : (
+                    visibleUsers.map((user) => {
+                      const member = members.find(
+                        (item) => item.userId === user.id
+                      )
+                      return (
+                        <div
+                          key={user.id}
+                          className='flex items-center gap-3 p-3'
+                        >
+                          <input
+                            id={`team-member-${user.id}`}
+                            name='members'
+                            type='checkbox'
+                            className='size-4 accent-primary'
+                            checked={Boolean(member)}
+                            onChange={(event) =>
+                              toggleMember(user.id, event.target.checked)
                             }
+                            aria-label={`Adicionar ${user.name}`}
+                          />
+                          <Label
+                            htmlFor={`team-member-${user.id}`}
+                            className='min-w-0 flex-1 cursor-pointer'
                           >
-                            <SelectTrigger className='w-36'>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className='text-sm'>
-                              <SelectItem value='DEVELOPER'>
-                                Desenvolvedor
-                              </SelectItem>
-                              <SelectItem value='TESTER'>Testador</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        )}
-                      </div>
-                    )
-                  })
+                            <span className='block truncate text-sm font-medium'>
+                              {user.name}
+                            </span>
+                            <span className='block truncate text-xs text-muted-foreground'>
+                              {user.email}
+                            </span>
+                          </Label>
+                          {member && (
+                            <Select
+                              name={`memberRole-${user.id}`}
+                              value={member.role}
+                              onValueChange={(role) =>
+                                changeRole(
+                                  user.id,
+                                  role as 'DEVELOPER' | 'TESTER'
+                                )
+                              }
+                            >
+                              <SelectTrigger
+                                id={`team-member-role-${user.id}`}
+                                aria-label={`Função de ${user.name}`}
+                                className='w-36'
+                              >
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className='text-sm'>
+                                <SelectItem value='DEVELOPER'>
+                                  Desenvolvedor
+                                </SelectItem>
+                                <SelectItem value='TESTER'>Testador</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </div>
+                      )
+                    })
+                  )}
+                </div>
+                {form.formState.errors.members?.message && (
+                  <p className='text-xs text-destructive'>
+                    {form.formState.errors.members.message}
+                  </p>
                 )}
               </div>
-              {form.formState.errors.members?.message && (
-                <p className='text-xs text-destructive'>
-                  {form.formState.errors.members.message}
-                </p>
-              )}
             </div>
             <DrawerFooter className='border-t p-6'>
               {mutation.error && (
@@ -345,11 +382,13 @@ function normalizeSearch(value: string) {
 
 function Field({
   label,
+  htmlFor,
   error,
   wide,
   children,
 }: {
   label: string
+  htmlFor: string
   error?: string
   wide?: boolean
   children: React.ReactNode
@@ -360,7 +399,7 @@ function Field({
         wide ? 'flex flex-col gap-1.5 sm:col-span-2' : 'flex flex-col gap-1.5'
       }
     >
-      <Label>{label}</Label>
+      <Label htmlFor={htmlFor}>{label}</Label>
       {children}
       {error && <p className='text-xs text-destructive'>{error}</p>}
     </div>

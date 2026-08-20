@@ -78,8 +78,8 @@ export type User = {
   name: string
   email: string
   image: string | null
-  status: string
-  system_role: string
+  status: 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'REJECTED'
+  system_role: 'USER' | 'ADMIN'
   created_at: string
 }
 export type Activity = {

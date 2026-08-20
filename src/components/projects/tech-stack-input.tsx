@@ -41,6 +41,7 @@ export function TechStackInput({
     <div className='grid gap-2'>
       <Input
         id='project-tech-stack'
+        name='techStackDraft'
         value={draft}
         maxLength={MAX_TECHNOLOGY_LENGTH}
         placeholder='Ex.: Next.js, TypeScript, PostgreSQL'
@@ -60,7 +61,10 @@ export function TechStackInput({
         }}
       />
       {value.length ? (
-        <div className='flex flex-wrap gap-2' aria-label='Tecnologias selecionadas'>
+        <div
+          className='flex flex-wrap gap-2'
+          aria-label='Tecnologias selecionadas'
+        >
           {value.map((technology) => (
             <Badge key={technology} variant='secondary' className='h-7 gap-1.5'>
               {technology}

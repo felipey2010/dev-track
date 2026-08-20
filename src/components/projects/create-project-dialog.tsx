@@ -184,6 +184,7 @@ export function ProjectFormDialog({
               name='teamId'
               render={({ field }) => (
                 <Select
+                  name={field.name}
                   value={field.value}
                   onValueChange={field.onChange}
                   disabled={isLoading || !eligible.length}
@@ -215,7 +216,11 @@ export function ProjectFormDialog({
               control={form.control}
               name='status'
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select
+                  name={field.name}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
                   <SelectTrigger id='project-status' className='w-full'>
                     <SelectValue />
                   </SelectTrigger>

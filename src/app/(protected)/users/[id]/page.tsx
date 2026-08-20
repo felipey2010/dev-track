@@ -96,7 +96,7 @@ export default async function UserProfilePage({
       </Card>
 
       <div className='grid gap-6 lg:grid-cols-2'>
-        <Card>
+        <Card className='h-fit'>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
               <Users className='size-4' />
@@ -135,7 +135,7 @@ export default async function UserProfilePage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className='h-fit'>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
               <FolderKanban className='size-4' />

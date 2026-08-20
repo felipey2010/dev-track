@@ -36,7 +36,7 @@ export default function Topbar() {
         <div className='ml-auto flex items-center gap-1'>
           <NotificationBell />
           <ThemeToggle />
-          <div className='ml-2 hidden items-center gap-2 border-l pl-3 sm:flex'>
+          <div className='sm:ml-2 sm:border-l sm:pl-3'>
             <SignOutButton />
           </div>
         </div>

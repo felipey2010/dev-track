@@ -2,6 +2,7 @@ export const AUDIT_ACTIONS = {
   userRegistered: 'USER_REGISTERED',
   userEmailVerified: 'USER_EMAIL_VERIFIED',
   userPasswordReset: 'USER_PASSWORD_RESET',
+  userAccessUpdated: 'USER_ACCESS_UPDATED',
   projectCreated: 'PROJECT_CREATED',
   projectUpdated: 'PROJECT_UPDATED',
   projectDeleted: 'PROJECT_DELETED',

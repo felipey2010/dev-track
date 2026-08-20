@@ -75,6 +75,55 @@ export async function updateUserStatus(input: {
   return { id: input.targetId, status: input.status }
 }
 
+export async function updateUserAccess(input: {
+  targetId: string
+  systemRole: 'USER' | 'ADMIN'
+  status: 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'REJECTED'
+  actor: { id: string; name: string; system_role: 'ADMIN' | 'USER' }
+}) {
+  if (input.actor.id === input.targetId)
+    throw new ApplicationError(
+      'Você não pode alterar o próprio papel ou situação.',
+      422
+    )
+
+  const target = await prisma.users.findUnique({
+    where: { id: input.targetId },
+    select: { id: true, status: true, system_role: true },
+  })
+  if (!target) throw new ApplicationError('Usuário não encontrado.', 404)
+
+  await prisma.$transaction([
+    prisma.users.update({
+      where: { id: input.targetId },
+      data: { status: input.status, system_role: input.systemRole },
+    }),
+    prisma.audit_logs.create({
+      data: {
+        id: randomUUID(),
+        entity_type: USER_ROLE.USER,
+        entity_id: input.targetId,
+        action: AUDIT_ACTIONS.userAccessUpdated,
+        actor_user_id: input.actor.id,
+        actor_name_snapshot: input.actor.name,
+        actor_system_role_snapshot: input.actor.system_role,
+        metadata_json: {
+          previousStatus: target.status,
+          newStatus: input.status,
+          previousSystemRole: target.system_role,
+          newSystemRole: input.systemRole,
+        },
+      },
+    }),
+  ])
+
+  return {
+    id: input.targetId,
+    status: input.status,
+    systemRole: input.systemRole,
+  }
+}
+
 export async function getUserProfile(userId: string) {
   const user = await prisma.users.findUnique({
     where: { id: userId },

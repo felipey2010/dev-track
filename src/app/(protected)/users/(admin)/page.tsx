@@ -80,7 +80,14 @@ export default function UsersPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <UserStatusActions id={u.id} status={u.status} />
+                      <UserStatusActions
+                        id={u.id}
+                        name={u.name}
+                        email={u.email}
+                        image={u.image}
+                        status={u.status}
+                        systemRole={u.system_role}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

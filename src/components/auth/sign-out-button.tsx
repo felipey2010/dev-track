@@ -6,10 +6,13 @@ export function SignOutButton() {
   return (
     <Button
       variant='outline'
+      size='icon'
+      className='sm:w-auto sm:px-4'
+      aria-label='Sair'
       onClick={() => signOut({ callbackUrl: '/login' })}
     >
       <LogOut className='size-4' />
-      Sair
+      <span className='hidden sm:inline'>Sair</span>
     </Button>
   )
 }

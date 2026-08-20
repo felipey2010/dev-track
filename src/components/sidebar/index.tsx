@@ -1,14 +1,7 @@
 'use client'
-import {
-  FolderKanban,
-  LayoutDashboard,
-  LogOut,
-  UserCog,
-  Users,
-} from 'lucide-react'
+import { FolderKanban, LayoutDashboard, UserCog, Users } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { signOut } from 'next-auth/react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import SidebarItem from './sidebar-item'
 import { USER_ROLE } from '@/lib/auth/constants'
@@ -91,14 +84,6 @@ export default function Sidebar({ user }: { user: CurrentUser }) {
             </Link>
           )
         })}
-        <button
-          type='button'
-          onClick={() => signOut({ callbackUrl: '/login' })}
-          className='flex min-w-0 flex-col items-center justify-center gap-1 text-[10px] text-muted-foreground'
-        >
-          <LogOut className='size-4' />
-          <span>Sair</span>
-        </button>
       </nav>
     </>
   )

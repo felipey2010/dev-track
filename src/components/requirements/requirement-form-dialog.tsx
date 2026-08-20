@@ -139,7 +139,11 @@ export function RequirementFormDialog({
               control={form.control}
               name='type'
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select
+                  name={field.name}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
                   <SelectTrigger id='requirement-type'>
                     <SelectValue />
                   </SelectTrigger>
@@ -162,7 +166,11 @@ export function RequirementFormDialog({
               control={form.control}
               name='priority'
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select
+                  name={field.name}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
                   <SelectTrigger id='requirement-priority'>
                     <SelectValue />
                   </SelectTrigger>
