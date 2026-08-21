@@ -1,4 +1,5 @@
 import { PasswordResetForm } from '@/components/auth/password-reset-form'
+import { AuthCard } from '@/components/auth/auth-card'
 import { passwordResetCodeSchema } from '@/lib/auth/validation'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
@@ -20,5 +21,9 @@ export default async function PasswordResetPage({
 
   if (!parsed.success) redirect('/forgot-password')
 
-  return <PasswordResetForm resetId={parsed.data} />
+  return (
+    <AuthCard>
+      <PasswordResetForm resetId={parsed.data} />
+    </AuthCard>
+  )
 }

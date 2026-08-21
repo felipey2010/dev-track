@@ -1,4 +1,5 @@
 import { PasswordResetCodeForm } from '@/components/auth/password-reset-code-form'
+import { AuthCard } from '@/components/auth/auth-card'
 import { passwordResetCodeSchema } from '@/lib/auth/validation'
 import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -23,14 +24,14 @@ export default async function PasswordResetVerifyPage({
   if (!parsed.success) redirect('/forgot-password')
 
   return (
-    <div className='mt-10'>
+    <AuthCard>
       <Link
         href='/login'
-        className='flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground'
+        className='mb-7 flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-primary'
       >
         <ArrowLeft className='size-3.5' /> Voltar para login
       </Link>
       <PasswordResetCodeForm resetId={parsed.data} />
-    </div>
+    </AuthCard>
   )
 }

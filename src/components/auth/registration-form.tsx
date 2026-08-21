@@ -113,6 +113,7 @@ function RegistrationForm({
         <PasswordInput
           id='register-confirmation'
           autoComplete='new-password'
+          placeholder='Confirmar sua senha'
           {...form.register('passwordConfirmation')}
         />
       </AuthField>
@@ -146,7 +147,7 @@ function RegistrationForm({
       )}
       <Button
         size='lg'
-        className='w-full'
+        className='h-12 w-full text-[14px] font-bold'
         disabled={form.formState.isSubmitting}
         type='submit'
       >

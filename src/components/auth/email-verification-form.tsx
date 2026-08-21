@@ -66,7 +66,7 @@ export function EmailVerificationForm({
   return (
     <form
       onSubmit={form.handleSubmit(submit)}
-      className='mt-8 flex flex-col gap-4'
+      className='flex flex-col gap-4'
       noValidate
     >
       <AuthHeader
@@ -94,7 +94,12 @@ export function EmailVerificationForm({
           {form.formState.errors.root.message}
         </TimedNotification>
       )}
-      <Button size='lg' type='submit' disabled={form.formState.isSubmitting}>
+      <Button
+        className='h-12 font-bold'
+        size='lg'
+        type='submit'
+        disabled={form.formState.isSubmitting}
+      >
         {form.formState.isSubmitting ? 'Verificando...' : 'Verificar e-mail'}
       </Button>
       <button

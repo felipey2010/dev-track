@@ -16,6 +16,7 @@ export function ListFilter({
       <span className='sr-only'>{label}</span>
       <select
         value={value}
+        name={label}
         onChange={(event) => onChange(event.target.value)}
         className='h-12 w-full rounded-[10px] border bg-card px-4 text-sm text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring'
       >

@@ -26,11 +26,11 @@ export function PageHeader({
     <div className='mb-8 flex flex-col items-start justify-between gap-5 sm:flex-row sm:items-end'>
       <div>
         {eyebrow && (
-          <p className="mb-3 flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[.18em] text-primary before:h-px before:w-3.5 before:bg-primary before:content-['']">
+          <p className="mb-3 flex items-center gap-2 font-mono text-[7px] font-semibold uppercase tracking-[.18em] text-primary before:h-px before:w-3.5 before:bg-primary before:content-['']">
             {eyebrow}
           </p>
         )}
-        <h1 className='text-[2rem] font-bold leading-none tracking-[-.025em]'>
+        <h1 className='text-[2rem] font-bold leading-none tracking-tight'>
           {title}
         </h1>
         <Linkify options={linkifyOptions}>

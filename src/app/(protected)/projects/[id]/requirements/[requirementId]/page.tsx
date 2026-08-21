@@ -84,10 +84,9 @@ export default async function RequirementDetailsPage({
 
   return (
     <div className='mx-auto max-w-7xl'>
-      <GoBack className='mb-5' />
-      <p className='mb-3 font-mono text-[10px] text-muted-foreground'>
-        Projetos / {requirement.projects.name} / {requirement.code}
-      </p>
+      <GoBack
+        page={`Projetos / ${requirement.projects.name} / ${requirement.code}`}
+      />
       <PageHeader
         eyebrow={requirement.code}
         title={requirement.title}
@@ -136,7 +135,7 @@ export default async function RequirementDetailsPage({
       />
 
       <div className='grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.7fr)]'>
-        <Card>
+        <Card className='h-fit'>
           <CardHeader>
             <CardTitle>Informações</CardTitle>
           </CardHeader>
@@ -164,7 +163,7 @@ export default async function RequirementDetailsPage({
           </CardContent>
         </Card>
 
-        <Card className='gap-0 overflow-hidden py-0'>
+        <Card className='h-fit gap-0 overflow-hidden py-0'>
           <CardHeader className='border-b py-4'>
             <CardTitle>Histórico</CardTitle>
           </CardHeader>

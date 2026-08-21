@@ -1,6 +1,6 @@
 export function RecaptchaConsent() {
   return (
-    <p className='text-center text-[9px] leading-4 text-muted-foreground'>
+    <p className='text-center text-[11px] leading-[1.6] text-muted-foreground'>
       Este site é protegido pelo reCAPTCHA. Aplicam-se a{' '}
       <a
         className='underline hover:text-foreground'

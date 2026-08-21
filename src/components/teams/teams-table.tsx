@@ -167,7 +167,7 @@ export function TeamsTable({ isAdmin }: { isAdmin: boolean }) {
                         <div className='flex justify-end gap-1'>
                           <Button
                             size='icon-sm'
-                            variant='ghost'
+                            variant='outline'
                             aria-label={`Editar ${team.name}`}
                             onClick={() => setEditing(team)}
                           >
@@ -175,7 +175,7 @@ export function TeamsTable({ isAdmin }: { isAdmin: boolean }) {
                           </Button>
                           <Button
                             size='icon-sm'
-                            variant='ghost'
+                            variant='outline'
                             className='text-destructive'
                             aria-label={`Excluir ${team.name}`}
                             onClick={() => setDeleting(team)}

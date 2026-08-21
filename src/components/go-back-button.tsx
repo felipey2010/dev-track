@@ -1,22 +1,31 @@
 'use client'
-import { useRouter } from 'next/navigation'
-import { Button } from './ui/button'
 import { cn } from '@/lib/utils'
 import { ArrowLeft } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Button } from './ui/button'
 
 type Props = {
-  text?: string
+  buttonText?: string
+  page?: string
   className?: string
 }
 
-function GoBack({ text = 'Voltar', className }: Props) {
+function GoBack({ buttonText = 'Voltar', page, className }: Props) {
   const router = useRouter()
 
   return (
-    <div className={cn('mb-2', className)}>
-      <Button type='button' size='lg' onClick={() => router.back()}>
-        <ArrowLeft className='mr-1' /> {text}
+    <div className={cn('flex flex-col gap-3 mb-3', className)}>
+      <Button
+        type='button'
+        size='lg'
+        onClick={() => router.back()}
+        className='w-fit'
+      >
+        <ArrowLeft /> {buttonText}
       </Button>
+      {page && (
+        <p className='font-mono text-[10px] text-muted-foreground'>{page}</p>
+      )}
     </div>
   )
 }

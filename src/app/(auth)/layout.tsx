@@ -1,6 +1,7 @@
 import { AuthBrand } from '@/components/auth/auth-brand'
 import GoogleRecaptchaWrapper from '@/components/auth/google-recaptcha-wrapper'
 import type { Metadata } from 'next'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 export const metadata: Metadata = {
   title: 'Acesso',
@@ -15,8 +16,11 @@ export default function AuthLayout({
 }) {
   return (
     <GoogleRecaptchaWrapper>
-      <main className='grid min-h-dvh place-items-center bg-background px-4 py-10'>
-        <div className='w-full max-w-90'>
+      <main className='app-surface relative grid min-h-dvh place-items-center bg-background px-5 py-16 sm:px-6'>
+        <div className='absolute right-5 top-5 rounded-full border border-border/70 bg-card p-1 shadow-lg sm:right-7 sm:top-6'>
+          <ThemeToggle />
+        </div>
+        <div className='w-full max-w-[440px]'>
           <AuthBrand />
           {children}
         </div>

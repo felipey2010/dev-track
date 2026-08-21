@@ -2,6 +2,7 @@
 import { ProjectNotFound } from '@/components/feedback/entity-not-found'
 import GoBack from '@/components/go-back-button'
 import { ListSearch } from '@/components/list-search'
+import { ListFilter } from '@/components/list-filter'
 import { ProjectFormDialog } from '@/components/projects/create-project-dialog'
 import { DeleteProjectDialog } from '@/components/projects/delete-project-dialog'
 import { DeleteRequirementDialog } from '@/components/requirements/delete-requirement-dialog'
@@ -56,6 +57,8 @@ export default function ProjectPage({
   const { id } = use(params)
   const [requirementsPage, setRequirementsPage] = useState(DEFAULT_PAGE)
   const [requirementsSearch, setRequirementsSearch] = useState('')
+  const [requirementsStatus, setRequirementsStatus] = useState('ALL')
+  const [requirementsPriority, setRequirementsPriority] = useState('ALL')
   const [creatingRequirement, setCreatingRequirement] = useState(false)
   const [editingRequirement, setEditingRequirement] =
     useState<Requirement | null>(null)
@@ -87,20 +90,24 @@ export default function ProjectPage({
   const normalizedRequirementsSearch = requirementsSearch
     .trim()
     .toLocaleLowerCase('pt-BR')
-  const filteredRequirements = normalizedRequirementsSearch
-    ? data.requirements.filter((requirement) =>
-        [
-          requirement.code,
-          requirement.title,
-          requirement.description,
-          requirement.users_requirements_assigned_user_idTousers?.name,
-        ].some((value) =>
-          value
-            ?.toLocaleLowerCase('pt-BR')
-            .includes(normalizedRequirementsSearch)
-        )
+  const filteredRequirements = data.requirements.filter((requirement) => {
+    const matchesSearch =
+      !normalizedRequirementsSearch ||
+      [
+        requirement.code,
+        requirement.title,
+        requirement.description,
+        requirement.users_requirements_assigned_user_idTousers?.name,
+      ].some((value) =>
+        value?.toLocaleLowerCase('pt-BR').includes(normalizedRequirementsSearch)
       )
-    : data.requirements
+    const matchesStatus =
+      requirementsStatus === 'ALL' || requirement.status === requirementsStatus
+    const matchesPriority =
+      requirementsPriority === 'ALL' ||
+      requirement.priority === requirementsPriority
+    return matchesSearch && matchesStatus && matchesPriority
+  })
   const requirementPages = Math.max(
     DEFAULT_PAGE,
     Math.ceil(filteredRequirements.length / REQUIREMENTS_PAGE_SIZE)
@@ -112,10 +119,7 @@ export default function ProjectPage({
 
   return (
     <div className='mx-auto max-w-7xl'>
-      <GoBack />
-      <p className='mb-3 font-mono text-[10px] text-muted-foreground'>
-        Projetos / {data.name}
-      </p>
+      <GoBack page={`Projetos / ${data.name}`} />
       <PageHeader
         title={data.name}
         description={data.client ?? 'Sem cliente informado'}
@@ -146,14 +150,16 @@ export default function ProjectPage({
           </div>
         }
       />
-      <section className='mb-6 grid gap-px overflow-hidden rounded-md border bg-border sm:grid-cols-2 lg:grid-cols-3'>
+      <section className='mb-6 grid gap-px overflow-hidden rounded-xl border border-border/70 bg-border/70 sm:grid-cols-2 lg:grid-cols-3'>
         <Summary label='Equipe responsável'>
           <strong>{data.team.name}</strong>
         </Summary>
         <Summary label='Gestor atual'>
           <div className='flex flex-col gap-1'>
             <strong>{data.team.leader?.name ?? 'Não definido'}</strong>
-            <span className='text-xs'>Derivado da liderança da equipe</span>
+            <span className='text-xs text-muted-foreground'>
+              Derivado da liderança da equipe
+            </span>
           </div>
         </Summary>
         <Summary label='Data de início'>
@@ -167,14 +173,16 @@ export default function ProjectPage({
         </Summary>
         <Summary label='Progresso calculado'>
           <Progress value={data.progress} />
-          <span className='text-xs'>Requisitos concluídos / total</span>
+          <span className='text-xs text-muted-foreground'>
+            Requisitos concluídos / total
+          </span>
         </Summary>
       </section>
-      <Card className='mb-6'>
-        <CardHeader>
+      <Card className='mb-6 gap-0 py-0'>
+        <CardHeader className='px-6 pb-3 pt-5'>
           <CardTitle className='text-sm'>Stack tecnológica</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className='px-6 pb-5'>
           {data.tech_stack.length ? (
             <div className='flex flex-wrap gap-2'>
               {data.tech_stack.map((technology) => (
@@ -191,7 +199,7 @@ export default function ProjectPage({
         </CardContent>
       </Card>
       <Card className='gap-0 overflow-hidden py-0'>
-        <CardHeader className='flex flex-col md:flex-row md:items-center justify-between border-b py-4'>
+        <CardHeader className='flex flex-col justify-between gap-4 border-b px-6 py-5 md:flex-row md:items-center'>
           <CardTitle className='text-sm'>
             Requisitos{' '}
             <span className='ml-2 font-normal text-muted-foreground'>
@@ -204,7 +212,7 @@ export default function ProjectPage({
             </Button>
           )}
         </CardHeader>
-        <div className='border-b p-4'>
+        <div className='grid gap-3 border-b p-4 md:grid-cols-[minmax(16rem,1fr)_12rem_12rem]'>
           <ListSearch
             value={requirementsSearch}
             onChange={(value) => {
@@ -214,6 +222,34 @@ export default function ProjectPage({
             placeholder='Buscar por código, requisito ou responsável...'
             label='Buscar requisitos'
           />
+          <ListFilter
+            label='Status do requisito'
+            value={requirementsStatus}
+            onChange={(value) => {
+              setRequirementsStatus(value)
+              setRequirementsPage(DEFAULT_PAGE)
+            }}
+          >
+            <option value='ALL'>Todos os status</option>
+            <option value='REQUIREMENTS'>Requisitos</option>
+            <option value='DEVELOPMENT'>Em desenvolvimento</option>
+            <option value='TESTING'>Em testes</option>
+            <option value='COMPLETED'>Concluídos</option>
+          </ListFilter>
+          <ListFilter
+            label='Prioridade do requisito'
+            value={requirementsPriority}
+            onChange={(value) => {
+              setRequirementsPriority(value)
+              setRequirementsPage(DEFAULT_PAGE)
+            }}
+          >
+            <option value='ALL'>Todas as prioridades</option>
+            <option value='LOW'>Baixa</option>
+            <option value='MEDIUM'>Média</option>
+            <option value='HIGH'>Alta</option>
+            <option value='CRITICAL'>Crítica</option>
+          </ListFilter>
         </div>
         <CardContent className='p-0'>
           {!data.requirements.length ? (
@@ -222,7 +258,7 @@ export default function ProjectPage({
             </div>
           ) : !filteredRequirements.length ? (
             <div className='p-8 text-sm text-muted-foreground'>
-              Nenhum requisito encontrado para esta busca.
+              Nenhum requisito corresponde aos filtros selecionados.
             </div>
           ) : (
             <>
@@ -246,7 +282,7 @@ export default function ProjectPage({
                       <TableCell className='font-semibold'>
                         <Link
                           href={`/projects/${id}/requirements/${r.id}`}
-                          className='transition-colors hover:text-cyan-600 dark:hover:text-cyan-400'
+                          className='font-mono text-primary transition-colors hover:text-primary/80'
                         >
                           {r.code}
                         </Link>
@@ -278,7 +314,7 @@ export default function ProjectPage({
                           <div className='flex justify-end gap-1'>
                             <Button
                               size='icon-sm'
-                              variant='ghost'
+                              variant='outline'
                               aria-label={`Editar ${r.code}`}
                               onClick={() => setEditingRequirement(r)}
                             >
@@ -286,7 +322,7 @@ export default function ProjectPage({
                             </Button>
                             <Button
                               size='icon-sm'
-                              variant='ghost'
+                              variant='outline'
                               className='text-destructive'
                               aria-label={`Excluir ${r.code}`}
                               onClick={() => setDeletingRequirement(r)}
@@ -356,11 +392,11 @@ function Summary({
   children: React.ReactNode
 }) {
   return (
-    <div className='flex min-h-24 flex-col gap-2 bg-card p-5'>
-      <span className='text-[9px] uppercase tracking-wider text-muted-foreground'>
+    <div className='flex min-h-24 flex-col gap-2 bg-card p-6'>
+      <span className='text-[10px] font-semibold uppercase tracking-[.08em] text-muted-foreground'>
         {label}
       </span>
-      <div className='text-sm'>{children}</div>
+      <div className='text-sm text-foreground'>{children}</div>
     </div>
   )
 }

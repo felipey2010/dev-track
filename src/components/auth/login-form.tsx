@@ -1,9 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Eye, EyeOff } from 'lucide-react'
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { loginFormSchema, type CredentialsInput } from '@/lib/auth/validation'
 import {
@@ -19,6 +17,7 @@ import GoogleButton from './google-button'
 import { RecaptchaConsent } from './recaptcha-consent'
 import { useRecaptchaToken } from './use-recaptcha-token'
 import { TimedNotification } from './timed-notification'
+import { PasswordInput } from './password-input'
 
 function LoginForm({
   onRegister,
@@ -28,7 +27,6 @@ function LoginForm({
   googleEnabled: boolean
 }) {
   const router = useRouter()
-  const [passwordVisible, setPasswordVisible] = useState(false)
   const getRecaptchaToken = useRecaptchaToken()
   const form = useForm<CredentialsInput>({
     resolver: zodResolver(loginFormSchema),
@@ -105,28 +103,12 @@ function LoginForm({
           </Link>
         }
       >
-        <div className='relative'>
-          <Input
-            id='login-password'
-            type={passwordVisible ? 'text' : 'password'}
-            autoComplete='current-password'
-            placeholder='Digite sua senha'
-            className='pr-10'
-            {...form.register('password')}
-          />
-          <button
-            type='button'
-            onClick={() => setPasswordVisible((value) => !value)}
-            className='absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground'
-            aria-label={passwordVisible ? 'Ocultar senha' : 'Mostrar senha'}
-          >
-            {passwordVisible ? (
-              <EyeOff className='size-4' />
-            ) : (
-              <Eye className='size-4' />
-            )}
-          </button>
-        </div>
+        <PasswordInput
+          id='login-password'
+          autoComplete='current-password'
+          placeholder='Digite sua senha'
+          {...form.register('password')}
+        />
       </AuthField>
       {form.formState.errors.root?.message && (
         <TimedNotification onDismiss={() => form.clearErrors('root')}>
@@ -135,7 +117,7 @@ function LoginForm({
       )}
       <Button
         size='lg'
-        className='w-full'
+        className='h-12 w-full text-[14px] font-bold'
         disabled={form.formState.isSubmitting}
         type='submit'
       >

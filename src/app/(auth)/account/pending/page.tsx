@@ -1,5 +1,6 @@
 import { auth } from '@/auth'
 import { SignOutButton } from '@/components/auth/sign-out-button'
+import { AuthCard } from '@/components/auth/auth-card'
 import { USER_STATUS } from '@/lib/auth/constants'
 import { Clock3 } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -18,18 +19,18 @@ export default async function PendingPage() {
     redirect('/account/suspended')
 
   return (
-    <div className='mt-10 rounded-lg border bg-card p-6 text-center'>
+    <AuthCard className='text-center'>
       <span className='mx-auto grid size-11 place-items-center rounded-full bg-amber-500/10 text-amber-500'>
         <Clock3 className='size-5' />
       </span>
-      <h1 className='mt-4 text-lg font-semibold'>Aguardando aprovação</h1>
-      <p className='mt-2 text-xs leading-5 text-muted-foreground'>
+      <h1 className='mt-5 text-xl font-bold'>Aguardando aprovação</h1>
+      <p className='mt-2 text-[13px] leading-5 text-muted-foreground'>
         Sua identidade foi confirmada, mas um administrador precisa aprovar a
         conta antes do acesso aos projetos.
       </p>
       <div className='mt-6'>
         <SignOutButton />
       </div>
-    </div>
+    </AuthCard>
   )
 }

@@ -1,4 +1,5 @@
 import { EmailVerificationForm } from '@/components/auth/email-verification-form'
+import { AuthCard } from '@/components/auth/auth-card'
 import { emailVerificationSchema } from '@/lib/auth/validation'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
@@ -19,5 +20,9 @@ export default async function VerifyEmailPage({
     emailVerificationSchema.shape.verificationId.safeParse(verificationId)
   if (!validId.success) redirect('/login')
 
-  return <EmailVerificationForm verificationId={validId.data} />
+  return (
+    <AuthCard>
+      <EmailVerificationForm verificationId={validId.data} />
+    </AuthCard>
+  )
 }

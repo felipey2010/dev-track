@@ -16,7 +16,7 @@ export default function AuthField({
   return (
     <div className='flex flex-col gap-2'>
       <div className='flex items-center justify-between'>
-        <Label htmlFor={htmlFor} className='text-xs'>
+        <Label htmlFor={htmlFor} className='text-[13px] font-semibold'>
           {label}
         </Label>
         {aside}
