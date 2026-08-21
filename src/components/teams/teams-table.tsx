@@ -2,6 +2,7 @@
 
 import { PageHeader } from '@/components/ui'
 import { ListSearch } from '@/components/list-search'
+import { ListFilter } from '@/components/list-filter'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Pagination } from '@/components/ui/pagination'
@@ -27,12 +28,16 @@ import { TeamFormDialog } from './team-form-dialog'
 export function TeamsTable({ isAdmin }: { isAdmin: boolean }) {
   const [page, setPage] = useState(DEFAULT_PAGE)
   const [search, setSearch] = useState('')
+  const [leadership, setLeadership] = useState('ALL')
+  const [projects, setProjects] = useState('ALL')
   const deferredSearch = useDeferredValue(search.trim())
   const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState<Team | null>(null)
   const [deleting, setDeleting] = useState<Team | null>(null)
   const searchParameters = new URLSearchParams({ page: String(page) })
   if (deferredSearch) searchParameters.set('search', deferredSearch)
+  if (leadership !== 'ALL') searchParameters.set('leadership', leadership)
+  if (projects !== 'ALL') searchParameters.set('projects', projects)
   const { data, error, isLoading } = useApi<PaginatedData<Team>>(
     'teams',
     `/api/teams?${searchParameters}`
@@ -42,6 +47,7 @@ export function TeamsTable({ isAdmin }: { isAdmin: boolean }) {
   return (
     <div className='mx-auto max-w-7xl'>
       <PageHeader
+        eyebrow='Organização'
         title='Equipes'
         description='Liderança, membros e projetos sob responsabilidade.'
         action={
@@ -56,18 +62,42 @@ export function TeamsTable({ isAdmin }: { isAdmin: boolean }) {
           ) : undefined
         }
       />
+      <div className='mb-5 grid gap-3 md:grid-cols-[minmax(16rem,1fr)_13rem_13rem]'>
+        <ListSearch
+          value={search}
+          onChange={(value) => {
+            setSearch(value)
+            setPage(DEFAULT_PAGE)
+          }}
+          placeholder='Buscar por equipe, descrição ou liderança...'
+          label='Buscar equipes'
+        />
+        <ListFilter
+          label='Liderança'
+          value={leadership}
+          onChange={(value) => {
+            setLeadership(value)
+            setPage(DEFAULT_PAGE)
+          }}
+        >
+          <option value='ALL'>Toda liderança</option>
+          <option value='WITH'>Com liderança</option>
+          <option value='WITHOUT'>Sem liderança</option>
+        </ListFilter>
+        <ListFilter
+          label='Projetos'
+          value={projects}
+          onChange={(value) => {
+            setProjects(value)
+            setPage(DEFAULT_PAGE)
+          }}
+        >
+          <option value='ALL'>Todos os vínculos</option>
+          <option value='WITH'>Com projetos</option>
+          <option value='WITHOUT'>Sem projetos</option>
+        </ListFilter>
+      </div>
       <Card className='gap-0 overflow-hidden py-0'>
-        <div className='border-b p-4'>
-          <ListSearch
-            value={search}
-            onChange={(value) => {
-              setSearch(value)
-              setPage(DEFAULT_PAGE)
-            }}
-            placeholder='Buscar por equipe, descrição ou liderança...'
-            label='Buscar equipes'
-          />
-        </div>
         <CardContent className='p-0'>
           {isLoading ? (
             <div className='p-5'>
@@ -78,8 +108,8 @@ export function TeamsTable({ isAdmin }: { isAdmin: boolean }) {
           ) : !teams?.length ? (
             <State
               text={
-                deferredSearch
-                  ? 'Nenhuma equipe encontrada para esta busca.'
+                deferredSearch || leadership !== 'ALL' || projects !== 'ALL'
+                  ? 'Nenhuma equipe corresponde aos filtros selecionados.'
                   : 'Nenhuma equipe cadastrada.'
               }
             />
@@ -103,7 +133,7 @@ export function TeamsTable({ isAdmin }: { isAdmin: boolean }) {
                     <TableCell className='font-semibold'>
                       <Link
                         href={`/teams/${team.id}`}
-                        className='transition-colors hover:text-cyan-600 dark:hover:text-cyan-400'
+                        className='transition-colors hover:text-primary'
                       >
                         {team.name}
                       </Link>
@@ -116,9 +146,22 @@ export function TeamsTable({ isAdmin }: { isAdmin: boolean }) {
                     <TableCell>
                       {team.users?.name ?? 'Liderança não definida'}
                     </TableCell>
-                    <TableCell>{team.developerCount}</TableCell>
-                    <TableCell>{team.testerCount}</TableCell>
-                    <TableCell>{team._count.projects}</TableCell>
+                    <TableCell>
+                      <span className='inline-flex min-w-7 justify-center rounded-full border bg-secondary px-2 py-1 text-xs'>
+                        {team.developerCount}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className='inline-flex min-w-7 justify-center rounded-full border bg-secondary px-2 py-1 text-xs'>
+                        {team.testerCount}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className='inline-flex rounded-full border border-primary/25 bg-accent px-2.5 py-1 text-xs font-semibold text-primary'>
+                        {team._count.projects}{' '}
+                        {team._count.projects === 1 ? 'projeto' : 'projetos'}
+                      </span>
+                    </TableCell>
                     {isAdmin && (
                       <TableCell>
                         <div className='flex justify-end gap-1'>

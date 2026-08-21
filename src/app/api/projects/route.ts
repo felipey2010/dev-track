@@ -3,6 +3,7 @@ import { getPagination } from '@/lib/pagination'
 import { projectCreateSchema } from '@/lib/projects/validation'
 import { createProject, listProjects } from '@/lib/services/projects'
 import { requireActiveUser } from '@/server/authorization/session'
+import { project_status } from '@/generated/prisma/enums'
 
 export async function GET(request: Request) {
   try {
@@ -11,9 +12,22 @@ export async function GET(request: Request) {
     const parameters = new URL(request.url).searchParams
     const enabled = parameters.has('page')
     const search = parameters.get('search')?.trim().slice(0, 100) ?? ''
+    const requestedStatus = parameters.get('status')
+    const status = Object.values(project_status).includes(
+      requestedStatus as project_status
+    )
+      ? (requestedStatus as project_status)
+      : undefined
+    const teamId = parameters.get('teamId')?.trim() || undefined
     return apiSuccess(
       'Projetos carregados.',
-      await listProjects(actor, { ...pagination, enabled, search })
+      await listProjects(actor, {
+        ...pagination,
+        enabled,
+        search,
+        status,
+        teamId,
+      })
     )
   } catch (error) {
     return apiError(error, 'Não foi possível carregar os projetos.')

@@ -6,21 +6,32 @@ import { prisma } from '@/lib/prisma'
 import { ApplicationError } from '@/server/errors/application-error'
 import { randomUUID } from 'node:crypto'
 import { USER_ROLE, USER_STATUS } from '../auth/constants'
+import type { system_role, user_status } from '@/generated/prisma/enums'
 
 export async function listUsersExcept(
   currentUserId: string,
   page: number,
   pageSize: number,
   skip: number,
-  search: string
+  filters: {
+    search: string
+    role?: system_role
+    status?: user_status
+  }
 ) {
   const where = {
     id: { not: currentUserId },
-    ...(search
+    ...(filters.role ? { system_role: filters.role } : {}),
+    ...(filters.status ? { status: filters.status } : {}),
+    ...(filters.search
       ? {
           OR: [
-            { name: { contains: search, mode: 'insensitive' as const } },
-            { email: { contains: search, mode: 'insensitive' as const } },
+            {
+              name: { contains: filters.search, mode: 'insensitive' as const },
+            },
+            {
+              email: { contains: filters.search, mode: 'insensitive' as const },
+            },
           ],
         }
       : {}),

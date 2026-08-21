@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import SidebarItem from './sidebar-item'
 import { USER_ROLE } from '@/lib/auth/constants'
 import { ACCOUNT_ROLE } from '@/types/next-auth'
+import { getInitials } from '@/lib/utils'
 
 const primary = [
   ['/dashboard', 'Painel', LayoutDashboard],
@@ -28,12 +29,7 @@ type CurrentUser = {
 }
 export default function Sidebar({ user }: { user: CurrentUser }) {
   const pathname = usePathname()
-  const initials = user.name
-    .split(' ')
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
+  const initials = getInitials(user.name)
   const mobileItems =
     user.system_role === USER_ROLE.ADMIN ? [...primary, ...admin] : primary
 

@@ -1,5 +1,6 @@
 import { UserNotFound } from '@/components/feedback/user-not-found'
 import GoBack from '@/components/go-back-button'
+import { StatusBadge } from '@/components/ui'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -12,9 +13,10 @@ import {
 import { USER_STATUS } from '@/lib/auth/constants'
 import { projectStatusLabel } from '@/lib/format'
 import { getUserProfile } from '@/lib/services/users'
+import { getInitials } from '@/lib/utils'
 import { identifierSchema } from '@/lib/validation/common'
 import { requireActiveUser } from '@/server/authorization/session'
-import { FolderKanban, Mail, ShieldCheck, Users } from 'lucide-react'
+import { Mail, ShieldCheck } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
@@ -47,37 +49,36 @@ export default async function UserProfilePage({
   const user = await getUserProfile(parsedId.data)
   if (!user) return <UserNotFound />
 
-  const initials = user.name
-    .split(' ')
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
+  const initials = getInitials(user.name)
 
   return (
-    <div className='mx-auto max-w-7xl flex flex-col gap-6'>
+    <div className='mx-auto flex max-w-7xl flex-col gap-5'>
       <GoBack />
-      <p className='font-mono text-[10px] text-muted-foreground'>
+      <p className="flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[.16em] text-primary before:h-px before:w-3.5 before:bg-primary before:content-['']">
         Usuários / {user.name}
       </p>
-      <Card>
-        <CardContent className='flex flex-col gap-5 sm:flex-row sm:items-center'>
-          <Avatar className='size-24'>
+      <Card className='py-0'>
+        <CardContent className='flex flex-col gap-5 p-6 sm:flex-row sm:items-center'>
+          <Avatar className='size-18.5 border border-border'>
             {user.image && <AvatarImage src={user.image} alt={user.name} />}
-            <AvatarFallback className='bg-cyan-500/10 text-2xl text-cyan-600'>
+            <AvatarFallback className='bg-accent text-xl font-bold text-primary'>
               {initials}
             </AvatarFallback>
           </Avatar>
           <div className='min-w-0 flex-1'>
             <div className='mb-2 flex flex-wrap items-center gap-2'>
-              <h1 className='font-heading text-3xl font-semibold'>
+              <h1 className='text-[28px] font-bold tracking-[-.02em]'>
                 {user.name}
               </h1>
               <Badge
-                variant={
-                  user.status === USER_STATUS.ACTIVE ? 'secondary' : 'outline'
+                variant='outline'
+                className={
+                  user.status === USER_STATUS.ACTIVE
+                    ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-500'
+                    : ''
                 }
               >
+                <span className='size-1.5 rounded-full bg-current' />{' '}
                 {statusLabels[user.status]}
               </Badge>
             </div>
@@ -95,27 +96,24 @@ export default async function UserProfilePage({
         </CardContent>
       </Card>
 
-      <div className='grid gap-6 lg:grid-cols-2'>
-        <Card className='h-fit'>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2'>
-              <Users className='size-4' />
-              Equipes
-            </CardTitle>
+      <div className='grid gap-5 lg:grid-cols-2'>
+        <Card className='h-fit gap-0 py-0'>
+          <CardHeader className='border-b p-5'>
+            <CardTitle>Equipes</CardTitle>
             <CardDescription>
               Equipes das quais o usuário participa atualmente.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className='p-0'>
             {!user.teams.length ? (
               <EmptyState>Nenhuma equipe vinculada.</EmptyState>
             ) : (
-              <div className='divide-y rounded-lg border'>
+              <div className='divide-y'>
                 {user.teams.map((team) => (
                   <Link
                     key={team.id}
                     href={`/teams/${team.id}`}
-                    className='flex items-center justify-between gap-3 p-3 transition-colors hover:bg-muted'
+                    className='flex items-center justify-between gap-3 p-4 transition-colors hover:bg-muted'
                   >
                     <div className='min-w-0'>
                       <p className='font-medium'>{team.name}</p>
@@ -135,31 +133,26 @@ export default async function UserProfilePage({
           </CardContent>
         </Card>
 
-        <Card className='h-fit'>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2'>
-              <FolderKanban className='size-4' />
-              Projetos
-            </CardTitle>
+        <Card className='h-fit gap-0 py-0'>
+          <CardHeader className='border-b p-5'>
+            <CardTitle>Projetos</CardTitle>
             <CardDescription>
               Projetos atribuídos às equipes do usuário.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className='p-0'>
             {!user.projects.length ? (
               <EmptyState>Nenhum projeto vinculado.</EmptyState>
             ) : (
-              <div className='divide-y rounded-lg border'>
+              <div className='divide-y'>
                 {user.projects.map((project) => (
                   <Link
                     key={project.id}
                     href={`/projects/${project.id}`}
-                    className='flex items-center justify-between gap-3 p-3 transition-colors hover:bg-muted'
+                    className='flex items-center justify-between gap-3 p-4 transition-colors hover:bg-muted'
                   >
                     <span className='font-medium'>{project.name}</span>
-                    <Badge variant='outline' className='text-[9px]'>
-                      {projectStatusLabel(project.status)}
-                    </Badge>
+                    <StatusBadge value={projectStatusLabel(project.status)} />
                   </Link>
                 ))}
               </div>

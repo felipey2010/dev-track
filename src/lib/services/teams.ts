@@ -22,6 +22,8 @@ export async function listTeams(
     skip: number
     enabled: boolean
     search: string
+    leadership?: 'WITH' | 'WITHOUT'
+    projects?: 'WITH' | 'WITHOUT'
   }
 ) {
   const accessWhere =
@@ -56,10 +58,21 @@ export async function listTeams(
         ],
       }
     : undefined
-  const where =
-    accessWhere && searchWhere
-      ? { AND: [accessWhere, searchWhere] }
-      : (accessWhere ?? searchWhere)
+  const filters = [
+    accessWhere,
+    searchWhere,
+    pagination.leadership === 'WITH'
+      ? { leader_id: { not: null } }
+      : pagination.leadership === 'WITHOUT'
+        ? { leader_id: null }
+        : undefined,
+    pagination.projects === 'WITH'
+      ? { projects: { some: {} } }
+      : pagination.projects === 'WITHOUT'
+        ? { projects: { none: {} } }
+        : undefined,
+  ].filter((filter) => filter !== undefined)
+  const where = filters.length ? { AND: filters } : undefined
   const rows = await prisma.teams.findMany({
     where,
     include: {

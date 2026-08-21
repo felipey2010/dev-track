@@ -1,6 +1,7 @@
 'use client'
 import { Loading, State } from '@/components/content-states'
-import { Progress, ProjectLink, StatusBadge } from '@/components/ui'
+import { Metric, MetricStrip } from '@/components/metric-strip'
+import { PageHeader, Progress, ProjectLink, StatusBadge } from '@/components/ui'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Pagination } from '@/components/ui/pagination'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -19,13 +20,7 @@ import { DEFAULT_PAGE, type PaginatedData } from '@/lib/pagination'
 import { PROJECT_STATUS } from '@/lib/projects/constants'
 import type { Activity, Project, Team } from '@/lib/types'
 import { useApi } from '@/lib/use-api'
-import {
-  AlertTriangle,
-  CheckCircle2,
-  CircleDot,
-  FlaskConical,
-  FolderKanban,
-} from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import { useState } from 'react'
 
 export default function Dashboard() {
@@ -62,57 +57,46 @@ export default function Dashboard() {
 
   return (
     <div className='mx-auto max-w-7xl'>
-      <div className='mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end'>
-        <div>
-          <h1 className='text-2xl font-semibold tracking-tight'>Painel</h1>
-          <p className='mt-1 text-xs text-muted-foreground'>
-            Visão geral dos projetos de software da empresa.
-          </p>
-        </div>
-        <div className='flex items-center gap-4'>
-          <span className='hidden items-center gap-2 font-mono text-[10px] text-muted-foreground lg:flex'>
-            <i className='size-2 animate-pulse rounded-full bg-emerald-500' />
+      <PageHeader
+        eyebrow='Visão executiva'
+        title='Painel'
+        description='Visão geral dos projetos de software da empresa.'
+        action={
+          <span className='hidden items-center gap-2 rounded-full border border-primary/25 bg-accent px-3 py-1.5 text-[10px] font-semibold text-primary lg:flex'>
+            <i className='size-2 animate-pulse rounded-full bg-primary' />
             Dados atualizados do banco
           </span>
-        </div>
-      </div>
-      <section className='mb-7 grid overflow-hidden rounded-md border bg-card sm:grid-cols-2 lg:grid-cols-4'>
+        }
+      />
+      <MetricStrip>
         <Metric
-          icon={<FolderKanban />}
           label='Total de projetos'
           value={rows.length}
           note={`${teams.data?.length ?? 0} equipes cadastradas`}
         />
         <Metric
-          icon={<CircleDot />}
           label='Em desenvolvimento'
           value={counts.development}
           note={percentage(counts.development, rows.length)}
         />
         <Metric
-          icon={<FlaskConical />}
           label='Em teste'
           value={counts.testing}
           note={percentage(counts.testing, rows.length)}
         />
         <Metric
-          icon={<CheckCircle2 />}
           label='Concluídos'
           value={counts.completed}
           note={percentage(counts.completed, rows.length)}
         />
-      </section>
+      </MetricStrip>
       <div className='grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_320px]'>
         <Card className='gap-0 overflow-hidden py-0'>
-          <CardHeader className='border-b py-4'>
-            <CardTitle className='text-sm'>
-              Projetos{' '}
-              {rows.length > 0 && (
-                <span className='ml-2 font-normal text-muted-foreground'>
-                  {rows.length} no total
-                </span>
-              )}
-            </CardTitle>
+          <CardHeader className='border-b px-5 py-4'>
+            <CardTitle className='text-sm'>Projetos</CardTitle>
+            <p className='text-xs text-muted-foreground'>
+              {rows.length} no total
+            </p>
           </CardHeader>
           <CardContent className='p-0'>
             {projects.isLoading ? (
@@ -165,8 +149,11 @@ export default function Dashboard() {
         </Card>
         <aside className='flex flex-col gap-4'>
           <Card className='gap-0 py-0'>
-            <CardHeader className='border-b py-4'>
+            <CardHeader className='border-b px-5 py-4'>
               <CardTitle className='text-sm'>Avisos</CardTitle>
+              <p className='text-xs text-muted-foreground'>
+                Alertas que exigem atenção
+              </p>
             </CardHeader>
             <CardContent className='p-0'>
               {teams.isLoading ? (
@@ -202,8 +189,11 @@ export default function Dashboard() {
             </CardContent>
           </Card>
           <Card className='gap-0 py-0'>
-            <CardHeader className='border-b py-4'>
+            <CardHeader className='border-b px-5 py-4'>
               <CardTitle className='text-sm'>Atividade recente</CardTitle>
+              <p className='text-xs text-muted-foreground'>
+                Últimas alterações registradas
+              </p>
             </CardHeader>
             <CardContent className='p-0'>
               {activity.isLoading ? (
@@ -239,31 +229,6 @@ export default function Dashboard() {
           </Card>
         </aside>
       </div>
-    </div>
-  )
-}
-
-function Metric({
-  icon,
-  label,
-  value,
-  note,
-}: {
-  icon: React.ReactNode
-  label: string
-  value: number
-  note: string
-}) {
-  return (
-    <div className='border-b p-5 last:border-0 sm:border-b-0 sm:border-r'>
-      <div className='flex items-center gap-2 text-[10px] uppercase tracking-wide text-muted-foreground'>
-        <span className='text-cyan-500 [&>svg]:size-3'>{icon}</span>
-        {label}
-      </div>
-      <strong className='mt-4 block text-2xl'>{value}</strong>
-      <span className='mt-2 block text-[10px] text-muted-foreground'>
-        {note}
-      </span>
     </div>
   )
 }

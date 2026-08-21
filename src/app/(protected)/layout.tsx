@@ -23,10 +23,10 @@ export default async function DashboardLayout({
   if (user.status !== USER_STATUS.ACTIVE) redirect('/login')
 
   return (
-    <div className='grid h-dvh grid-cols-1 grid-rows-[56px_minmax(0,1fr)] overflow-hidden bg-background md:grid-cols-[216px_minmax(0,1fr)]'>
+    <div className='app-surface grid h-dvh grid-cols-1 grid-rows-[56px_minmax(0,1fr)] overflow-hidden bg-background md:grid-cols-[216px_minmax(0,1fr)]'>
       <Topbar />
       <Sidebar user={user} />
-      <main className='min-h-0 min-w-0 overflow-y-auto overscroll-contain px-4 py-8 pb-24 md:col-start-2 md:px-8 md:pb-8 lg:px-12'>
+      <main className='min-h-0 min-w-0 overflow-y-auto overscroll-contain px-5 py-8 pb-24 md:col-start-2 md:px-8 md:py-10 md:pb-10 lg:px-12 lg:py-12'>
         {children}
       </main>
     </div>

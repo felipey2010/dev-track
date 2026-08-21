@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/table'
 import { dateLabel, projectStatusLabel } from '@/lib/format'
 import { getTeam } from '@/lib/services/teams'
+import { getInitials } from '@/lib/utils'
 import { identifierSchema } from '@/lib/validation/common'
 import { requireActiveUser } from '@/server/authorization/session'
 import { ApplicationError } from '@/server/errors/application-error'
@@ -147,12 +148,7 @@ export default async function TeamDetailsPage({
             ) : (
               <div className='divide-y'>
                 {team.team_members.map((member) => {
-                  const initials = member.users.name
-                    .split(' ')
-                    .slice(0, 2)
-                    .map((part) => part[0])
-                    .join('')
-                    .toUpperCase()
+                  const initials = getInitials(member.users.name)
                   return (
                     <Link
                       key={member.id}

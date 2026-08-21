@@ -1,7 +1,7 @@
 import { Providers } from '@/components/providers'
 import { APP_IDENTITY } from '@/lib/app-identity'
 import type { Metadata } from 'next'
-import { fraunces, ibmPlexMono, poppins } from './fonts'
+import { fraunces, ibmPlexMono, ibmPlexSans, poppins } from './fonts'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -32,14 +32,12 @@ export const metadata: Metadata = {
     locale: 'pt_BR',
     siteName: APP_IDENTITY.name,
     title: APP_IDENTITY.name,
-    description:
-      'Acompanhamento interno de projetos e requisitos de software.',
+    description: 'Acompanhamento interno de projetos e requisitos de software.',
   },
   twitter: {
     card: 'summary',
     title: APP_IDENTITY.name,
-    description:
-      'Acompanhamento interno de projetos e requisitos de software.',
+    description: 'Acompanhamento interno de projetos e requisitos de software.',
   },
 }
 
@@ -49,7 +47,7 @@ export default function RootLayout({
   return (
     <html
       lang='pt-BR'
-      className={`${poppins.className} ${poppins.variable} ${fraunces.className} ${fraunces.variable} ${ibmPlexMono.className} ${ibmPlexMono.variable} antialiased bg-background font-sans`}
+      className={`${ibmPlexSans.className} ${ibmPlexSans.variable} ${poppins.variable} ${fraunces.variable} ${ibmPlexMono.variable} antialiased bg-background font-sans`}
       suppressHydrationWarning
     >
       <body>

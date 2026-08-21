@@ -15,7 +15,7 @@ export function ListSearch({
   label: string
 }) {
   return (
-    <div className='relative w-full max-w-sm'>
+    <div className='relative w-full'>
       <Search
         aria-hidden='true'
         className='pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground'
@@ -26,7 +26,7 @@ export function ListSearch({
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         aria-label={label}
-        className='pl-9'
+        className='h-12 rounded-[10px] border-border bg-card pl-10 text-sm shadow-none'
       />
     </div>
   )

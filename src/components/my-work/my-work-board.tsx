@@ -1,6 +1,8 @@
 'use client'
 
 import { StatusBadge } from '@/components/ui'
+import { ListFilter } from '@/components/list-filter'
+import { Metric, MetricStrip } from '@/components/metric-strip'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -48,21 +50,37 @@ export function MyWorkBoard({ items }: { items: MyWorkItem[] }) {
 
   return (
     <>
-      <section className='mb-6 grid overflow-hidden rounded-xl border bg-card sm:grid-cols-2 lg:grid-cols-4'>
-        <Metric label='Atribuídos a mim' value={assigned.length} />
+      <MetricStrip>
+        <Metric
+          label='Atribuídos a mim'
+          value={assigned.length}
+          note='Itens sob sua responsabilidade'
+          tone='primary'
+        />
         <Metric
           label='Atrasados'
           value={overdue.length}
-          alert={overdue.length > 0}
+          tone={overdue.length > 0 ? 'destructive' : 'default'}
+          note={
+            overdue.length ? 'Itens que exigem atenção' : 'Nenhum item crítico'
+          }
         />
-        <Metric label='Próximos 7 dias' value={dueSoon.length} />
+        <Metric
+          label='Próximos 7 dias'
+          value={dueSoon.length}
+          note={
+            dueSoon.length ? 'Vencimentos próximos' : 'Sem vencimentos próximos'
+          }
+        />
         <Metric
           label='Disponíveis para assumir'
           value={items.filter((item) => item.kind === 'AVAILABLE').length}
+          note='Itens aguardando responsável'
+          tone='amber'
         />
-      </section>
+      </MetricStrip>
 
-      <div className='mb-5 grid gap-3 rounded-lg border bg-card p-4 md:grid-cols-[minmax(14rem,1fr)_12rem_12rem]'>
+      <div className='mb-5 grid gap-3 md:grid-cols-[minmax(14rem,1fr)_12rem_12rem]'>
         <label className='relative'>
           <span className='sr-only'>Buscar trabalho</span>
           <Search className='absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground' />
@@ -70,20 +88,20 @@ export function MyWorkBoard({ items }: { items: MyWorkItem[] }) {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder='Buscar requisito ou projeto'
-            className='pl-9'
+            className='h-12 rounded-[10px] bg-card pl-10'
           />
         </label>
-        <Filter value={scope} onChange={setScope} label='Responsabilidade'>
+        <ListFilter value={scope} onChange={setScope} label='Responsabilidade'>
           <option value='ALL'>Todos</option>
           <option value='ASSIGNED'>Atribuídos a mim</option>
           <option value='AVAILABLE'>Disponíveis</option>
-        </Filter>
-        <Filter value={status} onChange={setStatus} label='Etapa'>
+        </ListFilter>
+        <ListFilter value={status} onChange={setStatus} label='Etapa'>
           <option value='ALL'>Todas as etapas</option>
           <option value='REQUIREMENTS'>Requisitos</option>
           <option value='DEVELOPMENT'>Desenvolvimento</option>
           <option value='TESTING'>Testes</option>
-        </Filter>
+        </ListFilter>
       </div>
 
       {!filtered.length ? (
@@ -91,7 +109,7 @@ export function MyWorkBoard({ items }: { items: MyWorkItem[] }) {
           Nenhum trabalho corresponde aos filtros selecionados.
         </div>
       ) : (
-        <div className='grid gap-4 lg:grid-cols-2'>
+        <div className='grid gap-3.5 lg:grid-cols-2'>
           {filtered.map((item) => (
             <WorkCard key={item.id} item={item} today={today} />
           ))}
@@ -104,16 +122,16 @@ export function MyWorkBoard({ items }: { items: MyWorkItem[] }) {
 function WorkCard({ item, today }: { item: MyWorkItem; today: Date }) {
   const deadline = deadlineState(item.deadline, today)
   return (
-    <Card className='gap-0 py-0 transition-colors hover:border-cyan-500/40'>
+    <Card className='gap-0 py-0 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg'>
       <CardContent className='p-5'>
         <div className='flex items-start justify-between gap-4'>
           <div className='min-w-0'>
-            <p className='font-mono text-[10px] text-cyan-600 dark:text-cyan-400'>
+            <p className='font-mono text-[11px] text-primary'>
               {item.code} · {item.project.name}
             </p>
             <Link
               href={`/projects/${item.project.id}/requirements/${item.id}`}
-              className='mt-1 block truncate font-semibold hover:text-cyan-600'
+              className='mt-1.5 block truncate text-[15px] font-semibold hover:text-primary'
             >
               {item.title}
             </Link>
@@ -149,52 +167,6 @@ function WorkCard({ item, today }: { item: MyWorkItem; today: Date }) {
         </div>
       </CardContent>
     </Card>
-  )
-}
-
-function Metric({
-  label,
-  value,
-  alert = false,
-}: {
-  label: string
-  value: number
-  alert?: boolean
-}) {
-  return (
-    <div className='border-b p-5 last:border-0 sm:border-r lg:border-b-0'>
-      <span className='text-[10px] uppercase tracking-wider text-muted-foreground'>
-        {label}
-      </span>
-      <strong className={`mt-2 block text-2xl ${alert ? 'text-red-600' : ''}`}>
-        {value}
-      </strong>
-    </div>
-  )
-}
-
-function Filter({
-  value,
-  onChange,
-  label,
-  children,
-}: {
-  value: string
-  onChange: (value: string) => void
-  label: string
-  children: React.ReactNode
-}) {
-  return (
-    <label>
-      <span className='sr-only'>{label}</span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className='h-9 w-full rounded-md border bg-transparent px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring'
-      >
-        {children}
-      </select>
-    </label>
   )
 }
 

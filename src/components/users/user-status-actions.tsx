@@ -1,8 +1,8 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/select'
 import { updateUserAccess } from '@/lib/client-api/users'
 import type { UserAccessFormData } from '@/lib/users/validation'
+import { getInitials } from '@/lib/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Pencil } from 'lucide-react'
 import { useState } from 'react'
@@ -77,12 +78,7 @@ export function UserStatusActions({
     setOpen(nextOpen)
   }
 
-  const initials = name
-    .split(' ')
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
+  const initials = getInitials(name)
 
   return (
     <div className='flex flex-wrap gap-2'>

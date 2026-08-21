@@ -11,9 +11,21 @@ export async function GET(request: Request) {
     const parameters = new URL(request.url).searchParams
     const enabled = parameters.has('page')
     const search = parameters.get('search')?.trim().slice(0, 100) ?? ''
+    const leadership = parameters.get('leadership')
+    const projects = parameters.get('projects')
     return apiSuccess(
       'Equipes carregadas.',
-      await listTeams(actor, { ...pagination, enabled, search })
+      await listTeams(actor, {
+        ...pagination,
+        enabled,
+        search,
+        leadership:
+          leadership === 'WITH' || leadership === 'WITHOUT'
+            ? leadership
+            : undefined,
+        projects:
+          projects === 'WITH' || projects === 'WITHOUT' ? projects : undefined,
+      })
     )
   } catch (error) {
     return apiError(error, 'Não foi possível carregar as equipes.')

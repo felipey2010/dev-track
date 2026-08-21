@@ -1,4 +1,16 @@
-import { Poppins, Fraunces, IBM_Plex_Mono } from 'next/font/google'
+import {
+  Poppins,
+  Fraunces,
+  IBM_Plex_Mono,
+  IBM_Plex_Sans,
+} from 'next/font/google'
+
+export const ibmPlexSans = IBM_Plex_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  style: ['normal'],
+  variable: '--font-plex-sans',
+})
 
 export const poppins = Poppins({
   subsets: ['latin'],

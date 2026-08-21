@@ -11,6 +11,7 @@ import {
 import { ACCOUNT_ROLE } from '@/types/next-auth'
 import { randomUUID } from 'node:crypto'
 import { USER_ROLE, USER_STATUS } from '../auth/constants'
+import type { project_status } from '@/generated/prisma/enums'
 
 type Actor = { id: string; name: string; system_role: ACCOUNT_ROLE }
 type Pagination = {
@@ -19,6 +20,8 @@ type Pagination = {
   skip: number
   enabled: boolean
   search: string
+  status?: project_status
+  teamId?: string
 }
 
 export async function listProjects(actor: Actor, pagination: Pagination) {
@@ -60,10 +63,13 @@ export async function listProjects(actor: Actor, pagination: Pagination) {
         ],
       }
     : undefined
-  const where =
-    accessWhere && searchWhere
-      ? { AND: [accessWhere, searchWhere] }
-      : (accessWhere ?? searchWhere)
+  const filters = [
+    accessWhere,
+    searchWhere,
+    pagination.status ? { status: pagination.status } : undefined,
+    pagination.teamId ? { team_id: pagination.teamId } : undefined,
+  ].filter((filter) => filter !== undefined)
+  const where = filters.length ? { AND: filters } : undefined
   const rows = await prisma.projects.findMany({
     where,
     include: {

@@ -23,16 +23,20 @@ export function PageHeader({
   action?: React.ReactNode
 }) {
   return (
-    <div className='mb-7 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end'>
+    <div className='mb-8 flex flex-col items-start justify-between gap-5 sm:flex-row sm:items-end'>
       <div>
         {eyebrow && (
-          <p className='mb-1 text-[10px] font-bold tracking-[.16em] text-cyan-600 dark:text-cyan-400'>
+          <p className="mb-3 flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[.18em] text-primary before:h-px before:w-3.5 before:bg-primary before:content-['']">
             {eyebrow}
           </p>
         )}
-        <h1 className='text-2xl font-semibold tracking-tight'>{title}</h1>
+        <h1 className='text-[2rem] font-bold leading-none tracking-[-.025em]'>
+          {title}
+        </h1>
         <Linkify options={linkifyOptions}>
-          <p className='mt-1 text-sm text-muted-foreground'>{description}</p>
+          <p className='mt-2 text-[15px] text-muted-foreground'>
+            {description}
+          </p>
         </Linkify>
       </div>
       {action}
@@ -51,7 +55,7 @@ export function StatusBadge({ value }: { value: string }) {
     <Badge
       variant='outline'
       className={cn(
-        'gap-1.5 rounded-sm px-2 py-1 text-[10px] font-medium',
+        'gap-1.5 rounded-full border-transparent px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[.03em]',
         style
       )}
     >
@@ -62,9 +66,9 @@ export function StatusBadge({ value }: { value: string }) {
 }
 export function Progress({ value }: { value: number }) {
   return (
-    <div className='w-full flex min-w-28 items-center gap-3'>
+    <div className='flex w-full min-w-32 items-center gap-3'>
       <ProgressBar value={value} className='flex-1 h-1.5' />
-      <span className='w-8 font-mono text-[13px] text-muted-foreground'>
+      <span className='w-9 text-right font-mono text-xs text-muted-foreground'>
         {value}%
       </span>
     </div>
@@ -79,7 +83,7 @@ export function ProjectLink({
 }) {
   return (
     <Link
-      className='font-semibold text-foreground transition-colors hover:text-cyan-600 dark:hover:text-cyan-400'
+      className='font-semibold text-foreground transition-colors hover:text-primary'
       href={`/projects/${id}`}
     >
       {children}
