@@ -1,24 +1,16 @@
 import { UserNotFound } from '@/components/feedback/user-not-found'
 import GoBack from '@/components/go-back-button'
-import { StatusBadge } from '@/components/ui'
+import { UserAssociations } from '@/components/users/user-associations'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { USER_STATUS } from '@/lib/auth/constants'
-import { projectStatusLabel } from '@/lib/format'
 import { getUserProfile } from '@/lib/services/users'
 import { getInitials } from '@/lib/utils'
 import { identifierSchema } from '@/lib/validation/common'
 import { requireActiveUser } from '@/server/authorization/session'
 import { Mail, ShieldCheck } from 'lucide-react'
 import type { Metadata } from 'next'
-import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Perfil do usuário',
@@ -30,12 +22,6 @@ const statusLabels = {
   PENDING: 'Pendente',
   SUSPENDED: 'Suspenso',
   REJECTED: 'Rejeitado',
-} as const
-
-const teamRoleLabels = {
-  LEADER: 'Liderança',
-  DEVELOPER: 'Desenvolvedor',
-  TESTER: 'Testador',
 } as const
 
 export default async function UserProfilePage({
@@ -94,79 +80,8 @@ export default async function UserProfilePage({
           </CardContent>
         </Card>
 
-        <div className='grid gap-5 lg:grid-cols-2'>
-          <Card className='h-fit gap-0 py-0'>
-            <CardHeader className='border-b p-5'>
-              <CardTitle>Equipes</CardTitle>
-              <CardDescription>
-                Equipes das quais o usuário participa atualmente.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className='p-0'>
-              {!user.teams.length ? (
-                <EmptyState>Nenhuma equipe vinculada.</EmptyState>
-              ) : (
-                <div className='divide-y'>
-                  {user.teams.map((team) => (
-                    <Link
-                      key={team.id}
-                      href={`/teams/${team.id}`}
-                      className='flex items-center justify-between gap-3 p-4 transition-colors hover:bg-muted'
-                    >
-                      <div className='min-w-0'>
-                        <p className='font-medium'>{team.name}</p>
-                        {team.description && (
-                          <p className='truncate text-xs text-muted-foreground'>
-                            {team.description}
-                          </p>
-                        )}
-                      </div>
-                      <Badge variant='outline' className='text-[10px]'>
-                        {teamRoleLabels[team.role]}
-                      </Badge>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className='h-fit gap-0 py-0'>
-            <CardHeader className='border-b p-5'>
-              <CardTitle>Projetos</CardTitle>
-              <CardDescription>
-                Projetos atribuídos às equipes do usuário.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className='p-0'>
-              {!user.projects.length ? (
-                <EmptyState>Nenhum projeto vinculado.</EmptyState>
-              ) : (
-                <div className='divide-y'>
-                  {user.projects.map((project) => (
-                    <Link
-                      key={project.id}
-                      href={`/projects/${project.id}`}
-                      className='flex items-center justify-between gap-3 p-4 transition-colors hover:bg-muted'
-                    >
-                      <span className='font-medium'>{project.name}</span>
-                      <StatusBadge value={projectStatusLabel(project.status)} />
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        <UserAssociations teams={user.teams} projects={user.projects} />
       </div>
     </div>
-  )
-}
-
-function EmptyState({ children }: { children: React.ReactNode }) {
-  return (
-    <p className='rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground'>
-      {children}
-    </p>
   )
 }

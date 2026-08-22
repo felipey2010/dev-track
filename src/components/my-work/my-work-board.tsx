@@ -122,51 +122,53 @@ export function MyWorkBoard({ items }: { items: MyWorkItem[] }) {
 function WorkCard({ item, today }: { item: MyWorkItem; today: Date }) {
   const deadline = deadlineState(item.deadline, today)
   return (
-    <Card className='gap-0 py-0 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg'>
-      <CardContent className='p-5'>
-        <div className='flex items-start justify-between gap-4'>
-          <div className='min-w-0'>
-            <p className='font-mono text-[11px] text-primary'>
-              {item.code} · {item.project.name}
-            </p>
-            <Link
-              href={`/projects/${item.project.id}/requirements/${item.id}`}
-              className='mt-1.5 block truncate text-[15px] font-semibold hover:text-primary'
-            >
-              {item.title}
-            </Link>
-            <p className='mt-1 text-xs text-muted-foreground'>
-              {item.team.name}
-            </p>
+    <Link
+      href={`/projects/${item.project.id}/requirements/${item.id}`}
+      className='group rounded-xl'
+    >
+      <Card className='gap-0 py-0 transition-all group-hover:-translate-y-0.5 group-hover:border-primary/40 group-hover:shadow-lg'>
+        <CardContent className='p-5'>
+          <div className='flex items-start justify-between gap-4'>
+            <div className='min-w-0'>
+              <p className='font-mono text-[11px] text-primary'>
+                {item.code} · {item.project.name}
+              </p>
+              <span className='mt-1.5 block truncate text-[15px] font-semibold'>
+                {item.title}
+              </span>
+              <p className='mt-1 text-xs text-muted-foreground'>
+                {item.team.name}
+              </p>
+            </div>
+            <StatusBadge value={requirementStatusLabel(item.status)} />
           </div>
-          <StatusBadge value={requirementStatusLabel(item.status)} />
-        </div>
-        <div className='mt-5 flex flex-wrap items-center gap-2'>
-          <Badge variant='outline'>{priorityLabels[item.priority]}</Badge>
-          <Badge variant={item.kind === 'ASSIGNED' ? 'default' : 'secondary'}>
-            {item.kind === 'ASSIGNED' ? 'Atribuído a mim' : 'Disponível'}
-          </Badge>
-          {item.returnedFromTesting && item.status === 'DEVELOPMENT' && (
-            <Badge variant='outline' className='gap-1 text-amber-600'>
-              <RotateCcw className='size-3' /> Devolvido pelo teste
+          <div className='mt-5 flex flex-wrap items-center gap-2'>
+            <Badge variant='outline'>{priorityLabels[item.priority]}</Badge>
+            <Badge variant={item.kind === 'ASSIGNED' ? 'default' : 'secondary'}>
+              {item.kind === 'ASSIGNED' ? 'Atribuído a mim' : 'Disponível'}
             </Badge>
-          )}
-          {item.deadline && (
-            <span
-              className={`ml-auto flex items-center gap-1 text-xs ${deadline === 'OVERDUE' ? 'font-medium text-red-600' : 'text-muted-foreground'}`}
-            >
-              {deadline === 'OVERDUE' ? (
-                <AlertTriangle className='size-3.5' />
-              ) : (
-                <CalendarClock className='size-3.5' />
-              )}
-              {deadline === 'OVERDUE' ? 'Atrasado · ' : ''}
-              {dateLabel(item.deadline)}
-            </span>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+            {item.returnedFromTesting && item.status === 'DEVELOPMENT' && (
+              <Badge variant='outline' className='gap-1 text-amber-600'>
+                <RotateCcw className='size-3' /> Devolvido pelo teste
+              </Badge>
+            )}
+            {item.deadline && (
+              <span
+                className={`ml-auto flex items-center gap-1 text-xs ${deadline === 'OVERDUE' ? 'font-medium text-red-600' : 'text-muted-foreground'}`}
+              >
+                {deadline === 'OVERDUE' ? (
+                  <AlertTriangle className='size-3.5' />
+                ) : (
+                  <CalendarClock className='size-3.5' />
+                )}
+                {deadline === 'OVERDUE' ? 'Atrasado · ' : ''}
+                {dateLabel(item.deadline)}
+              </span>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   )
 }
 
