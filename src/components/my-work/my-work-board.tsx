@@ -6,7 +6,9 @@ import { Metric, MetricStrip } from '@/components/metric-strip'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Pagination } from '@/components/ui/pagination'
 import { dateLabel, requirementStatusLabel } from '@/lib/format'
+import { DEFAULT_PAGE } from '@/lib/pagination'
 import type { MyWorkItem } from '@/lib/services/my-work'
 import { AlertTriangle, CalendarClock, RotateCcw, Search } from 'lucide-react'
 import Link from 'next/link'
@@ -19,10 +21,13 @@ const priorityLabels = {
   CRITICAL: 'Crítica',
 } as const
 
+const WORK_PAGE_SIZE = 6
+
 export function MyWorkBoard({ items }: { items: MyWorkItem[] }) {
   const [search, setSearch] = useState('')
   const [scope, setScope] = useState('ALL')
   const [status, setStatus] = useState('ALL')
+  const [page, setPage] = useState(DEFAULT_PAGE)
   const today = startOfToday()
   const nextWeek = new Date(today)
   nextWeek.setUTCDate(nextWeek.getUTCDate() + 7)
@@ -38,6 +43,14 @@ export function MyWorkBoard({ items }: { items: MyWorkItem[] }) {
     const matchesStatus = status === 'ALL' || item.status === status
     return matchesSearch && matchesScope && matchesStatus
   })
+  const totalPages = Math.max(
+    DEFAULT_PAGE,
+    Math.ceil(filtered.length / WORK_PAGE_SIZE)
+  )
+  const visibleItems = filtered.slice(
+    (page - DEFAULT_PAGE) * WORK_PAGE_SIZE,
+    page * WORK_PAGE_SIZE
+  )
 
   const assigned = items.filter((item) => item.kind === 'ASSIGNED')
   const overdue = assigned.filter(
@@ -80,23 +93,40 @@ export function MyWorkBoard({ items }: { items: MyWorkItem[] }) {
         />
       </MetricStrip>
 
-      <div className='mb-5 grid gap-3 md:grid-cols-[minmax(14rem,1fr)_12rem_12rem]'>
-        <label className='relative'>
+      <div className='mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(14rem,1fr)_12rem_12rem]'>
+        <label className='relative sm:col-span-2 lg:col-span-1'>
           <span className='sr-only'>Buscar trabalho</span>
           <Search className='absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground' />
           <Input
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) => {
+              setSearch(event.target.value)
+              setPage(DEFAULT_PAGE)
+            }}
             placeholder='Buscar requisito ou projeto'
             className='h-12 rounded-[10px] bg-card pl-10'
           />
         </label>
-        <ListFilter value={scope} onChange={setScope} label='Responsabilidade'>
+        <ListFilter
+          value={scope}
+          onChange={(value) => {
+            setScope(value)
+            setPage(DEFAULT_PAGE)
+          }}
+          label='Responsabilidade'
+        >
           <option value='ALL'>Todos</option>
           <option value='ASSIGNED'>Atribuídos a mim</option>
           <option value='AVAILABLE'>Disponíveis</option>
         </ListFilter>
-        <ListFilter value={status} onChange={setStatus} label='Etapa'>
+        <ListFilter
+          value={status}
+          onChange={(value) => {
+            setStatus(value)
+            setPage(DEFAULT_PAGE)
+          }}
+          label='Etapa'
+        >
           <option value='ALL'>Todas as etapas</option>
           <option value='REQUIREMENTS'>Requisitos</option>
           <option value='DEVELOPMENT'>Desenvolvimento</option>
@@ -110,9 +140,18 @@ export function MyWorkBoard({ items }: { items: MyWorkItem[] }) {
         </div>
       ) : (
         <div className='grid gap-3.5 lg:grid-cols-2'>
-          {filtered.map((item) => (
+          {visibleItems.map((item) => (
             <WorkCard key={item.id} item={item} today={today} />
           ))}
+        </div>
+      )}
+      {totalPages > DEFAULT_PAGE && (
+        <div className='mt-5 overflow-hidden rounded-xl border bg-card'>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
         </div>
       )}
     </>

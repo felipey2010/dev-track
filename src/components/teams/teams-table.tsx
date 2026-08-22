@@ -62,16 +62,18 @@ export function TeamsTable({ isAdmin }: { isAdmin: boolean }) {
           ) : undefined
         }
       />
-      <div className='mb-5 grid gap-3 md:grid-cols-[minmax(16rem,1fr)_13rem_13rem]'>
-        <ListSearch
-          value={search}
-          onChange={(value) => {
-            setSearch(value)
-            setPage(DEFAULT_PAGE)
-          }}
-          placeholder='Buscar por equipe, descrição ou liderança...'
-          label='Buscar equipes'
-        />
+      <div className='mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(16rem,1fr)_13rem_13rem]'>
+        <div className='sm:col-span-2 lg:col-span-1'>
+          <ListSearch
+            value={search}
+            onChange={(value) => {
+              setSearch(value)
+              setPage(DEFAULT_PAGE)
+            }}
+            placeholder='Buscar por equipe, descrição ou liderança...'
+            label='Buscar equipes'
+          />
+        </div>
         <ListFilter
           label='Liderança'
           value={leadership}
